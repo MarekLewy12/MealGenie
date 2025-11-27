@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { z, ZodError } from 'zod';
 
+import { savePreferencesController } from './controllers/preferences.controller.js';
+
 dotenv.config();
 
 const envSchema = z.object({
@@ -32,6 +34,8 @@ app.post('/api/echo', (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 });
+
+app.post('/api/preferences', savePreferencesController);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof ZodError) {
