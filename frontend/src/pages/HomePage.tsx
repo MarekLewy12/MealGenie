@@ -82,7 +82,7 @@ const howItWorks = [
   {
     title: "Witaj! Pozwól się poznać",
     description:
-      "Ustal preferencje, alergie, kuchnie, czas. Robisz to raz – my zapamiętujemy.",
+      "Ustal preferencje, alergie, kuchnie, czas. Robisz to raz – aplikacja zapamiętuje.",
   },
   {
     title: "AI tworzy propozycje",
@@ -93,33 +93,6 @@ const howItWorks = [
     title: "Wybierasz i gotujesz",
     description:
       "Czytelne kroki, składniki dostępne w Polsce, zero zgadywania.",
-  },
-];
-
-const valuePoints = [
-  {
-    title: "Koniec z frustracją",
-    description:
-      "Zero przewijania tysiąca przepisów — dostajesz gotowe, trafione propozycje.",
-    Icon: CheckCircle2,
-  },
-  {
-    title: "Dopasowane do sprzętu",
-    description:
-      "Uwzględniamy to, co masz w kuchni i tempo Twojego dnia, bez kompromisów.",
-    Icon: Smile,
-  },
-  {
-    title: "Rekomendacje, które się uczą",
-    description:
-      "AI reaguje na Twoje wybory i preferencje, codziennie dopracowując pomysły.",
-    Icon: Brain,
-  },
-  {
-    title: "AI, które naprawdę Cię zna",
-    description:
-      "Personalizacja oparta na diecie, alergiach i sprzęcie, który realnie masz pod ręką.",
-    Icon: Heart,
   },
 ];
 
@@ -240,70 +213,190 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
-        <div className="mb-8 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 ring-1 ring-indigo-200 dark:bg-indigo-500/15 dark:ring-indigo-400/30">
-            <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-200" />
-          </span>
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-200">
-              Jak to działa
-            </p>
-            <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
-              Klarowność w 15 sekund
-            </h2>
-          </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {howItWorks.map((step, index) => (
-            <div
-              key={step.title}
-              className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-lg shadow-indigo-100/50 backdrop-blur dark:border-white/10 dark:bg-white/5 dark:shadow-indigo-900/30"
-            >
-              <div className="mb-3 flex items-center gap-3 text-sm text-indigo-700 dark:text-indigo-200">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-base font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-100">
-                  {index + 1}
-                </span>
-                {step.title}
+      <div className="relative mx-auto max-w-7xl px-6">
+        <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent shadow-[0_0_12px_rgba(79,70,229,0.25)] dark:via-indigo-500/70 dark:shadow-[0_0_16px_rgba(99,102,241,0.35)]" />
+      </div>
+
+      <section className="relative overflow-hidden py-24 lg:py-32">
+        <div className="absolute inset-0 origin-bottom-right scale-110 skew-y-3 bg-gradient-to-br from-indigo-50 via-white to-emerald-50 opacity-80 dark:from-slate-900/20 dark:via-slate-900/20 dark:to-slate-900/30" />
+        <div className="relative mx-auto max-w-7xl px-6">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            <div className="order-2 space-y-6 lg:order-1">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-emerald-500">
+                <CheckCircle2 className="h-4 w-4" />
+                Logistyka z głowy
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-200">{step.description}</p>
+              <h2 className="text-4xl font-bold leading-tight text-slate-900 dark:text-white">
+                Lista zakupów <br />
+                <span className="text-emerald-500">robi się sama.</span>
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-300">
+                Wybierasz dania, a MealGenie automatycznie generuje listę zakupów, grupuje produkty
+                według alejek w sklepie i pozwala odhaczać to, co już masz.
+              </p>
+              <ul className="space-y-4 pt-4">
+                {[
+                  "Automatyczne sumowanie składników",
+                  "Podział na kategorie (Warzywa, Nabiał...)",
+                  "Odhaczanie jednym kliknięciem",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-slate-700 dark:text-slate-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500">
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
+
+            <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
+              <div className="relative h-[500px] w-72 rotate-3 rounded-[3rem] border-8 border-slate-200 bg-white shadow-2xl transition-transform duration-500 hover:rotate-0 dark:border-slate-800 dark:bg-slate-950">
+                <div className="absolute left-1/2 top-0 z-20 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-slate-200 dark:bg-slate-800" />
+                <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] bg-slate-50 p-6 pt-12 dark:bg-slate-900">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-lg font-bold text-slate-900 dark:text-white">Lista Zakupów</span>
+                    <span className="text-xs text-slate-500">3/12</span>
+                  </div>
+                  {[
+                    { name: "Awokado", done: true },
+                    { name: "Mleko migdałowe", done: false },
+                    { name: "Płatki owsiane", done: false },
+                    { name: "Borówki", done: true },
+                    { name: "Łosoś", done: false },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className={`mb-3 flex items-center gap-3 rounded-xl border p-3 ${
+                        item.done
+                          ? "border-emerald-500/30 bg-emerald-100/70 text-emerald-900 opacity-80 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
+                          : "border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                          item.done
+                            ? "border-emerald-500 bg-emerald-500"
+                            : "border-slate-400 dark:border-slate-500"
+                        }`}
+                      >
+                        {item.done && (
+                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm ${
+                          item.done
+                            ? "text-emerald-700 line-through dark:text-emerald-200"
+                            : "text-slate-800 dark:text-slate-200"
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="mt-auto flex h-12 w-full items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-lg shadow-indigo-200/50 dark:shadow-none">
+                    Rozpocznij zakupy
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-fuchsia-100 ring-1 ring-fuchsia-200 dark:bg-fuchsia-500/15 dark:ring-fuchsia-400/30">
-            <Wand2 className="h-5 w-5 text-fuchsia-600 dark:text-fuchsia-200" />
-          </span>
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-200">
-              Dlaczego MealGenie?
-            </p>
-            <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
-              Zmiana, którą poczujesz
+      <section className="relative py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
+              Jak to działa?
             </h2>
+            <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mt-3">
+              Trzy proste kroki dzielą Cię od idealnego posiłku. Bez skomplikowanych formularzy.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {howItWorks.map((step, index) => (
+              <div
+                key={step.title}
+                className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-lg shadow-indigo-100/50 backdrop-blur transition-all hover:-translate-y-1 hover:border-indigo-300 dark:border-white/10 dark:bg-white/5 dark:shadow-indigo-900/30"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 text-base font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-100">
+                    {index + 1}
+                  </span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-indigo-200 to-transparent dark:from-indigo-500/40" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-white">{step.title}</h3>
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-200">{step.description}</p>
+                <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-indigo-200/30 blur-3xl transition-all group-hover:bg-indigo-200/50 dark:bg-indigo-600/20" />
+              </div>
+            ))}
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {valuePoints.map(({ title, description, Icon }) => (
-            <div
-              key={title}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-8 text-sm shadow-lg shadow-indigo-100/60 backdrop-blur transition-all hover:-translate-y-1 hover:border-orange-300/80 hover:shadow-orange-200/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-indigo-900/30 dark:hover:border-orange-500/30 dark:hover:shadow-orange-900/20"
-            >
-              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition-all group-hover:scale-110 group-hover:bg-orange-100 dark:bg-orange-500/10 dark:text-orange-200 dark:group-hover:bg-orange-500/20">
-                <Icon className="h-6 w-6" />
-              </div>
-              <h3 className="mb-3 text-lg font-bold text-slate-900 transition-colors group-hover:text-orange-700 dark:text-white dark:group-hover:text-orange-100">
-                {title}
-              </h3>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {description}
-              </p>
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-orange-200/30 blur-2xl transition-all group-hover:bg-orange-200/60 dark:bg-orange-500/5 dark:group-hover:bg-orange-500/10" />
+      </section>
+
+      <section className="relative mx-auto max-w-7xl px-6 py-24">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
+            Więcej niż przepisy. <span className="text-indigo-500">System.</span>
+          </h2>
+        </div>
+
+        <div className="grid auto-rows-[250px] grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="group relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-slate-100 p-8 text-slate-900 shadow-lg shadow-indigo-100 transition-transform dark:border-indigo-500/20 dark:bg-gradient-to-br dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-950 dark:text-white dark:shadow-indigo-900/40 md:col-span-2">
+            <div className="absolute top-0 right-0 p-8 opacity-10 transition-opacity group-hover:opacity-20">
+              <Brain className="h-40 w-40 text-indigo-400 dark:text-indigo-600" />
             </div>
-          ))}
+            <div className="relative flex h-full flex-col justify-between">
+              <div>
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-500 shadow-inner shadow-indigo-100/60 dark:bg-indigo-500/20 dark:text-indigo-200 dark:shadow-none">
+                  <CheckCircle2 />
+                </div>
+                <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Koniec z decyzyjnym paraliżem</h3>
+                <p className="max-w-md text-slate-600 dark:text-slate-300">
+                  Nie musisz przeglądać tysięcy blogów. MealGenie daje Ci 3 idealne opcje. Wybierasz
+                  jedną, reszta znika.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="group rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-lg shadow-indigo-100 transition hover:border-orange-300 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:shadow-indigo-900/30 hover:shadow-orange-200/50">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-500 transition-transform group-hover:scale-110 dark:bg-orange-500/20 dark:text-orange-200">
+              <Smile />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Tylko Twój sprzęt</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Masz tylko Thermomix i mikrofalę? Dostaniesz przepisy tylko pod to.</p>
+          </div>
+
+          <div className="group rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-lg shadow-indigo-100 transition hover:border-pink-300 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:shadow-indigo-900/30">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-pink-500 transition-transform group-hover:scale-110 dark:bg-pink-500/20 dark:text-pink-200">
+              <Heart />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Full personalizacja</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Dieta keto, bez glutenu, nienawidzisz kolendry? AI o tym pamięta.</p>
+          </div>
+
+          <div className="group relative overflow-hidden rounded-3xl border border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-slate-100 p-8 text-slate-900 shadow-lg shadow-indigo-100 transition-transform dark:border-fuchsia-500/25 dark:bg-gradient-to-br dark:from-fuchsia-950/50 dark:via-slate-900 dark:to-slate-950 dark:text-white dark:shadow-indigo-900/40 md:col-span-2">
+            <div className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-fuchsia-300/30 blur-[100px] dark:bg-fuchsia-500/15" />
+            <div className="relative flex h-full flex-col justify-between">
+              <div>
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-500 shadow-inner shadow-fuchsia-100/60 dark:bg-fuchsia-500/20 dark:text-fuchsia-200 dark:shadow-none">
+                  <Brain />
+                </div>
+                <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Uczy się Ciebie</h3>
+                <p className="max-w-md text-slate-600 dark:text-slate-300">
+                  Im częściej używasz, tym lepsze propozycje dostajesz. To nie jest statyczna baza, to
+                  Twój osobisty kucharz.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
