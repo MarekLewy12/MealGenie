@@ -40,11 +40,12 @@ enum BudgetLevel {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
-  status      String       @default("ACTIVE")
-  createdAt   DateTime     @default(now())
-  preferences Preferences?
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  status       String       @default("ACTIVE")
+  createdAt    DateTime     @default(now())
+  preferences  Preferences?
 }
 
 model Preferences {

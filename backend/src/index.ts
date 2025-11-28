@@ -9,6 +9,10 @@ import { z, ZodError } from "zod";
 
 import { savePreferencesController } from "./controllers/preferences.controller.js";
 import { suggestMealsController } from "./controllers/meals.controller.js";
+import {
+  registerController,
+  loginController,
+} from "./controllers/auth.controller.js";
 
 dotenv.config();
 
@@ -40,8 +44,13 @@ app.post("/api/echo", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// API
 app.post("/api/preferences", savePreferencesController);
 app.post("/api/meals/suggest", suggestMealsController);
+
+// Auth
+app.post("/api/auth/register", registerController);
+app.post("/api/auth/login", loginController);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof ZodError) {
