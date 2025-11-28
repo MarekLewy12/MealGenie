@@ -38,20 +38,20 @@ export function TagInput({
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-200">{label}</label>
+      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 p-2 focus-within:border-indigo-500 focus-within:bg-slate-800 transition">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 transition focus-within:border-indigo-500 focus-within:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:focus-within:bg-slate-800">
         {/* Tagi */}
         {value.map((tag) => (
           <span
             key={tag}
-            className="flex items-center gap-1 rounded-full bg-indigo-900/50 px-3 py-1 text-sm text-indigo-200 border border-indigo-500/30 animate-fadeIn"
+            className="flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-100 px-3 py-1 text-sm text-indigo-700 animate-fadeIn dark:border-indigo-500/30 dark:bg-indigo-900/50 dark:text-indigo-200"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="ml-1 text-indigo-400 hover:text-white focus:outline-none"
+              className="ml-1 text-indigo-500 hover:text-indigo-700 focus:outline-none dark:text-indigo-400 dark:hover:text-white"
             >
               &times;
             </button>
@@ -61,7 +61,7 @@ export function TagInput({
         {/* Kontener Input + Przycisk */}
         <div className="flex flex-1 min-w-[150px] items-center">
           <input
-            className="w-full flex-1 bg-transparent px-2 py-1 text-white outline-none placeholder:text-slate-500"
+            className="w-full flex-1 bg-transparent px-2 py-1 text-slate-900 outline-none placeholder:text-slate-500 dark:text-white"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -71,14 +71,14 @@ export function TagInput({
             <button
               type="button"
               onClick={addTag}
-              className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-500 active:scale-95 transition"
+              className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white transition hover:bg-indigo-500 active:scale-95"
             >
               +
             </button>
           )}
         </div>
       </div>
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         Wpisz i naciśnij <strong>Enter</strong> lub <strong>+</strong>
       </p>
     </div>

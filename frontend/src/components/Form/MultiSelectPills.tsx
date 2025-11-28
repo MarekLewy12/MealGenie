@@ -21,7 +21,7 @@ export function MultiSelectPills({ options, value, onChange, label }: MultiSelec
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-200">{label}</label>
+      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const active = value.includes(option.value);
@@ -30,10 +30,10 @@ export function MultiSelectPills({ options, value, onChange, label }: MultiSelec
               key={option.value}
               type="button"
               onClick={() => toggle(option.value)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 active
-                  ? 'bg-indigo-600 text-white ring-2 ring-indigo-400 shadow-md shadow-indigo-900/40'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  ? "border-indigo-300 bg-indigo-600 text-white ring-2 ring-indigo-300 shadow-md shadow-indigo-200/60 dark:border-indigo-500 dark:ring-indigo-400 dark:shadow-indigo-900/40"
+                  : "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               }`}
             >
               {option.label}
