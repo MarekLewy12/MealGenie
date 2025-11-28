@@ -60,3 +60,28 @@ body {
 .delay-300 {
   animation-delay: 3s;
 }
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    translate: 0 20px;
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.9s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-slow {
+  animation: fade-in-up 1.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}

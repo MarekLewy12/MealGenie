@@ -8,9 +8,9 @@ import {
   ShieldCheck,
   Smile,
   Sparkles,
-  UtensilsCrossed,
   Wand2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MealCard } from "../components/MealCard";
 import type { MealSuggestion } from "../types/meal";
@@ -80,7 +80,7 @@ const sampleMeals: MealSuggestion[] = [
 
 const howItWorks = [
   {
-    title: "Poznajemy Cię",
+    title: "Witaj! Pozwól się poznać",
     description:
       "Ustal preferencje, alergie, kuchnie, czas. Robisz to raz – my zapamiętujemy.",
   },
@@ -130,109 +130,109 @@ const trustPoints = [
 ];
 
 export function HomePage() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % sampleMeals.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentMeal = sampleMeals[activeIndex];
+
   return (
-    <div className="relative isolate overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-10 top-10 h-64 w-64 rounded-full bg-indigo-200/40 blur-[120px] dark:bg-indigo-500/25" />
-        <div className="absolute right-[-60px] top-0 h-72 w-72 rounded-full bg-fuchsia-200/35 blur-[120px] dark:bg-fuchsia-500/20" />
-        <div className="absolute bottom-[-120px] left-1/3 h-80 w-80 rounded-full bg-blue-200/30 blur-[140px] dark:bg-blue-500/10" />
+    <div className="relative isolate overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-[#020617]">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
+        <div className="absolute left-1/2 top-[-10%] h-[780px] w-[780px] -translate-x-1/2 rounded-full bg-indigo-200/40 blur-[100px] dark:bg-indigo-500/15 dark:blur-[140px]" />
+        <div className="absolute left-[15%] top-[18%] h-[520px] w-[520px] rounded-full bg-fuchsia-200/30 blur-[90px] dark:bg-fuchsia-600/20 dark:blur-[120px]" />
+        <div className="absolute right-[12%] top-[8%] h-[480px] w-[480px] rounded-full bg-blue-200/30 blur-[90px] dark:bg-blue-600/20 dark:blur-[120px]" />
       </div>
 
-      <section className="relative mx-auto max-w-screen-xl px-6 pt-20 pb-32 lg:pt-28">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-8">
-          <div className="relative z-10 space-y-8 text-center lg:text-left">
-            <div className="inline-flex w-full items-center justify-center lg:w-auto lg:justify-start">
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200/50 bg-indigo-50/50 px-3 py-1 pr-4 backdrop-blur dark:border-indigo-500/30 dark:bg-indigo-500/10">
-                <span className="flex h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_10px_#6366f1] dark:bg-indigo-400" />
-                <span className="text-xs font-medium tracking-wide text-indigo-700 dark:text-indigo-200">
-                  AI KITCHEN — V1.0
+      <section className="relative overflow-visible pt-24 pb-32 lg:pt-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12">
+            <div className="relative z-10 text-center lg:col-span-7 lg:text-left">
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-200/60 bg-indigo-50/70 px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm shadow-indigo-100 transition-colors dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200 dark:shadow-indigo-900/30">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-indigo-500" />
                 </span>
+                AI Kitchen v1.0 — Twój osobisty kucharz
+              </div>
+
+              <h1 className="mb-6 text-5xl font-bold leading-[1.1] tracking-tight text-slate-900 dark:text-white sm:text-7xl">
+                Koniec z pytaniem <br />
+                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-white dark:to-indigo-300">
+                  „co dziś na obiad?”
+                </span>
+              </h1>
+
+              <p className="mb-10 text-lg leading-relaxed text-slate-600 dark:text-slate-300 lg:max-w-lg">
+                MealGenie w sekundy przetwarza Twoje preferencje, dietę i czas,
+                tworząc gotowy plan posiłków. Zobacz, jak to działa obok. 👉
+              </p>
+
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+                <Link
+                  to="/onboarding"
+                  className="flex h-12 items-center gap-2 rounded-xl bg-gradient-to-b from-indigo-500 to-indigo-600 px-8 text-base font-semibold text-white shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]"
+                >
+                  Rozpocznij teraz
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/generator"
+                  className="flex h-12 items-center gap-2 rounded-xl border border-slate-200 bg-white px-8 text-base font-medium text-slate-900 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                >
+                  Zobacz demo
+                </Link>
               </div>
             </div>
 
-            <h1 className="text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl lg:leading-[1.1]">
-              Twoja dieta <br />
-              <span className="relative whitespace-nowrap bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 bg-clip-text text-transparent dark:from-indigo-400 dark:via-purple-400 dark:to-amber-400">
-                na autopilocie.
-              </span>
-            </h1>
+            <div className="relative flex justify-center perspective-1000 lg:col-span-5">
+              <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-transparent to-fuchsia-500/10 blur-2xl" />
+                <div className="relative z-10 flex w-full max-w-[420px] flex-col items-center">
+                  <div className="relative z-20 mb-8 animate-float">
+                    <img
+                      src="/logo-genie.png"
+                      alt="MealGenie"
+                      className="h-48 w-48 drop-shadow-2xl"
+                    />
+                  </div>
 
-            <p className="mx-auto max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 lg:mx-0">
-              Koniec z pytaniem "co dziś na obiad?". MealGenie tworzy
-              spersonalizowane plany posiłków w sekundy, uwzględniając to, co
-              masz w lodówce.
-            </p>
-
-            <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
-              <Link
-                to="/onboarding"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-[1.02] hover:bg-indigo-500 active:scale-95"
-              >
-                Zacznij za darmo
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                to="/generator"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-4 text-base font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-              >
-                Zobacz demo
-              </Link>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 pt-2 text-sm text-slate-500 dark:text-slate-400 lg:justify-start">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Bez reklam</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Polskie produkty</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative mt-12 flex justify-center lg:mt-0 lg:justify-end">
-            <div className="absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-[90px] dark:bg-indigo-500/20" />
-
-            <div className="relative z-10 flex aspect-square w-full max-w-[420px] flex-col items-center justify-center rounded-[3rem] border border-white/40 bg-white/20 p-8 shadow-2xl backdrop-blur-xl animate-float dark:border-white/10 dark:bg-slate-900/40 dark:shadow-indigo-900/50">
-              <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-br from-white/40 to-transparent opacity-50 dark:from-white/5" />
-
-              <img
-                src="/logo-genie.png"
-                alt="App Interface"
-                className="relative z-20 h-48 w-48 drop-shadow-2xl transition-transform duration-500 hover:scale-110"
-              />
-
-              <div className="z-20 mt-6 text-center">
-                <p className="text-lg font-bold text-slate-800 dark:text-white">Twój Osobisty Kucharz</p>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
-                    AI Online
-                  </p>
+                <div
+                  key={activeIndex}
+                  className="relative w-full transform-gpu transition-all duration-700 ease-out animate-fade-in-up-slow"
+                  style={{ transform: "rotateY(-5deg) rotateX(2deg)" }}
+                >
+                  <div className="absolute inset-0 translate-y-4 scale-95 rounded-3xl bg-indigo-100/50 blur-sm dark:bg-indigo-900/20" />
+                  <div className="relative rounded-3xl shadow-2xl shadow-indigo-200/50 dark:shadow-black/50">
+                    <MealCard meal={currentMeal} onSelect={() => {}} />
+                  </div>
                 </div>
-              </div>
 
-              <div className="absolute top-12 -left-6 flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-xl animate-float delay-100 dark:border-slate-700 dark:bg-slate-800">
-                <div className="rounded-lg bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">
-                  <Clock className="h-5 w-5" />
+                <div className="absolute top-32 -right-4 lg:-right-12 animate-float delay-100">
+                  <div className="flex items-center gap-2 rounded-xl border border-white/50 bg-white/80 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-800/90">
+                    <div className="rounded-lg bg-blue-100 p-1.5 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      {currentMeal.cookingTimeMinutes} min
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-400">Czas</p>
-                  <p className="text-sm font-bold text-slate-800 dark:text-white">15 min</p>
-                </div>
-              </div>
 
-              <div className="absolute bottom-20 -right-6 flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-xl animate-float delay-300 dark:border-slate-700 dark:bg-slate-800">
-                <div className="rounded-lg bg-orange-100 p-2 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300">
-                  <Flame className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-400">Kalorie</p>
-                  <p className="text-sm font-bold text-slate-800 dark:text-white">450 kcal</p>
+                <div className="absolute bottom-10 -left-4 lg:-left-12 animate-float delay-300">
+                  <div className="flex items-center gap-2 rounded-xl border border-white/50 bg-white/80 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-800/90">
+                    <div className="rounded-lg bg-orange-100 p-1.5 text-orange-600 dark:bg-orange-500/20 dark:text-orange-300">
+                      <Flame className="h-4 w-4" />
+                    </div>
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      {currentMeal.calories} kcal
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -303,36 +303,6 @@ export function HomePage() {
               </p>
               <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-orange-200/30 blur-2xl transition-all group-hover:bg-orange-200/60 dark:bg-orange-500/5 dark:group-hover:bg-orange-500/10" />
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 ring-1 ring-indigo-200 dark:bg-indigo-500/15 dark:ring-indigo-400/30">
-            <UtensilsCrossed className="h-5 w-5 text-indigo-700 dark:text-indigo-100" />
-          </span>
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-200">
-              Przykładowe posiłki
-            </p>
-            <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
-              Zobacz jakość zanim klikniesz
-            </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              Jeśli tak wyglądają przykłady, wyobraź sobie, jak smakuje Twój
-              spersonalizowany wynik.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {sampleMeals.map((meal, index) => (
-            <MealCard
-              key={`${meal.name}-${index}`}
-              meal={meal}
-              onSelect={() => console.log("Wybrano posiłek z sekcji demo")}
-            />
           ))}
         </div>
       </section>
