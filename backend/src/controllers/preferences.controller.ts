@@ -1,8 +1,16 @@
-import { BudgetLevel, CookingSkill, Diet, KitchenEquipment } from '@prisma/client';
-import { type NextFunction, type Request, type Response } from 'express';
-import { z } from 'zod';
+import {
+  BudgetLevel,
+  CookingSkill,
+  Diet,
+  KitchenEquipment,
+} from "@prisma/client";
+import { type NextFunction, type Request, type Response } from "express";
+import { z } from "zod";
 
-import { savePreferences, type SavePreferencesInput } from '../services/preferences.service';
+import {
+  savePreferences,
+  type SavePreferencesInput,
+} from "../services/preferences.service.js";
 
 export const savePreferencesSchema = z.object({
   userId: z.string().uuid(),

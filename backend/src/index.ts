@@ -1,9 +1,14 @@
-import cors from 'cors';
-import dotenv from 'dotenv';
-import express, { type NextFunction, type Request, type Response } from 'express';
-import { z, ZodError } from 'zod';
+import cors from "cors";
+import dotenv from "dotenv";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
+import { z, ZodError } from "zod";
 
-import { savePreferencesController } from './controllers/preferences.controller.js';
+import { savePreferencesController } from "./controllers/preferences.controller.js";
+import { suggestMealsController } from "./controllers/meals.controller.js";
 
 dotenv.config();
 
@@ -19,14 +24,14 @@ app.use(cors());
 app.use(express.json());
 
 const echoBodySchema = z.object({
-  message: z.string().min(1, 'message is required'),
+  message: z.string().min(1, "message is required"),
 });
 
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok' });
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok" });
 });
 
-app.post('/api/echo', (req: Request, res: Response, next: NextFunction) => {
+app.post("/api/echo", (req: Request, res: Response, next: NextFunction) => {
   try {
     const body = echoBodySchema.parse(req.body);
     res.json({ message: body.message });
@@ -35,18 +40,19 @@ app.post('/api/echo', (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-app.post('/api/preferences', savePreferencesController);
+app.post("/api/preferences", savePreferencesController);
+app.post("/api/meals/suggest", suggestMealsController);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof ZodError) {
     return res.status(400).json({
-      error: 'ValidationError',
+      error: "ValidationError",
       issues: err.issues,
     });
   }
 
   console.error(err);
-  return res.status(500).json({ error: 'InternalServerError' });
+  return res.status(500).json({ error: "InternalServerError" });
 });
 
 app.listen(env.PORT, () => {
