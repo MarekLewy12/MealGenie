@@ -1,9 +1,19 @@
 import axios from 'axios';
 
+import type { AuthFormData } from '../schemas/auth';
+import { useAuthStore } from '../store/authStore';
 import type { MealResponse, MealType } from '../types/meal';
 
 export const api = axios.create({
   baseURL: 'http://localhost:3000/api',
+});
+
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export type SavePreferencesPayload = {
@@ -39,4 +49,14 @@ export async function generateMealSuggestions(
   );
 
   return data;
+}
+
+export async function registerUser(data: AuthFormData) {
+  const response = await api.post('/auth/register', data);
+  return response.data;
+}
+
+export async function loginUser(data: AuthFormData) {
+  const response = await api.post('/auth/login', data);
+  return response.data;
 }

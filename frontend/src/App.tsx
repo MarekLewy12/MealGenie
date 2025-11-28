@@ -1,6 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
 import { GeneratorPage } from "./pages/GeneratorPage";
 import { HomePage } from "./pages/HomePage";
+import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { ThemeToggle } from "./components/ThemeToggle";
 
@@ -52,6 +53,12 @@ function App() {
                 >
                   Generator
                 </Link>
+                <Link
+                  to="/login"
+                  className="rounded-lg px-3 py-2 text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 dark:text-indigo-100 dark:hover:bg-white/5 dark:hover:text-white"
+                >
+                  Logowanie
+                </Link>
                 <div className="ml-2 border-l border-slate-200/60 pl-3 dark:border-white/10">
                   <ThemeToggle />
                 </div>
@@ -63,6 +70,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/generator" element={<GeneratorPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
