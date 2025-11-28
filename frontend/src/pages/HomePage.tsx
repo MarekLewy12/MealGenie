@@ -1,4 +1,15 @@
-import { Brain, CheckCircle2, Heart, Smile, Zap } from "lucide-react";
+import {
+  Activity,
+  Brain,
+  CheckCircle2,
+  Heart,
+  ShieldCheck,
+  Smile,
+  Sparkles,
+  UtensilsCrossed,
+  Wand2,
+  Zap,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { MealCard } from "../components/MealCard";
 import type { MealSuggestion } from "../types/meal";
@@ -86,34 +97,28 @@ const howItWorks = [
 
 const valuePoints = [
   {
-    text: "Koniec z frustracją i przewijaniem tysiąca przepisów.",
+    title: "Koniec z frustracją",
+    description:
+      "Zero przewijania tysiąca przepisów — dostajesz gotowe, trafione propozycje.",
     Icon: CheckCircle2,
-    color: "text-emerald-300",
-    bg: "bg-emerald-500/10 border-emerald-400/40",
   },
   {
-    text: "Posiłki dopasowane do Twojego sprzętu i stylu życia.",
+    title: "Dopasowane do sprzętu",
+    description:
+      "Uwzględniamy to, co masz w kuchni i tempo Twojego dnia, bez kompromisów.",
     Icon: Smile,
-    color: "text-amber-200",
-    bg: "bg-amber-500/10 border-amber-400/40",
   },
   {
-    text: "Inteligentne rekomendacje, które uczą się razem z Tobą.",
+    title: "Rekomendacje, które się uczą",
+    description:
+      "AI reaguje na Twoje wybory i preferencje, codziennie dopracowując pomysły.",
     Icon: Brain,
-    color: "text-indigo-200",
-    bg: "bg-indigo-500/10 border-indigo-400/40",
   },
   {
-    text: "Zdrowiej, prościej, szybciej – bez dietetycznych mitów.",
-    Icon: Zap,
-    color: "text-orange-200",
-    bg: "bg-orange-500/10 border-orange-400/40",
-  },
-  {
-    text: "AI, które naprawdę Cię zna i reaguje na Twoje wybory.",
+    title: "AI, które naprawdę Cię zna",
+    description:
+      "Personalizacja oparta na diecie, alergiach i sprzęcie, który realnie masz pod ręką.",
     Icon: Heart,
-    color: "text-pink-200",
-    bg: "bg-pink-500/10 border-pink-400/40",
   },
 ];
 
@@ -140,7 +145,10 @@ export function HomePage() {
                 AI Kitchen — Premium
               </p>
               <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl">
-                Już nigdy nie musisz zastanawiać się, co dziś zjeść.
+                Już nigdy nie musisz zastanawiać się,{" "}
+                <span className="bg-gradient-to-r from-indigo-200 via-fuchsia-200 to-amber-200 bg-clip-text text-transparent">
+                  co dziś zjeść.
+                </span>
               </h1>
               <p className="max-w-2xl text-lg text-slate-200">
                 MealGenie poznaje Twoje preferencje i w kilka sekund tworzy
@@ -231,7 +239,9 @@ export function HomePage() {
                 </div>
               </div>
               <div className="mt-6 flex items-center gap-3 text-xs text-slate-300">
-                <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-400/40">
+                  <Activity className="h-4 w-4 text-emerald-200" />
+                </span>
                 Personalizacja w czasie rzeczywistym, żadnych kompromisów.
               </div>
             </div>
@@ -241,7 +251,9 @@ export function HomePage() {
 
       <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
         <div className="mb-8 flex items-center gap-3">
-          <span className="h-10 w-10 rounded-full bg-indigo-500/20 ring-1 ring-indigo-400/30" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15 ring-1 ring-indigo-400/30">
+            <Sparkles className="h-5 w-5 text-indigo-200" />
+          </span>
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">
               Jak to działa
@@ -271,7 +283,9 @@ export function HomePage() {
 
       <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
         <div className="mb-6 flex items-center gap-3">
-          <span className="h-10 w-10 rounded-full bg-fuchsia-500/20 ring-1 ring-fuchsia-400/30" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-fuchsia-500/15 ring-1 ring-fuchsia-400/30">
+            <Wand2 className="h-5 w-5 text-fuchsia-200" />
+          </span>
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">
               Dlaczego MealGenie?
@@ -282,17 +296,21 @@ export function HomePage() {
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {valuePoints.map(({ text, Icon, color, bg }) => (
+          {valuePoints.map(({ title, description, Icon }) => (
             <div
-              key={text}
-              className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm shadow-lg shadow-indigo-900/30 backdrop-blur"
+              key={title}
+              className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 p-8 text-sm shadow-lg shadow-indigo-900/30 backdrop-blur transition-all hover:border-orange-500/30 hover:bg-slate-900/80 hover:shadow-orange-900/20"
             >
-              <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full border ${bg} shadow-[0_0_25px_rgba(255,255,255,0.05)]`}
-              >
-                <Icon className={`h-5 w-5 flex-shrink-0 ${color}`} />
-              </span>
-              <p className="text-slate-100">{text}</p>
+              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400 transition-all group-hover:scale-110 group-hover:bg-orange-500/20">
+                <Icon className="h-6 w-6" />
+              </div>
+              <h3 className="mb-3 text-lg font-bold text-white transition-colors group-hover:text-orange-100">
+                {title}
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-400">
+                {description}
+              </p>
+              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-orange-500/5 blur-2xl transition-all group-hover:bg-orange-500/10" />
             </div>
           ))}
         </div>
@@ -300,7 +318,9 @@ export function HomePage() {
 
       <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
         <div className="mb-6 flex items-center gap-3">
-          <span className="h-10 w-10 rounded-full bg-indigo-500/20 ring-1 ring-indigo-400/30" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15 ring-1 ring-indigo-400/30">
+            <UtensilsCrossed className="h-5 w-5 text-indigo-100" />
+          </span>
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">
               Przykładowe posiłki
@@ -328,7 +348,9 @@ export function HomePage() {
 
       <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
         <div className="mb-6 flex items-center gap-3">
-          <span className="h-10 w-10 rounded-full bg-emerald-500/20 ring-1 ring-emerald-400/30" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-400/30">
+            <ShieldCheck className="h-5 w-5 text-emerald-100" />
+          </span>
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">
               Zaufanie
@@ -384,17 +406,16 @@ export function HomePage() {
       </section>
 
       <footer className="border-t border-white/10 bg-white/5">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-screen-2xl flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 text-sm font-bold text-white">
-              MG
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white">MealGenie</p>
-              <p className="text-xs text-slate-300">
-                Twój osobisty AI Szef Kuchni
-              </p>
-            </div>
+            <img
+              src="/logo-genie.png"
+              alt="MealGenie"
+              className="h-10 w-10 rounded-xl bg-white/5 p-1 shadow-lg shadow-indigo-900/40"
+            />
+            <span className="bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+              MealGenie
+            </span>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
             <Link to="/onboarding" className="hover:text-white">

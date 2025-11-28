@@ -16,18 +16,19 @@ function App() {
         <div className="relative z-10">
           <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0c0f1d]/80 backdrop-blur-xl">
             <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-6 py-4">
-              <Link
-                to="/"
-                className="group flex items-center gap-3 text-white"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 text-sm font-bold shadow-lg shadow-indigo-900/40 transition group-hover:scale-105">
-                  MG
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">MealGenie</p>
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-indigo-200">
-                    AI Kitchen
-                  </p>
+              <Link to="/" className="group flex items-center gap-3 text-white">
+                <img
+                  src="/logo-genie.png"
+                  alt="MealGenie"
+                  className="h-10 w-10 rounded-xl bg-white/5 p-1 shadow-lg shadow-indigo-900/40 transition group-hover:scale-105"
+                />
+                <div className="flex flex-col leading-none">
+                  <span className="bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-2xl font-bold tracking-tight text-transparent transition group-hover:drop-shadow-[0_6px_25px_rgba(99,102,241,0.25)]">
+                    MealGenie
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-200/70">
+                    by Marek Lewandowski
+                  </span>
                 </div>
               </Link>
 
