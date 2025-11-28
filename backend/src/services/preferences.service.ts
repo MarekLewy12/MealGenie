@@ -32,6 +32,8 @@ export async function savePreferences(input: SavePreferencesInput) {
       // Tymczasowy adres, by spełnić unikalny constraint email w środowisku dev.
       email: `${userId}@placeholder.local`,
       status: 'ACTIVE',
+      // Wymagane przez nowy model użytkownika (Email+Hasło).
+      passwordHash: 'DEV_PLACEHOLDER_PASSWORD_HASH',
     },
   });
 
