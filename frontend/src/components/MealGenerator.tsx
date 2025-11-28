@@ -104,7 +104,7 @@ export function MealGenerator() {
           </p>
           <button
             onClick={handleGenerate}
-            className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-indigo-900/50 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/30 transition hover:-translate-y-0.5 hover:shadow-amber-900/50 focus:outline-none focus:ring-2 focus:ring-amber-200"
           >
             Spróbuj ponownie
           </button>
@@ -122,7 +122,7 @@ export function MealGenerator() {
           </p>
           <button
             onClick={handleGenerate}
-            className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-indigo-900/50 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/30 transition hover:-translate-y-0.5 hover:shadow-amber-900/50 focus:outline-none focus:ring-2 focus:ring-amber-200"
           >
             Generuj Posiłki
           </button>
@@ -155,7 +155,7 @@ export function MealGenerator() {
           <div className="text-center">
             <button
               onClick={handleGenerate}
-              className="text-sm font-semibold text-indigo-200 underline-offset-4 hover:text-indigo-100 hover:underline"
+              className="text-sm font-semibold text-amber-200 underline-offset-4 hover:text-amber-100 hover:underline"
             >
               Wylosuj inne
             </button>

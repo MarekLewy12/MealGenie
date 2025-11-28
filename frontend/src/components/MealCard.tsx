@@ -31,19 +31,19 @@ export function MealCard({ meal, onSelect }: MealCardProps) {
         <span className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-100">
           Czas: {meal.cookingTimeMinutes} min
         </span>
-        <span className="inline-flex items-center rounded-full border border-slate-500/30 bg-slate-700/40 px-3 py-1 text-xs font-semibold text-slate-100">
+        <span className="inline-flex items-center rounded-full border border-amber-400/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-100 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
           Kalorie: {meal.calories ? `${meal.calories} kcal` : 'n/d'}
         </span>
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-800/60 p-4">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-200">
           Składniki
         </div>
         <ul className="space-y-2 text-sm text-slate-200">
           {displayedIngredients.map((ingredient, index) => (
             <li key={index} className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(245,158,11,0.08)]" />
               <span className="flex-1">{ingredient.name}</span>
               <span className="text-slate-400">
                 {ingredient.amount}
@@ -60,7 +60,7 @@ export function MealCard({ meal, onSelect }: MealCardProps) {
       <div className="mt-auto pt-2">
         <button
           onClick={onSelect}
-          className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-indigo-900/40 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/30 transition hover:-translate-y-0.5 hover:shadow-amber-900/50 focus:outline-none focus:ring-2 focus:ring-amber-300"
         >
           Wybieram to danie
         </button>
