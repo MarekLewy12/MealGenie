@@ -1,15 +1,31 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
 import { generateMealSuggestions } from "../services/api";
 import { MealCard } from "./MealCard";
-import type { MealSuggestion } from "../types/meal";
+import type { MealSuggestion, MealType } from "../types/meal";
 
 const DEV_USER_ID = "e4d2ae12-7632-426d-86d1-417651604866";
 
+const mealTypeOptions: Array<{
+  value: MealType;
+  label: string;
+  hint: string;
+}> = [
+  { value: "BREAKFAST", label: "Śniadanie", hint: "lekko i szybko" },
+  { value: "LUNCH", label: "Lunch/Obiad", hint: "mocno i treściwie" },
+  { value: "DINNER", label: "Kolacja", hint: "wieczorne inspiracje" },
+  { value: "SNACK", label: "Przekąska", hint: "małe co nieco" },
+];
+
 export function MealGenerator() {
+  const [mealType, setMealType] = useState<MealType>("LUNCH");
   const { mutate, data, status, isError, error } = useMutation({
-    mutationFn: () => generateMealSuggestions(DEV_USER_ID),
+    mutationFn: () =>
+      generateMealSuggestions({
+        userId: DEV_USER_ID,
+        mealType,
+      }),
   });
 
   const mealsToDisplay = useMemo<MealSuggestion[] | null>(() => {
@@ -36,6 +52,36 @@ export function MealGenerator() {
         </div>
         <div className="rounded-full border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
           Dev User
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-indigo-100">
+          Wybierz typ posiłku
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {mealTypeOptions.map((option) => {
+            const isActive = option.value === mealType;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setMealType(option.value)}
+                className={`flex flex-col items-start rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                  isActive
+                    ? "border-indigo-400/80 bg-indigo-500/20 text-indigo-50 shadow-lg shadow-indigo-900/40"
+                    : "border-slate-800 bg-slate-900/70 text-slate-200 hover:border-indigo-400/50 hover:text-white"
+                }`}
+              >
+                <span className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-200/80">
+                  {option.label}
+                </span>
+                <span className="text-[12px] text-indigo-100/80">
+                  {option.hint}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

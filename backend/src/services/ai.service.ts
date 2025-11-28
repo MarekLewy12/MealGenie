@@ -1,12 +1,25 @@
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { PrismaClient } from "@prisma/client";
-import { MealSuggestionsResponseSchema } from "../schemas/meal.schema.js";
+import {
+  MealSuggestionsResponseSchema,
+  type MealType,
+} from "../schemas/meal.schema.js";
 
 const openai = new OpenAI();
 const prisma = new PrismaClient();
 
-export async function generateMealSuggestions(userId: string) {
+const mealTypeToPolishLabel: Record<MealType, string> = {
+  BREAKFAST: "śniadania",
+  LUNCH: "obiady",
+  DINNER: "kolacje",
+  SNACK: "przekąski",
+};
+
+export async function generateMealSuggestions(
+  userId: string,
+  mealType: MealType,
+) {
   const preferences = await prisma.preferences.findUnique({
     where: { userId },
   });
@@ -26,9 +39,11 @@ export async function generateMealSuggestions(userId: string) {
     - Sprzęt kuchenny: ${preferences.kitchenEquipment.join(", ")}
   `;
 
+  const mealTypeLabel = mealTypeToPolishLabel[mealType];
+
   const systemMessage = `
     Jesteś profesjonalnym szefem kuchni i dietetykiem w aplikacji MealGenie.
-    Twoim zadaniem jest zaproponować 3 idealnie dopasowane posiłki na podstawie profilu użytkownika.
+    Twoim zadaniem jest generowanie idealnie dopasowanych propozycji kulinarnych.
     
     Zasady:
     1. Posiłki muszą ściśle przestrzegać diety i wykluczeń (alergii).
@@ -44,7 +59,7 @@ export async function generateMealSuggestions(userId: string) {
       { role: "system", content: systemMessage },
       {
         role: "user",
-        content: `Zaproponuj obiady dla tego profilu: ${promptContext}`,
+        content: `Zaproponuj 3 ${mealTypeLabel} dla tego profilu: ${promptContext}`,
       },
     ],
     response_format: zodResponseFormat(

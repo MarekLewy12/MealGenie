@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const MealTypeSchema = z.enum([
+  "BREAKFAST",
+  "LUNCH",
+  "DINNER",
+  "SNACK",
+]);
+
 // Pojedyncza propozycja dania
 export const MealTeaserSchema = z.object({
   name: z.string().describe("Nazwa dania, kreatywna i zachęcająca"),
@@ -34,9 +41,11 @@ export const MealSuggestionsResponseSchema = z.object({
   meals: z
     .array(MealTeaserSchema)
     .length(3)
-    .describe("Lista dokładnie 3 propozycji obiadowych"),
+    .describe("Lista dokładnie 3 propozycji posiłków"),
 });
 
 export type MealSuggestionsResponse = z.infer<
   typeof MealSuggestionsResponseSchema
 >;
+
+export type MealType = z.infer<typeof MealTypeSchema>;

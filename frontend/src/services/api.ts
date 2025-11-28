@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import type { MealResponse } from '../types/meal';
+import type { MealResponse, MealType } from '../types/meal';
 
 export const api = axios.create({
   baseURL: 'http://localhost:3000/api',
@@ -24,10 +24,17 @@ export async function savePreferences(payload: SavePreferencesPayload) {
   return data;
 }
 
-export async function generateMealSuggestions(userId: string) {
+export type GenerateMealSuggestionsPayload = {
+  userId: string;
+  mealType: MealType;
+};
+
+export async function generateMealSuggestions(
+  payload: GenerateMealSuggestionsPayload,
+) {
   const { data } = await api.post<MealResponse>(
     '/meals/suggest',
-    { userId },
+    payload,
     { timeout: 30_000 },
   );
 
