@@ -132,7 +132,7 @@ export function HomePage() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-indigo-500" />
                 </span>
-                AI Kitchen v1.0 — Twój osobisty kucharz
+                Twój osobisty cyfrowy kucharz
               </div>
 
               <h1 className="mb-6 text-5xl font-bold leading-[1.1] tracking-tight text-slate-900 dark:text-white sm:text-7xl">
@@ -175,14 +175,21 @@ export function HomePage() {
                     />
                   </div>
 
-                <div
-                  key={activeIndex}
-                  className="relative w-full transform-gpu transition-all duration-700 ease-out animate-fade-in-up-slow"
-                  style={{ transform: "rotateY(-5deg) rotateX(2deg)" }}
-                >
-                  <div className="absolute inset-0 translate-y-4 scale-95 rounded-3xl bg-indigo-100/50 blur-sm dark:bg-indigo-900/20" />
-                  <div className="relative rounded-3xl shadow-2xl shadow-indigo-200/50 dark:shadow-black/50">
-                    <MealCard meal={currentMeal} onSelect={() => {}} />
+                <div className="relative w-full">
+                  <div
+                    key={`prev-${activeIndex}`}
+                    className="pointer-events-none absolute inset-0 transform-gpu opacity-0"
+                    style={{ transform: "rotateY(-5deg) rotateX(2deg)" }}
+                  />
+                  <div
+                    key={activeIndex}
+                    className="relative w-full transform-gpu fade-slide-in"
+                    style={{ transform: "rotateY(-5deg) rotateX(2deg)" }}
+                  >
+                    <div className="absolute inset-0 translate-y-4 scale-95 rounded-3xl bg-indigo-100/50 blur-sm dark:bg-indigo-900/20" />
+                    <div className="relative rounded-3xl shadow-2xl shadow-indigo-200/50 dark:shadow-black/50">
+                      <MealCard meal={currentMeal} onSelect={() => {}} />
+                    </div>
                   </div>
                 </div>
 

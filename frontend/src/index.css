@@ -77,6 +77,37 @@ body {
   opacity: 0;
 }
 
+.fade-slide-in {
+  animation: fade-slide-in 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+.fade-slide-out {
+  animation: fade-slide-out 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes fade-slide-in {
+  0% {
+    opacity: 0;
+    translate: 24px 10px;
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes fade-slide-out {
+  0% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 0;
+    translate: -24px 10px;
+  }
+}
+
 .animate-fade-in-up-slow {
   animation: fade-in-up 1.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
   opacity: 0;
