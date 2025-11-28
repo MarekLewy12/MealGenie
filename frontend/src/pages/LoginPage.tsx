@@ -102,7 +102,7 @@ export function LoginPage() {
       {/* --- KONTENER GŁÓWNY (Szklana Karta) --- */}
       <div className="relative z-10 grid min-h-screen w-full max-w-none grid-cols-1 overflow-hidden border border-white/50 bg-white/40 shadow-2xl backdrop-blur-xl transition-all dark:border-white/10 dark:bg-slate-900/60 lg:grid-cols-2 lg:shadow-[0_0_50px_-10px_rgba(79,70,229,0.3)]">
         {/* LEWA STRONA (Branding / Wizualna) */}
-        <div className="relative hidden flex-col items-center justify-center gap-12 bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-700 p-12 text-white lg:flex">
+        <div className="relative hidden flex-col items-center justify-center gap-12 bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-700 p-12 text-white dark:from-indigo-950 dark:via-slate-950 dark:to-fuchsia-900 lg:flex">
           {/* Dekoracyjne elementy tła lewej strony */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -left-12 -top-12 h-72 w-72 rounded-full border border-white/10 bg-white/5 blur-3xl" />
@@ -132,7 +132,7 @@ export function LoginPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="space-y-4"
+              className="space-y-4 text-center"
             >
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -155,10 +155,10 @@ export function LoginPage() {
                   </>
                 )}
               </h2>
-              <p className="max-w-xl text-base leading-relaxed text-indigo-100">
+              <p className="mx-auto max-w-xl text-center text-base leading-relaxed text-indigo-100">
                 MealGenie pomaga podejmować decyzje, bilansować posiłki i planować zakupy tak, by każdy tydzień był prostszy.
               </p>
-              <p className="max-w-xl text-sm leading-relaxed text-indigo-100/90">
+              <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-indigo-100/90">
                 W jednym miejscu łączymy preferencje, listy składników i inspiracje sezonowe, dzięki czemu nie tracisz czasu na szukanie pomysłów.
               </p>
             </motion.div>
@@ -360,13 +360,50 @@ export function LoginPage() {
             </motion.form>
           </AnimatePresence>
 
+          {/* Alternatywa logowania */}
+          <div className="w-full max-w-md">
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300">
+                albo
+              </span>
+              <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+            </div>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-[1px] hover:border-indigo-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-indigo-500/50"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white shadow-inner shadow-slate-200/70 dark:border-slate-700 dark:bg-slate-800">
+                <svg viewBox="0 0 533.5 544.3" className="h-4 w-4">
+                  <path
+                    fill="#4285F4"
+                    d="M533.5 278.4c0-17.4-1.6-34.1-4.6-50.4H272.1v95.4h146.8c-6.3 34-25 62.8-53.6 82.1v68.2h86.8c50.7-46.6 81.4-115.3 81.4-195.3z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M272.1 544.3c72.6 0 133.6-24 178.1-65.6l-86.8-68.2c-24.1 16.2-55 25.9-91.3 25.9-70 0-129.4-47.2-150.6-110.6H32.1v69.4c44.3 87.8 135.6 149.1 240 149.1z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M121.5 325.8c-10.9-32.7-10.9-68 0-100.7V155.7H32.1c-21.8 43.5-34.2 92.4-34.2 145 0 52.7 12.4 101.5 34.2 145l89.4-69.9z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M272.1 107.7c39.6 0 75 13.6 103 40.4l77-77C405.4 24.4 344.4 0 272.1 0 167.7 0 76.4 61.3 32.1 149.1l89.4 69.9c21.2-63.4 80.6-111.3 150.6-111.3z"
+                  />
+                </svg>
+              </span>
+              <span>Kontynuuj z Google (wkrótce)</span>
+            </button>
+          </div>
+
           {/* Separator */}
-          <div className="relative my-8">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-200 dark:border-slate-700" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-4 text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+              <span className="rounded-full bg-white/80 px-4 text-slate-500 backdrop-blur dark:bg-slate-900/80 dark:text-slate-400">
                 {mode === "login"
                   ? "Nie masz jeszcze konta?"
                   : "Masz już konto?"}
@@ -375,7 +412,10 @@ export function LoginPage() {
           </div>
 
           {/* Stopka formularza */}
-          <div className="text-center">
+          <div className="flex w-full max-w-md flex-col items-center justify-between gap-3 sm:flex-row">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              {mode === "login" ? "Nie masz jeszcze konta?" : "Masz już konto?"}
+            </span>
             <button
               onClick={toggleMode}
               className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-6 py-2.5 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
