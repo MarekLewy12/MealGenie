@@ -1,42 +1,24 @@
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { savePreferences } from '../services/api';
-import { MultiSelectPills } from './Form/MultiSelectPills';
+import { savePreferences } from "../services/api";
+import { MultiSelectPills } from "./Form/MultiSelectPills";
+import { TagInput } from "./TagInput.tsx";
 
-const Diet = {
-  NONE: 'NONE',
-  VEGETARIAN: 'VEGETARIAN',
-  VEGAN: 'VEGAN',
-  KETO: 'KETO',
-  PALEO: 'PALEO',
-  GLUTEN_FREE: 'GLUTEN_FREE',
-} as const;
-
-const CookingSkill = {
-  BEGINNER: 'BEGINNER',
-  INTERMEDIATE: 'INTERMEDIATE',
-  ADVANCED: 'ADVANCED',
-} as const;
-
-const KitchenEquipment = {
-  OVEN: 'OVEN',
-  STOVE: 'STOVE',
-  MICROWAVE: 'MICROWAVE',
-  BLENDER: 'BLENDER',
-  AIR_FRYER: 'AIR_FRYER',
-  SLOW_COOKER: 'SLOW_COOKER',
-  GRILL: 'GRILL',
-  THERMOMIX: 'THERMOMIX',
-} as const;
-
-const BudgetLevel = {
-  CHEAP: 'CHEAP',
-  MODERATE: 'MODERATE',
-  EXPENSIVE: 'EXPENSIVE',
-} as const;
+import {
+  Diet,
+  CookingSkill,
+  KitchenEquipment,
+  BudgetLevel,
+} from "../constants/enums";
+import {
+  DIET_LABELS,
+  SKILL_LABELS,
+  BUDGET_LABELS,
+  EQUIPMENT_LABELS,
+} from "../constants/translations";
 
 const preferencesSchema = z.object({
   userId: z.string().uuid(),
@@ -53,14 +35,14 @@ const preferencesSchema = z.object({
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
 
-const DEFAULT_USER_ID = '11111111-1111-1111-1111-111111111111';
+const DEFAULT_USER_ID = "e4d2ae12-7632-426d-86d1-417651604866";
 
 const badgeStyles =
-  'inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide';
+  "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide";
 
 function parseCommaList(value: string) {
   return value
-    .split(',')
+    .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
 }
@@ -93,26 +75,38 @@ export function OnboardingForm() {
   const onSubmit = async (values: PreferencesFormData) => {
     try {
       await savePreferences(values);
-      setMessage('Preferencje zapisane pomyślnie.');
+      setMessage("Preferencje zapisane pomyślnie.");
       reset({ ...values });
     } catch (error: unknown) {
       console.error(error);
-      setMessage('Nie udało się zapisać preferencji.');
+      setMessage("Nie udało się zapisać preferencji.");
     }
   };
+
+  // Mapowanie sprzętu kuchennego na format odpowiedni dla pastylek
+  const equipmentOptions = Object.values(KitchenEquipment).map((eq) => ({
+    value: eq,
+    label: EQUIPMENT_LABELS[eq],
+  }));
 
   return (
     <div className="w-full max-w-3xl rounded-2xl bg-slate-900/80 p-8 shadow-2xl shadow-slate-950/50 backdrop-blur border border-slate-800">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-indigo-300/70">Onboarding</p>
-          <h1 className="text-3xl font-semibold text-white">Ustal swoje preferencje</h1>
+          <p className="text-xs uppercase tracking-[0.3em] text-indigo-300/70">
+            Onboarding
+          </p>
+          <h1 className="text-3xl font-semibold text-white">
+            Ustal swoje preferencje
+          </h1>
           <p className="text-sm text-slate-300 mt-2">
-            Wybierz dietę, umiejętności i sprzęty kuchenne, aby MealGenie personalizował pomysły na
-            posiłki.
+            Wybierz dietę, umiejętności i sprzęty kuchenne, aby MealGenie
+            personalizował pomysły na posiłki.
           </p>
         </div>
-        <div className={`${badgeStyles} bg-indigo-600/20 text-indigo-200 ring-1 ring-indigo-500/40`}>
+        <div
+          className={`${badgeStyles} bg-indigo-600/20 text-indigo-200 ring-1 ring-indigo-500/40`}
+        >
           Dev User
         </div>
       </div>
@@ -120,38 +114,44 @@ export function OnboardingForm() {
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-200">User ID (dev)</label>
+            <label className="text-sm font-medium text-slate-200">
+              User ID (dev)
+            </label>
             <input
               className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none ring-0 transition focus:border-indigo-500 focus:bg-slate-800"
-              {...register('userId')}
+              {...register("userId")}
               placeholder="UUID"
             />
-            {errors.userId && <p className="text-sm text-red-400">{errors.userId.message}</p>}
+            {errors.userId && (
+              <p className="text-sm text-red-400">{errors.userId.message}</p>
+            )}
           </div>
 
           <div className="space-y-3">
             <label className="text-sm font-medium text-slate-200">Dieta</label>
             <select
               className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none transition focus:border-indigo-500 focus:bg-slate-800"
-              {...register('diet')}
+              {...register("diet")}
             >
               {Object.values(Diet).map((value) => (
                 <option key={value} value={value}>
-                  {value.replace('_', ' ')}
+                  {DIET_LABELS[value]}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-200">Umiejętności kulinarne</label>
+            <label className="text-sm font-medium text-slate-200">
+              Umiejętności kulinarne
+            </label>
             <select
               className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none transition focus:border-indigo-500 focus:bg-slate-800"
-              {...register('cookingSkill')}
+              {...register("cookingSkill")}
             >
               {Object.values(CookingSkill).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {SKILL_LABELS[value]}
                 </option>
               ))}
             </select>
@@ -161,11 +161,11 @@ export function OnboardingForm() {
             <label className="text-sm font-medium text-slate-200">Budżet</label>
             <select
               className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none transition focus:border-indigo-500 focus:bg-slate-800"
-              {...register('budget')}
+              {...register("budget")}
             >
               {Object.values(BudgetLevel).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {BUDGET_LABELS[value]}
                 </option>
               ))}
             </select>
@@ -175,17 +175,12 @@ export function OnboardingForm() {
             control={control}
             name="allergies"
             render={({ field }) => (
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-200">
-                  Alergie (oddziel przecinkami)
-                </label>
-                <input
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none transition focus:border-indigo-500 focus:bg-slate-800"
-                  value={field.value.join(', ')}
-                  onChange={(e) => field.onChange(parseCommaList(e.target.value))}
-                  placeholder="orzechy, gluten, ..."
-                />
-              </div>
+              <TagInput
+                label="Alergie"
+                placeholder="np. gluten, orzechy"
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
           />
 
@@ -193,17 +188,12 @@ export function OnboardingForm() {
             control={control}
             name="favCuisines"
             render={({ field }) => (
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-200">
-                  Ulubione kuchnie (przecinki)
-                </label>
-                <input
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none transition focus:border-indigo-500 focus:bg-slate-800"
-                  value={field.value.join(', ')}
-                  onChange={(e) => field.onChange(parseCommaList(e.target.value))}
-                  placeholder="włoska, tajska, ..."
-                />
-              </div>
+              <TagInput
+                label="Ulubione kuchnie"
+                placeholder="np. włoska, meksykańska"
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
           />
 
@@ -211,17 +201,12 @@ export function OnboardingForm() {
             control={control}
             name="dislikedIngredients"
             render={({ field }) => (
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-200">
-                  Nielubiane składniki (przecinki)
-                </label>
-                <input
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-white outline-none transition focus:border-indigo-500 focus:bg-slate-800"
-                  value={field.value.join(', ')}
-                  onChange={(e) => field.onChange(parseCommaList(e.target.value))}
-                  placeholder="kolendra, seler, ..."
-                />
-              </div>
+              <TagInput
+                label="Nielubiane składniki"
+                placeholder="np. seler, papryka"
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
           />
 
@@ -231,7 +216,7 @@ export function OnboardingForm() {
             render={({ field }) => (
               <MultiSelectPills
                 label="Sprzęt kuchenny"
-                options={Object.values(KitchenEquipment)}
+                options={equipmentOptions}
                 value={field.value}
                 onChange={field.onChange}
               />
@@ -257,7 +242,9 @@ export function OnboardingForm() {
             />
           </div>
           <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-200">Czas przygotowania (min)</label>
+            <label className="text-sm font-medium text-slate-200">
+              Czas przygotowania (min)
+            </label>
             <Controller
               control={control}
               name="prepTimePreference"
@@ -296,7 +283,7 @@ export function OnboardingForm() {
           disabled={isSubmitting}
           className="w-full rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-indigo-900/50 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Zapisywanie...' : 'Zapisz preferencje'}
+          {isSubmitting ? "Zapisywanie..." : "Zapisz preferencje"}
         </button>
       </form>
     </div>
