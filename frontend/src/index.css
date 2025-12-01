@@ -3,6 +3,14 @@
 @config "../tailwind.config.js";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Zabezpieczenie przed poziomym overflow na mobile */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
 :root {
   color: #0f172a;
   background-color: #f8fafc;
