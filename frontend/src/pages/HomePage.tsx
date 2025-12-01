@@ -123,9 +123,9 @@ export function HomePage() {
         <div className="absolute right-[12%] top-[8%] h-[480px] w-[480px] rounded-full bg-blue-200/30 blur-[90px] dark:bg-blue-600/20 dark:blur-[120px]" />
       </div>
 
-      <section className="relative overflow-visible pt-24 pb-32 lg:pt-32">
+      <section className="relative overflow-visible pt-20 pb-16 lg:pt-32 lg:pb-32">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="relative z-10 text-center lg:col-span-7 lg:text-left">
               <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-200/60 bg-indigo-50/70 px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm shadow-indigo-100 transition-colors dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200 dark:shadow-indigo-900/30">
                 <span className="relative flex h-2 w-2">
@@ -167,11 +167,11 @@ export function HomePage() {
             <div className="relative flex justify-center perspective-1000 lg:col-span-5">
               <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-transparent to-fuchsia-500/10 blur-2xl" />
                 <div className="relative z-10 flex w-full max-w-[420px] flex-col items-center">
-                  <div className="relative z-20 mb-8 animate-float">
+                  <div className="relative z-20 mb-8 hidden animate-float sm:block">
                     <img
                       src="/logo-genie.png"
                       alt="MealGenie"
-                      className="h-48 w-48 drop-shadow-2xl"
+                      className="h-32 w-32 drop-shadow-2xl sm:h-48 sm:w-48"
                     />
                   </div>
 
