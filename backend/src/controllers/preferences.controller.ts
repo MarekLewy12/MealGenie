@@ -13,7 +13,6 @@ import {
 } from "../services/preferences.service.js";
 
 export const savePreferencesSchema = z.object({
-  userId: z.string().uuid(),
   diet: z.nativeEnum(Diet),
   allergies: z.array(z.string()),
   favCuisines: z.array(z.string()),
@@ -31,8 +30,18 @@ export async function savePreferencesController(
   next: NextFunction,
 ) {
   try {
-    const body = savePreferencesSchema.parse(req.body) as SavePreferencesInput;
-    const preferences = await savePreferences(body);
+    const bodyData = savePreferencesSchema.parse(req.body);
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      throw new Error("User ID missing in request context");
+    }
+
+    const input: SavePreferencesInput = {
+      ...bodyData,
+      userId: userId,
+    };
+    const preferences = await savePreferences(input);
     res.json(preferences);
   } catch (error) {
     next(error);

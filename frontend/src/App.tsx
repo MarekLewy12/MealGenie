@@ -4,8 +4,14 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
+import { useAuthStore } from "./store/authStore";
 
 function App() {
+  const { token, logout } = useAuthStore();
+  const navLinkClasses =
+    "rounded-lg px-3 py-2 text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 dark:text-indigo-100 dark:hover:bg-white/5 dark:hover:text-white";
+
   return (
     <BrowserRouter>
       <div className="relative min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#05030f] dark:text-slate-50">
@@ -18,7 +24,10 @@ function App() {
         <div className="relative z-10">
           <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition dark:border-white/10 dark:bg-[#0c0f1d]/80">
             <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-6 py-4">
-              <Link to="/" className="group flex items-center gap-3 text-slate-900 dark:text-white">
+              <Link
+                to="/"
+                className="group flex items-center gap-3 text-slate-900 dark:text-white"
+              >
                 <img
                   src="/logo-genie.png"
                   alt="MealGenie"
@@ -35,30 +44,31 @@ function App() {
               </Link>
 
               <nav className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                <Link
-                  to="/"
-                  className="rounded-lg px-3 py-2 text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 dark:text-indigo-100 dark:hover:bg-white/5 dark:hover:text-white"
-                >
+                <Link to="/" className={navLinkClasses}>
                   Strona główna
                 </Link>
-                <Link
-                  to="/onboarding"
-                  className="rounded-lg px-3 py-2 text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 dark:text-indigo-100 dark:hover:bg-white/5 dark:hover:text-white"
-                >
-                  Onboarding
-                </Link>
-                <Link
-                  to="/generator"
-                  className="rounded-lg px-3 py-2 text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 dark:text-indigo-100 dark:hover:bg-white/5 dark:hover:text-white"
-                >
-                  Generator
-                </Link>
-                <Link
-                  to="/login"
-                  className="rounded-lg px-3 py-2 text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 dark:text-indigo-100 dark:hover:bg-white/5 dark:hover:text-white"
-                >
-                  Logowanie
-                </Link>
+
+                {token && (
+                  <>
+                    <Link to="/onboarding" className={navLinkClasses}>
+                      Onboarding
+                    </Link>
+                    <Link to="/generator" className={navLinkClasses}>
+                      Generator
+                    </Link>
+                  </>
+                )}
+
+                {!token ? (
+                  <Link to="/login" className={navLinkClasses}>
+                    Logowanie
+                  </Link>
+                ) : (
+                  <button onClick={logout} className={navLinkClasses}>
+                    Wyloguj
+                  </button>
+                )}
+
                 <div className="ml-2 border-l border-slate-200/60 pl-3 dark:border-white/10">
                   <ThemeToggle />
                 </div>
@@ -69,9 +79,14 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/generator" element={<GeneratorPage />} />
+
+              <Route element={<ProtectedRoute />}>
+                {/* Chronione trasy */}
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/generator" element={<GeneratorPage />} />
+              </Route>
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
