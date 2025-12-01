@@ -14,6 +14,8 @@ import {
   Brain,
   ShieldCheck,
   NotebookPen,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { authSchema, type AuthFormData } from "../schemas/auth";
 import { loginUser, registerUser } from "../services/api";
@@ -23,6 +25,7 @@ type AuthMode = "login" | "register";
 
 export function LoginPage() {
   const [mode, setMode] = useState<AuthMode>("login");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -60,6 +63,7 @@ export function LoginPage() {
   const toggleMode = () => {
     setMode((prev) => (prev === "login" ? "register" : "login"));
     setErrorMsg(null);
+    setShowPassword(false);
     clearErrors();
     reset();
   };
@@ -263,24 +267,42 @@ export function LoginPage() {
                 </div>
 
                 {/* Input Password */}
-                <div className="group relative">
-                  <label className="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                     Hasło
                   </label>
-                  <div className="pointer-events-none absolute bottom-0 left-0 flex h-[54px] items-center pl-4">
-                    <Lock className="h-5 w-5 text-slate-400 transition-colors group-focus-within:text-indigo-500" />
+
+                  <div className="group relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex h-[54px] items-center pl-4">
+                      <Lock className="h-5 w-5 text-slate-400 transition-colors group-focus-within:text-indigo-500" />
+                    </div>
+                    <input
+                      {...register("password")}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="block w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-12 text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-indigo-500/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100/60 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-indigo-300 dark:focus:ring-indigo-500/40"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" aria-hidden="true" />
+                      ) : (
+                        <Eye className="h-5 w-5" aria-hidden="true" />
+                      )}
+                      <span className="sr-only">
+                        {showPassword ? "Ukryj hasło" : "Pokaż hasło"}
+                      </span>
+                    </button>
                   </div>
-                  <input
-                    {...register("password")}
-                    type="password"
-                    placeholder="••••••••"
-                    className="block w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-indigo-500/20"
-                  />
+
                   {errors.password && (
                     <motion.p
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-1.5 flex items-center gap-1 text-xs font-medium text-red-500"
+                      className="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
                     >
                       <span className="inline-block h-1 w-1 rounded-full bg-red-500" />
                       {errors.password.message}
