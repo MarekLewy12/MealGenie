@@ -65,6 +65,10 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   return res.status(500).json({ error: "InternalServerError" });
 });
 
-app.listen(env.PORT, () => {
-  console.log(`MealGenie backend listening on port ${env.PORT}`);
-});
+export { app };
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(env.PORT, () => {
+    console.log(`MealGenie backend listening on port ${env.PORT}`);
+  });
+}
