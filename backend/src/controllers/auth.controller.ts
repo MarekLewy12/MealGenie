@@ -6,6 +6,7 @@ import { registerUser, loginUser } from "../services/auth.service.js";
 const authSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, "Name is too short").optional(),
 });
 
 export async function registerController(
@@ -17,8 +18,14 @@ export async function registerController(
     // Zod
     const data = authSchema.parse(req.body);
 
+    if (!data.name) {
+      return res
+        .status(400)
+        .json({ error: "Name is required for registration" });
+    }
+
     // rejestracja poprzez serwis
-    const result = await registerUser(data);
+    const result = await registerUser({ ...data, name: data.name });
 
     res.status(201).json(result);
   } catch (error) {

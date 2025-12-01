@@ -11,13 +11,18 @@ const prisma = new PrismaClient();
 type AuthInput = {
   email: string;
   password: string;
+  name?: string;
 };
 
-export async function registerUser({ email, password }: AuthInput) {
+export async function registerUser({ email, password, name }: AuthInput) {
   // duplikaty?
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     throw new Error("Email already exists");
+  }
+
+  if (!name) {
+    throw new Error("Name required");
   }
 
   // Hash
@@ -27,6 +32,7 @@ export async function registerUser({ email, password }: AuthInput) {
   const user = await prisma.user.create({
     data: {
       email,
+      name,
       passwordHash,
       // reszta prisma
     },

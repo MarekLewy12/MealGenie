@@ -16,8 +16,14 @@ import {
   NotebookPen,
   Eye,
   EyeOff,
+  User,
 } from "lucide-react";
-import { authSchema, type AuthFormData } from "../schemas/auth";
+import {
+  loginSchema,
+  registerSchema,
+  type LoginFormData,
+  type RegisterFormData,
+} from "../schemas/auth";
 import { loginUser, registerUser } from "../services/api";
 import { useAuthStore } from "../store/authStore";
 
@@ -29,6 +35,7 @@ export function LoginPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const activeSchema = mode === "login" ? loginSchema : registerSchema;
 
   const {
     register,
@@ -36,16 +43,20 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
     reset,
     clearErrors,
-  } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(activeSchema),
   });
 
-  const onSubmit = async (data: AuthFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setErrorMsg(null);
     try {
       let result;
       if (mode === "login") {
-        result = await loginUser(data);
+        const loginPayload: LoginFormData = {
+          email: data.email,
+          password: data.password,
+        };
+        result = await loginUser(loginPayload);
       } else {
         result = await registerUser(data);
       }
@@ -240,6 +251,36 @@ export function LoginPage() {
               className="w-full max-w-md space-y-5 text-left"
             >
               <div className="space-y-4">
+                {/* Input Name (register only) */}
+                {mode === "register" && (
+                  <div className="space-y-1.5 animate-fade-in-up">
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Jak masz na imię?
+                    </label>
+                    <div className="group relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex h-[54px] items-center pl-4">
+                        <User className="h-5 w-5 text-slate-400 transition-colors group-focus-within:text-indigo-500" />
+                      </div>
+                      <input
+                        {...register("name")}
+                        type="text"
+                        placeholder="Imię/Nazwa użytkownika"
+                        className="block w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-indigo-500/20"
+                      />
+                    </div>
+                    {errors.name && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
+                      >
+                        <span className="inline-block h-1 w-1 rounded-full bg-red-500" />
+                        {errors.name.message}
+                      </motion.p>
+                    )}
+                  </div>
+                )}
+
                 {/* Input Email */}
                 <div className="group relative">
                   <label className="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">

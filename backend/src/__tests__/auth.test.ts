@@ -8,6 +8,7 @@ const randomId = Math.floor(Math.random() * 100000);
 const testUser = {
   email: `test${randomId}@example.com`,
   password: "password123",
+  name: "Marek Tester",
 };
 
 describe("Auth & Security Integration Tests", () => {
@@ -22,6 +23,7 @@ describe("Auth & Security Integration Tests", () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("token");
     expect(res.body.user).toHaveProperty("email", testUser.email);
+    expect(res.body.user).toHaveProperty("name", testUser.name);
     expect(res.body.user).not.toHaveProperty("passwordHash");
   });
 

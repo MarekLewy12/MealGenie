@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom"; // <-- Do nawigacji
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { savePreferences } from "../services/api";
 import { MultiSelectPills } from "./Form/MultiSelectPills";
@@ -20,7 +22,9 @@ import {
   EQUIPMENT_LABELS,
 } from "../constants/translations";
 
+// Schemat Zod (bez zmian w logice, tylko usunięte userId jeśli jeszcze tam było)
 const preferencesSchema = z.object({
+  // userId usunięte - bierze z tokena
   diet: z.nativeEnum(Diet),
   allergies: z.array(z.string()).default([]),
   favCuisines: z.array(z.string()).default([]),
@@ -34,14 +38,20 @@ const preferencesSchema = z.object({
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
 
+// Style dla inputów select/text
+const inputStyles =
+  "w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:focus:bg-slate-800 dark:focus:ring-indigo-500/20";
+const labelStyles =
+  "block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2";
+
 export function OnboardingForm() {
-  const [message, setMessage] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const {
     control,
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
@@ -53,53 +63,46 @@ export function OnboardingForm() {
       cookingSkill: CookingSkill.BEGINNER,
       prepTimePreference: 30,
       kitchenEquipment: [],
-      budget: BudgetLevel.CHEAP,
+      budget: BudgetLevel.MODERATE,
       servingSize: 2,
     },
   });
 
   const onSubmit = async (values: PreferencesFormData) => {
+    setErrorMsg(null);
     try {
       await savePreferences(values);
-      setMessage("Preferencje zapisane pomyślnie.");
-      reset({ ...values });
+      // Przekierowanie na generator (lub dashboard w przyszłości)
+      navigate("/generator");
     } catch (error: unknown) {
       console.error(error);
-      setMessage("Nie udało się zapisać preferencji.");
+      setErrorMsg("Coś poszło nie tak przy zapisywaniu. Spróbuj ponownie.");
     }
   };
 
-  // Mapowanie sprzętu kuchennego na format odpowiedni dla pastylek
   const equipmentOptions = Object.values(KitchenEquipment).map((eq) => ({
     value: eq,
     label: EQUIPMENT_LABELS[eq],
   }));
 
   return (
-    <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white/90 p-8 shadow-xl shadow-indigo-100/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/50">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-300/70">
-            Onboarding
-          </p>
-          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">
-            Ustal swoje preferencje
-          </h1>
-          <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-            Wybierz dietę, umiejętności i sprzęty kuchenne, aby MealGenie
-            personalizował pomysły na posiłki.
-          </p>
-        </div>
-      </div>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="mx-auto max-w-2xl space-y-10 rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-indigo-100/50 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/50 md:p-10"
+    >
+      {/* SEKCJA 1: Podstawy */}
+      <div className="space-y-6">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+            1
+          </span>
+          Fundamenty
+        </h3>
 
-      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200">Dieta</label>
-            <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800"
-              {...register("diet")}
-            >
+          <div>
+            <label className={labelStyles}>Dieta</label>
+            <select className={inputStyles} {...register("diet")}>
               {Object.values(Diet).map((value) => (
                 <option key={value} value={value}>
                   {DIET_LABELS[value]}
@@ -108,28 +111,9 @@ export function OnboardingForm() {
             </select>
           </div>
 
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
-              Umiejętności kulinarne
-            </label>
-            <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800"
-              {...register("cookingSkill")}
-            >
-              {Object.values(CookingSkill).map((value) => (
-                <option key={value} value={value}>
-                  {SKILL_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200">Budżet</label>
-            <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800"
-              {...register("budget")}
-            >
+          <div>
+            <label className={labelStyles}>Budżet</label>
+            <select className={inputStyles} {...register("budget")}>
               {Object.values(BudgetLevel).map((value) => (
                 <option key={value} value={value}>
                   {BUDGET_LABELS[value]}
@@ -137,122 +121,158 @@ export function OnboardingForm() {
               ))}
             </select>
           </div>
+        </div>
 
-          <Controller
-            control={control}
-            name="allergies"
-            render={({ field }) => (
-              <TagInput
-                label="Alergie"
-                placeholder="np. gluten, orzechy"
-                value={field.value}
-                onChange={field.onChange}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <label className={labelStyles}>Poziom umiejętności</label>
+            <select className={inputStyles} {...register("cookingSkill")}>
+              {Object.values(CookingSkill).map((value) => (
+                <option key={value} value={value}>
+                  {SKILL_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelStyles}>Porcje</label>
+              <Controller
+                control={control}
+                name="servingSize"
+                render={({ field }) => (
+                  <input
+                    type="number"
+                    min={1}
+                    className={inputStyles}
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  />
+                )}
               />
-            )}
-          />
+            </div>
+            <div>
+              <label className={labelStyles}>Czas (min)</label>
+              <Controller
+                control={control}
+                name="prepTimePreference"
+                render={({ field }) => (
+                  <input
+                    type="number"
+                    min={5}
+                    step={5}
+                    className={inputStyles}
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div className="h-px w-full bg-slate-100 dark:bg-slate-800" />
+
+      {/* SEKCJA 2: Szczegóły */}
+      <div className="space-y-6">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-fuchsia-100 text-xs font-bold text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-300">
+            2
+          </span>
+          Smaki i Wykluczenia
+        </h3>
+
+        <Controller
+          control={control}
+          name="allergies"
+          render={({ field }) => (
+            <TagInput
+              label="Alergie i Nietolerancje"
+              placeholder="np. orzechy, laktoza"
+              value={field.value}
+              onChange={field.onChange}
+            />
+          )}
+        />
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Controller
             control={control}
             name="favCuisines"
             render={({ field }) => (
               <TagInput
                 label="Ulubione kuchnie"
-                placeholder="np. włoska, meksykańska"
+                placeholder="np. włoska, tajska"
                 value={field.value}
                 onChange={field.onChange}
               />
             )}
           />
-
           <Controller
             control={control}
             name="dislikedIngredients"
             render={({ field }) => (
               <TagInput
                 label="Nielubiane składniki"
-                placeholder="np. seler, papryka"
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="kitchenEquipment"
-            render={({ field }) => (
-              <MultiSelectPills
-                label="Sprzęt kuchenny"
-                options={equipmentOptions}
+                placeholder="np. brukselka"
                 value={field.value}
                 onChange={field.onChange}
               />
             )}
           />
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200">Porcje</label>
-            <Controller
-              control={control}
-              name="servingSize"
-              render={({ field }) => (
-                <input
-                  type="number"
-                  min={1}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800"
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 1)}
-                />
-              )}
+      <div className="h-px w-full bg-slate-100 dark:bg-slate-800" />
+
+      {/* SEKCJA 3: Sprzęt */}
+      <div className="space-y-6">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300">
+            3
+          </span>
+          Twój Arsenał
+        </h3>
+
+        <Controller
+          control={control}
+          name="kitchenEquipment"
+          render={({ field }) => (
+            <MultiSelectPills
+              label=""
+              options={equipmentOptions}
+              value={field.value}
+              onChange={field.onChange}
             />
-          </div>
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
-              Czas przygotowania (min)
-            </label>
-            <Controller
-              control={control}
-              name="prepTimePreference"
-              render={({ field }) => (
-                <input
-                  type="number"
-                  min={0}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800"
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                />
-              )}
-            />
-          </div>
+          )}
+        />
+      </div>
+
+      {/* Błędy / Sukces */}
+      {errorMsg && (
+        <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-300">
+          {errorMsg}
         </div>
+      )}
 
-        {errors && Object.keys(errors).length > 0 && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
-            <p className="font-semibold">Błędy walidacji:</p>
-            <ul className="mt-2 space-y-1">
-              {Object.values(errors).map((err, index) => (
-                <li key={index}>• {err?.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {message && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-100">
-            {message}
-          </div>
-        )}
-
+      {/* Submit */}
+      <div className="pt-4">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-indigo-200/60 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-indigo-900/50"
+          className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-900 py-4 text-base font-semibold text-white shadow-xl transition-all hover:scale-[1.01] hover:bg-slate-800 disabled:opacity-70 dark:bg-indigo-600 dark:hover:bg-indigo-500"
         >
-          {isSubmitting ? "Zapisywanie..." : "Zapisz preferencje"}
+          {isSubmitting ? (
+            "Zapisywanie..."
+          ) : (
+            <>
+              Zapisz i przejdź dalej
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </>
+          )}
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }

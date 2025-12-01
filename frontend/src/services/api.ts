@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import type { AuthFormData } from '../schemas/auth';
+import type { LoginFormData, RegisterFormData } from '../schemas/auth';
 import { useAuthStore } from '../store/authStore';
 import type { MealResponse, MealType } from '../types/meal';
 
@@ -49,12 +49,12 @@ export async function generateMealSuggestions(
   return data;
 }
 
-export async function registerUser(data: AuthFormData) {
+export async function registerUser(data: RegisterFormData) {
   const response = await api.post('/auth/register', data);
   return response.data;
 }
 
-export async function loginUser(data: AuthFormData) {
+export async function loginUser(data: LoginFormData) {
   const response = await api.post('/auth/login', data);
   return response.data;
 }
