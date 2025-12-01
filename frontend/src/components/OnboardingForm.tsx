@@ -21,7 +21,6 @@ import {
 } from "../constants/translations";
 
 const preferencesSchema = z.object({
-  userId: z.string().uuid(),
   diet: z.nativeEnum(Diet),
   allergies: z.array(z.string()).default([]),
   favCuisines: z.array(z.string()).default([]),
@@ -35,18 +34,6 @@ const preferencesSchema = z.object({
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
 
-const DEFAULT_USER_ID = "e4d2ae12-7632-426d-86d1-417651604866";
-
-const badgeStyles =
-  "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide";
-
-function parseCommaList(value: string) {
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 export function OnboardingForm() {
   const [message, setMessage] = useState<string | null>(null);
 
@@ -59,7 +46,6 @@ export function OnboardingForm() {
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      userId: DEFAULT_USER_ID,
       diet: Diet.NONE,
       allergies: [],
       favCuisines: [],
@@ -104,29 +90,10 @@ export function OnboardingForm() {
             personalizował pomysły na posiłki.
           </p>
         </div>
-        <div
-          className={`${badgeStyles} bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200 dark:bg-indigo-600/20 dark:text-indigo-200 dark:ring-indigo-500/40`}
-        >
-          Dev User
-        </div>
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
-              User ID (dev)
-            </label>
-            <input
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800"
-              {...register("userId")}
-              placeholder="UUID"
-            />
-            {errors.userId && (
-              <p className="text-sm text-red-600 dark:text-red-400">{errors.userId.message}</p>
-            )}
-          </div>
-
           <div className="space-y-3">
             <label className="text-sm font-medium text-slate-800 dark:text-slate-200">Dieta</label>
             <select

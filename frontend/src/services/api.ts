@@ -17,7 +17,6 @@ api.interceptors.request.use((config) => {
 });
 
 export type SavePreferencesPayload = {
-  userId: string;
   diet: string;
   allergies: string[];
   favCuisines: string[];
@@ -35,7 +34,6 @@ export async function savePreferences(payload: SavePreferencesPayload) {
 }
 
 export type GenerateMealSuggestionsPayload = {
-  userId: string;
   mealType: MealType;
 };
 
