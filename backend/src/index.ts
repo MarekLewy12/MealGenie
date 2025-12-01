@@ -13,6 +13,7 @@ import {
   registerController,
   loginController,
 } from "./controllers/auth.controller.js";
+import { authenticateToken } from "./middlewares/authMiddleware.js";
 
 dotenv.config();
 
@@ -45,8 +46,8 @@ app.post("/api/echo", (req: Request, res: Response, next: NextFunction) => {
 });
 
 // API
-app.post("/api/preferences", savePreferencesController);
-app.post("/api/meals/suggest", suggestMealsController);
+app.post("/api/preferences", authenticateToken, savePreferencesController);
+app.post("/api/meals/suggest", authenticateToken, suggestMealsController);
 
 // Auth
 app.post("/api/auth/register", registerController);

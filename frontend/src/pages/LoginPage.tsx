@@ -87,18 +87,6 @@ export function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen w-full items-start justify-center overflow-hidden bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#020617] dark:text-white">
-      {/* --- TŁO (Skopiowane vibes ze strony głównej dla spójności) --- */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Lewy górny Orb */}
-        <div className="absolute -left-[10%] -top-[10%] h-[600px] w-[600px] rounded-full bg-indigo-500/20 blur-[120px] dark:bg-indigo-500/15" />
-        {/* Prawy dolny Orb */}
-        <div className="absolute -bottom-[10%] -right-[10%] h-[600px] w-[600px] rounded-full bg-fuchsia-500/20 blur-[120px] dark:bg-fuchsia-500/15" />
-        {/* Środkowy dla dodatkowej głębi */}
-        <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/10 blur-[100px] dark:bg-violet-500/10" />
-        {/* Siatka (Grid) */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
-      </div>
-
       {/* --- KONTENER GŁÓWNY (Szklana Karta) --- */}
       <div className="relative z-10 grid min-h-screen w-full max-w-none grid-cols-1 overflow-hidden border border-white/50 bg-white/40 shadow-2xl backdrop-blur-xl transition-all dark:border-white/10 dark:bg-slate-900/60 lg:grid-cols-2 lg:shadow-[0_0_50px_-10px_rgba(79,70,229,0.3)]">
         {/* LEWA STRONA (Branding / Wizualna) */}
@@ -156,10 +144,13 @@ export function LoginPage() {
                 )}
               </h2>
               <p className="mx-auto max-w-xl text-center text-base leading-relaxed text-indigo-100">
-                MealGenie pomaga podejmować decyzje, bilansować posiłki i planować zakupy tak, by każdy tydzień był prostszy.
+                MealGenie pomaga podejmować decyzje, bilansować posiłki i
+                planować zakupy tak, by każdy tydzień był prostszy.
               </p>
               <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-indigo-100/90">
-                W jednym miejscu łączymy preferencje, listy składników i inspiracje sezonowe, dzięki czemu nie tracisz czasu na szukanie pomysłów.
+                W jednym miejscu łączymy preferencje, listy składników i
+                inspiracje sezonowe, dzięki czemu nie tracisz czasu na szukanie
+                pomysłów.
               </p>
             </motion.div>
 
@@ -171,7 +162,9 @@ export function LoginPage() {
             >
               <div className="w-full max-w-2xl rounded-2xl border border-white/15 bg-white/5 p-5 shadow-lg backdrop-blur-sm">
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="text-sm font-semibold text-white">Plan działania</div>
+                  <div className="text-sm font-semibold text-white">
+                    Plan działania
+                  </div>
                   <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
                     3 kroki · personalizacja
                   </div>
@@ -190,7 +183,9 @@ export function LoginPage() {
                         </span>
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-white">{step.title}</p>
+                        <p className="text-sm font-semibold text-white">
+                          {step.title}
+                        </p>
                         <p className="mt-0.5 text-xs leading-relaxed text-indigo-100/80">
                           {step.description}
                         </p>
@@ -199,10 +194,8 @@ export function LoginPage() {
                   ))}
                 </div>
               </div>
-
             </motion.div>
           </div>
-
         </div>
 
         {/* PRAWA STRONA (Formularz) */}
