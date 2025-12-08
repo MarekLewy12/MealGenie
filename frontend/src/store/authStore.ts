@@ -10,8 +10,10 @@ interface User {
 interface AuthState {
   token: string | null;
   user: User | null;
-  setAuth: (token: string, user: User) => void;
+  hasCompletedOnboarding: boolean;
+  setAuth: (token: string, user: User, hasCompletedOnboarding: boolean) => void;
   logout: () => void;
+  updateOnboardingStatus: (status: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -19,8 +21,16 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       token: null,
       user: null,
-      setAuth: (token, user) => set({ token, user }),
-      logout: () => set({ token: null, user: null }),
+      hasCompletedOnboarding: false,
+
+      setAuth: (token, user, hasCompletedOnboarding) =>
+        set({ token, user, hasCompletedOnboarding }),
+
+      logout: () =>
+        set({ token: null, user: null, hasCompletedOnboarding: false }),
+
+      updateOnboardingStatus: (status) =>
+        set({ hasCompletedOnboarding: status }),
     }),
     {
       name: "auth-storage",

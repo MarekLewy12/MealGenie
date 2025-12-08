@@ -60,8 +60,12 @@ export function LoginPage() {
       } else {
         result = await registerUser(data);
       }
-      setAuth(result.token, result.user);
-      navigate(mode === "login" ? "/" : "/onboarding");
+      setAuth(result.token, result.user, result.hasCompletedOnboarding);
+      if (result.hasCompletedOnboarding) {
+        navigate("/dashboard");
+      } else {
+        navigate("/onboarding");
+      }
     } catch (err: any) {
       console.error(err);
       setErrorMsg(

@@ -48,7 +48,15 @@ export async function registerUser({ email, password, name }: AuthInput) {
 
 export async function loginUser({ email, password }: AuthInput) {
   // czy user istnieje w bazie?
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      // czy użytkownik ma już globalne ustawienia?
+      preferences: {
+        select: { id: true },
+      },
+    },
+  });
 
   // jeśli nie ma usera błąd credentials żeby nie podpowiadać, które maile istnieją
   if (!user) {
@@ -67,5 +75,7 @@ export async function loginUser({ email, password }: AuthInput) {
 
   const { passwordHash: _ignored, ...safeUser } = user;
 
-  return { user: safeUser, token };
+  const hasCompletedOnboarding = Boolean(user.preferences);
+
+  return { user: safeUser, token, hasCompletedOnboarding };
 }
