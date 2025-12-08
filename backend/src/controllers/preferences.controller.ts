@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import {
   savePreferences,
+  getPreferences,
   type SavePreferencesInput,
 } from "../services/preferences.service.js";
 
@@ -24,23 +25,50 @@ export const savePreferencesSchema = z.object({
 });
 
 export async function savePreferencesController(
+  // zapisywanie preferencji użytkownika
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
+    // Walidacja danych wejściowych
     const bodyData = savePreferencesSchema.parse(req.body);
+
+    // Pobranie userId z kontekstu requestu (middleware auth)
     const userId = req.user?.userId;
 
     if (!userId) {
       throw new Error("User ID missing in request context");
     }
 
+    // Przygotowanie danych do zapisu
     const input: SavePreferencesInput = {
       ...bodyData,
       userId: userId,
     };
-    const preferences = await savePreferences(input);
+    const preferences = await savePreferences(input); // Zapis preferencji poprzez serwis
+    res.json(preferences); // Odpowiedź z zapisanymi preferencjami
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getPreferencesController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    // Pobranie userId z kontekstu requestu
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new Error("User ID missing");
+    }
+
+    // Pobranie preferencji poprzez serwis
+    const preferences = await getPreferences(userId);
+
+    // Zwrócenie preferencji w odpowiedzi
     res.json(preferences);
   } catch (error) {
     next(error);

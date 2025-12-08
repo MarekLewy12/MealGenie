@@ -7,7 +7,10 @@ import express, {
 } from "express";
 import { z, ZodError } from "zod";
 
-import { savePreferencesController } from "./controllers/preferences.controller.js";
+import {
+  getPreferencesController,
+  savePreferencesController,
+} from "./controllers/preferences.controller.js";
 import { suggestMealsController } from "./controllers/meals.controller.js";
 import {
   registerController,
@@ -47,6 +50,7 @@ app.post("/api/echo", (req: Request, res: Response, next: NextFunction) => {
 
 // API
 app.post("/api/preferences", authenticateToken, savePreferencesController);
+app.get("/api/preferences", authenticateToken, getPreferencesController);
 app.post("/api/meals/suggest", authenticateToken, suggestMealsController);
 
 // Auth

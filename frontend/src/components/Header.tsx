@@ -6,10 +6,14 @@ import { useAuthStore } from "../store/authStore";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
-  const { token, logout } = useAuthStore();
+  const { token, logout, user } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const homeLink = token ? "/dashboard" : "/";
+  const homeLabel = token ? "Dashboard" : "Strona główna";
+  const logoutTitle = user?.name ? `Wyloguj ${user.name}` : "Wyloguj";
 
   const linkBaseClasses =
     "text-sm font-semibold uppercase tracking-wide transition-colors duration-200";
@@ -20,7 +24,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#0c0f1d]/80">
       <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-6">
-        <Link to="/" className="group flex items-center gap-3" onClick={closeMenu}>
+        <Link to={homeLink} className="group flex items-center gap-3" onClick={closeMenu}>
           <img
             src="/logo-genie.png"
             alt="MealGenie"
@@ -34,14 +38,14 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          <Link to="/" className={desktopLinkClasses}>
-            Strona główna
+          <Link to={homeLink} className={desktopLinkClasses}>
+            {homeLabel}
           </Link>
 
           {token && (
             <>
-              <Link to="/onboarding" className={desktopLinkClasses}>
-                Onboarding
+              <Link to="/settings" className={desktopLinkClasses}>
+                Ustawienia
               </Link>
               <Link to="/generator" className={desktopLinkClasses}>
                 Generator
@@ -54,7 +58,7 @@ export function Header() {
               Logowanie
             </Link>
           ) : (
-            <button onClick={logout} className={desktopLinkClasses}>
+            <button onClick={logout} className={desktopLinkClasses} title={logoutTitle}>
               Wyloguj
             </button>
           )}
@@ -87,17 +91,17 @@ export function Header() {
             className="overflow-hidden border-t border-slate-200 bg-white/95 backdrop-blur-xl md:hidden dark:border-slate-800 dark:bg-[#0c0f1d]/95"
           >
             <nav className="flex flex-col p-4">
-              <Link to="/" className={mobileLinkClasses} onClick={closeMenu}>
-                Strona główna
+              <Link to={homeLink} className={mobileLinkClasses} onClick={closeMenu}>
+                {homeLabel}
               </Link>
 
               {token && (
                 <>
-                  <Link to="/onboarding" className={mobileLinkClasses} onClick={closeMenu}>
-                    Onboarding
+                  <Link to="/settings" className={mobileLinkClasses} onClick={closeMenu}>
+                    Ustawienia
                   </Link>
                   <Link to="/generator" className={mobileLinkClasses} onClick={closeMenu}>
-                    Generator AI
+                    Generator
                   </Link>
                 </>
               )}

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom"; // <-- Do nawigacji
+import { useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { savePreferences } from "../services/api";
@@ -22,9 +22,7 @@ import {
   EQUIPMENT_LABELS,
 } from "../constants/translations";
 
-// Schemat Zod (bez zmian w logice, tylko usunięte userId jeśli jeszcze tam było)
 const preferencesSchema = z.object({
-  // userId usunięte - bierze z tokena
   diet: z.nativeEnum(Diet),
   allergies: z.array(z.string()).default([]),
   favCuisines: z.array(z.string()).default([]),
@@ -43,8 +41,18 @@ const inputStyles =
 const labelStyles =
   "block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2";
 
-export function OnboardingForm() {
+type OnboardingFormProps = {
+  initialValues?: Partial<PreferencesFormData>;
+  isEditing?: boolean;
+};
+
+export function OnboardingForm({
+  initialValues,
+  isEditing = false,
+}: OnboardingFormProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const navigationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
   const {
@@ -54,7 +62,7 @@ export function OnboardingForm() {
     formState: { errors, isSubmitting },
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       diet: Diet.NONE,
       allergies: [],
       favCuisines: [],
@@ -66,12 +74,33 @@ export function OnboardingForm() {
     },
   });
 
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = setTimeout(() => setToastMessage(null), 2600);
+    return () => clearTimeout(timer);
+  }, [toastMessage]);
+
+  useEffect(
+    () => () => {
+      if (navigationTimerRef.current) {
+        clearTimeout(navigationTimerRef.current);
+      }
+    },
+    [],
+  );
+
   const onSubmit = async (values: PreferencesFormData) => {
     setErrorMsg(null);
     try {
       await savePreferences(values);
-      // Przekierowanie na generator (lub dashboard w przyszłości)
-      navigate("/generator");
+      if (isEditing) {
+        setToastMessage("Zapisano zmiany!");
+        navigationTimerRef.current = setTimeout(() => {
+          navigate("/dashboard");
+        }, 800);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: unknown) {
       console.error(error);
       setErrorMsg("Coś poszło nie tak przy zapisywaniu. Spróbuj ponownie.");
@@ -251,12 +280,30 @@ export function OnboardingForm() {
             "Zapisywanie..."
           ) : (
             <>
-              Zapisz i przejdź dalej
+              {isEditing ? "Zapisz zmiany" : "Zapisz i przejdź dalej"}
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </>
           )}
         </button>
       </div>
+
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 flex items-start gap-3 rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-2xl shadow-emerald-100/60 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-white dark:shadow-black/40"
+        >
+          <div className="mt-0.5 rounded-full bg-emerald-100 p-1 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300">
+            <CheckCircle2 className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
+              Sukces
+            </span>
+            <span className="font-medium">{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

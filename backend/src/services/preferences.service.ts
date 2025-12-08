@@ -1,9 +1,9 @@
 import {
-  PrismaClient,
   type BudgetLevel,
   type CookingSkill,
   type Diet,
   type KitchenEquipment,
+  PrismaClient,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -23,7 +23,7 @@ export type SavePreferencesInput = {
 export async function savePreferences(input: SavePreferencesInput) {
   const { userId, ...preferencesData } = input;
 
-  const preferences = await prisma.preferences.upsert({
+  return prisma.preferences.upsert({
     where: { userId },
     update: preferencesData,
     create: {
@@ -31,6 +31,10 @@ export async function savePreferences(input: SavePreferencesInput) {
       userId,
     },
   });
+}
 
-  return preferences;
+export async function getPreferences(userId: string) {
+  return prisma.preferences.findUnique({
+    where: { userId },
+  });
 }

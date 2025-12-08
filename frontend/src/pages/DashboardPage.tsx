@@ -71,7 +71,7 @@ export function DashboardPage() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Link to="/onboarding" className="group flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:border-indigo-300 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
+                            <Link to="/settings" className="group flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:border-indigo-300 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
                                 <Settings className="mb-3 h-6 w-6 text-slate-400 transition-colors group-hover:text-indigo-500" />
                                 <span className="text-sm font-semibold">Preferencje</span>
                                 <span className="text-xs text-slate-500">Edytuj globalne ustawienia</span>

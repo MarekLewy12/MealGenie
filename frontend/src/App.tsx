@@ -4,10 +4,14 @@ import { GeneratorPage } from "./pages/GeneratorPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { Header } from "./components/Header";
+import { useAuthStore } from "./store/authStore";
 
 function App() {
+  const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
+
   return (
     <BrowserRouter>
       <div className="relative min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#05030f] dark:text-slate-50">
@@ -22,13 +26,28 @@ function App() {
 
           <main>
             <Routes>
-              <Route path="/" element={<HomePage />} />
+              <Route
+                path="/"
+                element={
+                  hasCompletedOnboarding ? <Navigate to="/dashboard" replace /> : <HomePage />
+                }
+              />
               <Route path="/login" element={<LoginPage />} />
 
               <Route element={<ProtectedRoute />}>
                 {/* Chronione trasy */}
+                <Route
+                  path="/onboarding"
+                  element={
+                    hasCompletedOnboarding ? (
+                      <Navigate to="/settings" replace />
+                    ) : (
+                      <OnboardingPage />
+                    )
+                  }
+                />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/generator" element={<GeneratorPage />} />
               </Route>
 
