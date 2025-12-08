@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { DashboardPage } from "./pages/DashboardPage";
 import { GeneratorPage } from "./pages/GeneratorPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -26,6 +27,7 @@ function App() {
 
               <Route element={<ProtectedRoute />}>
                 {/* Chronione trasy */}
+                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/generator" element={<GeneratorPage />} />
               </Route>
