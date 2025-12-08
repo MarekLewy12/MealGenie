@@ -44,8 +44,13 @@ export async function loginController(
 
     res.status(200).json(result);
   } catch (error) {
-    if (error instanceof Error && error.message === "Invalid credentials") {
-      return res.status(401).json({ error: "Invalid credentials" });
+    if (
+      error instanceof Error &&
+      error.message === "Nieprawidłowe dane logowania"
+    ) {
+      return res
+        .status(401)
+        .json({ error: "Nieprawidłowe dane logowania" });
     }
     next(error);
   }

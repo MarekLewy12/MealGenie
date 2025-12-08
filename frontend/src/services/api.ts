@@ -22,10 +22,9 @@ export type SavePreferencesPayload = {
   favCuisines: string[];
   dislikedIngredients: string[];
   cookingSkill: string;
-  prepTimePreference: number;
   kitchenEquipment: string[];
   budget: string;
-  servingSize: number;
+  useThermomix: boolean;
 };
 
 export async function savePreferences(payload: SavePreferencesPayload) {
@@ -35,6 +34,8 @@ export async function savePreferences(payload: SavePreferencesPayload) {
 
 export type GenerateMealSuggestionsPayload = {
   mealType: MealType;
+  prepTime: number;
+  servingSize: number;
 };
 
 export async function generateMealSuggestions(

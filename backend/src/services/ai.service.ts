@@ -19,6 +19,8 @@ const mealTypeToPolishLabel: Record<MealType, string> = {
 export async function generateMealSuggestions(
   userId: string,
   mealType: MealType,
+  prepTime: number,
+  servingSize: number,
 ) {
   const preferences = await prisma.preferences.findUnique({
     where: { userId },
@@ -28,15 +30,31 @@ export async function generateMealSuggestions(
     throw new Error("User preferences not found");
   }
 
+  const equipmentList =
+    preferences.kitchenEquipment.length > 0
+      ? preferences.kitchenEquipment.join(", ")
+      : "Brak";
+
+  const thermomixContext = preferences.useThermomix
+    ? "UŻYTKOWNIK POSIADA THERMOMIX. Preferuj przepisy wykorzystujące to urządzenie, podawaj ustawienia (obroty, temperatura)."
+    : "";
+
   const promptContext = `
     Profil użytkownika:
     - Dieta: ${preferences.diet}
     - Alergie: ${preferences.allergies.join(", ") || "Brak"}
-    - Ulubione kuchnie: ${preferences.favCuisines.join(", ") || "Brak preferencji"}
-    - Nielubiane składniki: ${preferences.dislikedIngredients.join(", ") || "Brak"}
-    - Poziom umiejętności: ${preferences.cookingSkill}
-    - Dostępny czas: ${preferences.prepTimePreference} minut
-    - Sprzęt kuchenny: ${preferences.kitchenEquipment.join(", ")}
+    - Kuchnie: ${preferences.favCuisines.join(", ") || "Brak"}
+    - Wykluczenia: ${preferences.dislikedIngredients.join(", ") || "Brak"}
+    - Skill: ${preferences.cookingSkill}
+    - Sprzęt: ${equipmentList}
+    - Budżet: ${preferences.budget}
+    
+    PARAMETRY TEGO POSIŁKU (Lokalne):
+    - Czas: max ${prepTime} minut
+    - Liczba porcji: ${servingSize}
+    
+    SPECJALNE:
+    ${thermomixContext}
   `;
 
   const mealTypeLabel = mealTypeToPolishLabel[mealType];
@@ -47,10 +65,12 @@ export async function generateMealSuggestions(
     
     Zasady:
     1. Posiłki muszą ściśle przestrzegać diety i wykluczeń (alergii).
-    2. Czas przygotowania nie może przekraczać preferencji użytkownika.
-    3. Wykorzystuj podany sprzęt kuchenny.
-    4. Opisy mają być po polsku, zachęcające i "smaczne".
-    5. Składniki mają być ogólnodostępne w Polsce.
+    2. Czas przygotowania nie może przekraczać limitu z parametrów generowania.
+    3. Uwzględniaj wymaganą liczbę porcji.
+    4. Wykorzystuj podany sprzęt kuchenny.
+    5. Jeśli dostępny jest Thermomix, preferuj przepisy pod to urządzenie (z ustawieniami obrotów/temperatury).
+    6. Opisy mają być po polsku, zachęcające i "smaczne".
+    7. Składniki mają być ogólnodostępne w Polsce.
   `;
 
   const completion = await openai.chat.completions.create({

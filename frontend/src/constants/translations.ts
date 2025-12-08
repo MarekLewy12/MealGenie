@@ -23,7 +23,6 @@ export const EQUIPMENT_LABELS: Record<keyof typeof KitchenEquipment, string> = {
     AIR_FRYER: 'Frytkownica powietrzna',
     SLOW_COOKER: 'Wolnowar',
     GRILL: 'Grill',
-    THERMOMIX: 'Thermomix',
 }
 
 export const BUDGET_LABELS: Record<keyof typeof BudgetLevel, string> = {

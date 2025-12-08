@@ -52,14 +52,14 @@ export async function loginUser({ email, password }: AuthInput) {
 
   // jeśli nie ma usera błąd credentials żeby nie podpowiadać, które maile istnieją
   if (!user) {
-    throw new Error("Invalid credentials");
+    throw new Error("Nieprawidłowe dane logowania");
   }
 
   // porównanie haseł
   const isValid = await comparePasswords(password, user.passwordHash);
 
   if (!isValid) {
-    throw new Error("Invalid credentials");
+    throw new Error("Nieprawidłowe dane logowania");
   }
 
   // tworzenie tokena

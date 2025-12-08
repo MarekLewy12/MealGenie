@@ -20,8 +20,7 @@ export const KitchenEquipment = {
     BLENDER: 'BLENDER',
     AIR_FRYER: 'AIR_FRYER',
     SLOW_COOKER: 'SLOW_COOKER',
-    GRILL: 'GRILL',
-    THERMOMIX: 'THERMOMIX'
+    GRILL: 'GRILL'
 } as const;
 
 export const BudgetLevel = {

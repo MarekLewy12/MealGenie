@@ -18,10 +18,14 @@ const mealTypeOptions: Array<{
 
 export function MealGenerator() {
   const [mealType, setMealType] = useState<MealType>("LUNCH");
+  const [prepTime, setPrepTime] = useState(30);
+  const [servingSize, setServingSize] = useState(2);
   const { mutate, data, status, isError, error } = useMutation({
     mutationFn: () =>
       generateMealSuggestions({
         mealType,
+        prepTime,
+        servingSize,
       }),
   });
 
@@ -46,6 +50,54 @@ export function MealGenerator() {
             MealGenie dobierze przepisy dopasowane do Twoich preferencji. To
             może potrwać kilka sekund.
           </p>
+        </div>
+      </div>
+
+      <div className="mb-8 grid gap-6 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 md:grid-cols-2">
+        <div>
+          <div className="mb-2 flex justify-between">
+            <label className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+              Czas: {prepTime} min
+            </label>
+          </div>
+          <input
+            type="range"
+            min="15"
+            max="120"
+            step="15"
+            value={prepTime}
+            onChange={(e) => setPrepTime(Number(e.target.value))}
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-indigo-600 dark:bg-slate-700"
+          />
+          <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+            <span>15m</span>
+            <span>2h</span>
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+            Liczba osób: {servingSize}
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setServingSize((s) => Math.max(1, s - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+            >
+              -
+            </button>
+            <span className="w-8 text-center font-bold text-slate-900 dark:text-white">
+              {servingSize}
+            </span>
+            <button
+              type="button"
+              onClick={() => setServingSize((s) => Math.min(10, s + 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 
