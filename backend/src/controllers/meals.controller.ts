@@ -5,6 +5,8 @@ import { MealTypeSchema } from "../schemas/meal.schema.js";
 
 export const suggestMealsSchema = z.object({
   mealType: MealTypeSchema,
+  prepTime: z.number().min(5).max(180),
+  servingSize: z.number().min(1).max(10),
 });
 
 export async function suggestMealsController(
@@ -19,9 +21,16 @@ export async function suggestMealsController(
       throw new Error("User ID missing in request context");
     }
 
-    const { mealType } = suggestMealsSchema.parse(req.body);
+    const { mealType, prepTime, servingSize } = suggestMealsSchema.parse(
+      req.body,
+    );
 
-    const meals = await generateMealSuggestions(userId, mealType);
+    const meals = await generateMealSuggestions(
+      userId,
+      mealType,
+      prepTime,
+      servingSize,
+    );
 
     res.json({ meals });
   } catch (error) {

@@ -4,7 +4,7 @@ import {
   type CookingSkill,
   type Diet,
   type KitchenEquipment,
-} from '@prisma/client';
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -15,10 +15,9 @@ export type SavePreferencesInput = {
   favCuisines: string[];
   dislikedIngredients: string[];
   cookingSkill: CookingSkill;
-  prepTimePreference: number;
   kitchenEquipment: KitchenEquipment[];
   budget: BudgetLevel;
-  servingSize: number;
+  useThermomix: boolean;
 };
 
 export async function savePreferences(input: SavePreferencesInput) {
@@ -31,9 +30,9 @@ export async function savePreferences(input: SavePreferencesInput) {
       id: userId,
       // Tymczasowy adres, by spełnić unikalny constraint email w środowisku dev.
       email: `${userId}@placeholder.local`,
-      status: 'ACTIVE',
+      status: "ACTIVE",
       // Wymagane przez nowy model użytkownika (Email+Hasło).
-      passwordHash: 'DEV_PLACEHOLDER_PASSWORD_HASH',
+      passwordHash: "DEV_PLACEHOLDER_PASSWORD_HASH",
     },
   });
 
