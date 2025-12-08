@@ -13,7 +13,7 @@ export function OnboardingPage() {
       {/* Tło dekoracyjne (opcjonalne, subtelne glow) */}
       <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[100px] dark:bg-indigo-500/5" />
 
-      <div className="mx-auto max-w-2xl text-center">
+      <div className="mx-auto max-w-2xl lg:max-w-4xl xl:max-w-5xl text-center">
         {/* Badge */}
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/50 bg-indigo-50/50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-600 backdrop-blur-sm dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
           <Sparkles className="h-3 w-3" />

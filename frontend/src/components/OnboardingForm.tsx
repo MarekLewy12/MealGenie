@@ -86,7 +86,7 @@ export function OnboardingForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="mx-auto max-w-2xl space-y-10 rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-indigo-100/50 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/50 md:p-10"
+      className="mx-auto max-w-2xl lg:max-w-4xl xl:max-w-5xl space-y-10 rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-indigo-100/50 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/50 md:p-10"
     >
       {/* SEKCJA 1: Podstawy */}
       <div className="space-y-6">
