@@ -36,6 +36,9 @@ export type GenerateMealSuggestionsPayload = {
   mealType: MealType;
   prepTime: number;
   servingSize: number;
+  userPrompt?: string;
+  availableIngredients?: string[];
+  useEquipment?: string[];
 };
 
 export async function generateMealSuggestions(

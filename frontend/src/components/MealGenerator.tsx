@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Sparkles, Refrigerator, PenLine } from "lucide-react";
 
 import { generateMealSuggestions } from "../services/api";
 import { MealCard } from "./MealCard";
+import { TagInput } from "./TagInput";
 import type { MealSuggestion, MealType } from "../types/meal";
 
 const mealTypeOptions: Array<{
@@ -20,12 +22,17 @@ export function MealGenerator() {
   const [mealType, setMealType] = useState<MealType>("LUNCH");
   const [prepTime, setPrepTime] = useState(30);
   const [servingSize, setServingSize] = useState(2);
+  const [userPrompt, setUserPrompt] = useState("");
+  const [ingredients, setIngredients] = useState<string[]>([]);
+
   const { mutate, data, status, isError, error } = useMutation({
     mutationFn: () =>
       generateMealSuggestions({
         mealType,
         prepTime,
         servingSize,
+        userPrompt: userPrompt.length > 0 ? userPrompt : undefined,
+        availableIngredients: ingredients,
       }),
   });
 
@@ -37,19 +44,44 @@ export function MealGenerator() {
   const handleGenerate = () => mutate();
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white/90 p-8 shadow-xl shadow-indigo-100/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/50">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-indigo-100/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/50 md:p-8">
+      <div className="mb-8">
+        <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-300/70">
+          AI Kitchen
+        </p>
+        <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
+          Kreator Posiłków
+        </h2>
+        <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
+          Opisz na co masz ochotę lub podaj składniki, a AI zrobi resztę.
+        </p>
+      </div>
+
+      <div className="mb-8 space-y-6">
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <PenLine className="h-4 w-4 text-indigo-500" />
+            Na co masz dzisiaj ochotę? (Opcjonalne)
+          </label>
+          <textarea
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+            placeholder="np. Coś lekkiego po treningu, mam ochotę na kuchnię azjatycką..."
+            className="w-full min-h-[80px] rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          />
+        </div>
+
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-300/70">
-            AI Kitchen
-          </p>
-          <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
-            Generowanie Posiłków AI
-          </h2>
-          <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-            MealGenie dobierze przepisy dopasowane do Twoich preferencji. To
-            może potrwać kilka sekund.
-          </p>
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <Refrigerator className="h-4 w-4 text-indigo-500" />
+            Co masz w lodówce?
+          </div>
+          <TagInput
+            label=""
+            placeholder="Wpisz składnik i naciśnij Enter (np. kurczak, ryż)"
+            value={ingredients}
+            onChange={setIngredients}
+          />
         </div>
       </div>
 
@@ -57,7 +89,7 @@ export function MealGenerator() {
         <div>
           <div className="mb-2 flex justify-between">
             <label className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-              Czas: {prepTime} min
+              Maksymalny czas: {prepTime} min
             </label>
           </div>
           <input
@@ -70,8 +102,8 @@ export function MealGenerator() {
             className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-indigo-600 dark:bg-slate-700"
           />
           <div className="mt-1 flex justify-between text-[10px] text-slate-400">
-            <span>15m</span>
-            <span>2h</span>
+            <span>Szybko (15m)</span>
+            <span>Uczta (2h)</span>
           </div>
         </div>
 
@@ -101,9 +133,9 @@ export function MealGenerator() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-8">
         <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-100">
-          Wybierz typ posiłku
+          Typ posiłku (priorytet)
         </p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {mealTypeOptions.map((option) => {
@@ -115,16 +147,14 @@ export function MealGenerator() {
                 onClick={() => setMealType(option.value)}
                 className={`flex flex-col items-start rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                   isActive
-                    ? "border-indigo-300 bg-indigo-50 text-indigo-800 shadow-lg shadow-indigo-100/60 dark:border-indigo-400/80 dark:bg-indigo-500/20 dark:text-indigo-50 dark:shadow-indigo-900/40"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-400/50 dark:hover:text-white"
+                    ? "border-indigo-300 bg-indigo-50 text-indigo-800 shadow-md shadow-indigo-100/60 dark:border-indigo-400/80 dark:bg-indigo-500/20 dark:text-indigo-50"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-400/50"
                 }`}
               >
-                <span className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-700 dark:text-indigo-200/80">
+                <span className="text-xs font-semibold uppercase tracking-[0.25em] opacity-80">
                   {option.label}
                 </span>
-                <span className="text-[12px] text-indigo-600 dark:text-indigo-100/80">
-                  {option.hint}
-                </span>
+                <span className="text-[10px] opacity-60">{option.hint}</span>
               </button>
             );
           })}
@@ -132,62 +162,38 @@ export function MealGenerator() {
       </div>
 
       {isError && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
           {error instanceof Error
             ? error.message
             : "Nie udało się wygenerować posiłków."}
         </div>
       )}
 
-      {status === "error" && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-slate-200 bg-white/80 px-8 py-10 text-center shadow-lg shadow-indigo-100/50 dark:border-slate-800 dark:bg-slate-800/60">
-          <p className="text-lg font-semibold text-slate-900 dark:text-white">
-            Ups! Coś poszło nie tak przy generowaniu.
-          </p>
-          <p className="max-w-xl text-sm text-slate-700 dark:text-slate-300">
-            Sprawdź połączenie i spróbuj ponownie uruchomić naszego kuchennego
-            asystenta.
-          </p>
+      {status === "idle" || status === "success" || status === "error" ? (
+        <div className="flex flex-col items-center">
           <button
             onClick={handleGenerate}
-            className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/30 transition hover:-translate-y-0.5 hover:shadow-amber-900/50 focus:outline-none focus:ring-2 focus:ring-amber-200"
+            className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-900/40 active:scale-95"
           >
-            Spróbuj ponownie
-          </button>
-        </div>
-      )}
-
-      {status === "idle" && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-slate-300 bg-white/85 px-8 py-12 text-center shadow-lg shadow-indigo-100/50 dark:border-slate-700 dark:bg-slate-800/50">
-          <p className="text-lg font-semibold text-slate-900 dark:text-white">
-            Gotowy na pomysły kuchni AI?
-          </p>
-          <p className="max-w-xl text-sm text-slate-700 dark:text-slate-300">
-            Kliknij poniżej, a Szef Kuchni MealGenie przygotuje listę posiłków
-            dopasowanych do Twoich preferencji i czasu.
-          </p>
-          <button
-            onClick={handleGenerate}
-            className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/30 transition hover:-translate-y-0.5 hover:shadow-amber-900/50 focus:outline-none focus:ring-2 focus:ring-amber-200"
-          >
+            <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
             Generuj Posiłki
           </button>
-        </div>
-      )}
-
-      {status === "pending" && (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-8 py-12 text-center text-indigo-800 shadow-lg shadow-indigo-100/60 dark:border-indigo-500/30 dark:bg-indigo-500/5 dark:text-indigo-50">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-300/70 border-t-transparent dark:border-indigo-400/60" />
-          <p className="text-lg font-semibold">Twój szef kuchni myśli...</p>
-          <p className="max-w-xl text-sm text-indigo-700 dark:text-indigo-100/80">
-            Daj mu chwilę, aby dopracować listę przepisów specjalnie dla Ciebie.
-            🍃
+          <p className="mt-3 text-xs text-slate-400">
+            Kliknij, a AI połączy Twoje składniki z preferencjami.
           </p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-8 py-8 text-center text-indigo-800 dark:border-indigo-500/30 dark:bg-indigo-500/5 dark:text-indigo-50">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-300/70 border-t-transparent dark:border-indigo-400/60" />
+          <p className="font-semibold">Tworzę magię...</p>
         </div>
       )}
 
       {status === "success" && mealsToDisplay && (
-        <div className="space-y-6">
+        <div className="mt-12 animate-fade-in-up space-y-8 border-t border-slate-100 pt-8 dark:border-slate-800">
+          <h3 className="text-center text-xl font-bold text-slate-900 dark:text-white">
+            Oto propozycje szefa kuchni:
+          </h3>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {mealsToDisplay.map((meal, index) => (
               <MealCard
@@ -196,15 +202,6 @@ export function MealGenerator() {
                 onSelect={() => console.log("Wybrano posiłek:", meal.name)}
               />
             ))}
-          </div>
-
-          <div className="text-center">
-            <button
-              onClick={handleGenerate}
-              className="text-sm font-semibold text-amber-700 underline-offset-4 hover:text-amber-800 hover:underline dark:text-amber-200 dark:hover:text-amber-100"
-            >
-              Wylosuj inne
-            </button>
           </div>
         </div>
       )}
