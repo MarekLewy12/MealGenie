@@ -7,6 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Equipment {
+  THERMOMIX
+  MULTICOOKER
+  AIR_FRYER
+  SOUS_VIDE
+  HIGH_SPEED_BLENDER
+  STEAMER
+  ELECTRIC_GRILL
+}
+
+enum Budget {
+  NONE
+  ECONOMICAL
+  MEDIUM
+  PREMIUM
+}
+
 enum Diet {
   NONE
   VEGETARIAN
@@ -14,6 +31,7 @@ enum Diet {
   KETO
   PALEO
   GLUTEN_FREE
+  LACTOSE_FREE
 }
 
 enum CookingSkill {
@@ -22,43 +40,74 @@ enum CookingSkill {
   ADVANCED
 }
 
-enum KitchenEquipment {
-  OVEN
-  STOVE
-  MICROWAVE
-  BLENDER
-  AIR_FRYER
-  SLOW_COOKER
-  GRILL
-}
-
-enum BudgetLevel {
-  CHEAP
-  MODERATE
-  EXPENSIVE
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  DESSERT
+  ANY
 }
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
+  id           String         @id @default(uuid())
+  email        String         @unique
   name         String
   passwordHash String
-  status       String       @default("ACTIVE")
-  createdAt    DateTime     @default(now())
-  preferences  Preferences?
+  status       String         @default("ACTIVE")
+  createdAt    DateTime       @default(now())
+  preference   Preference?
+  mealHistory  MealHistory[]
+  shoppingList ShoppingItem[]
 }
 
-model Preferences {
-  id                  String             @id @default(uuid())
-  diet                Diet
+model Preference {
+  userId              String        @id
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  diet                Diet          @default(NONE)
   allergies           String[]
-  favCuisines         String[]
   dislikedIngredients String[]
-  cookingSkill        CookingSkill
-  kitchenEquipment    KitchenEquipment[] @default([])
-  useThermomix        Boolean            @default(false)
-  budget              BudgetLevel
-  updatedAt           DateTime           @updatedAt
-  user                User               @relation(fields: [userId], references: [id])
-  userId              String             @unique @map("user_id")
+  favoriteCuisines    String[]
+  cookingSkill        CookingSkill  @default(BEGINNER)
+  nutritionGoal       String?
+  equipment           Equipment[]   @default([])
+  defaultServings     Int?          @default(2)
+  defaultMaxTime      Int?          @default(30)
+  budget              Budget        @default(NONE)
+  spiceLevel          Int           @default(3)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model MealHistory {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  ingredients   String[]
+  estimatedTime Int?
+  category      MealType?
+  userPrompt    String?
+  wasSelected   Boolean   @default(false)
+  selectedAt    DateTime?
+  rating        Int?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model ShoppingItem {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item     String
+  quantity Float    @default(1.0)
+  unit     String?
+  category String?
+  obtained Boolean  @default(false)
+  mealId   String?
+  addedAt  DateTime @default(now())
+
+  @@index([userId, obtained])
 }
