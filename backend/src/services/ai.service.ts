@@ -1,77 +1,97 @@
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { PrismaClient } from "@prisma/client";
 import {
   MealSuggestionsResponseSchema,
   type MealType,
 } from "../schemas/meal.schema.js";
+import { Diet, CookingSkill, Budget, Equipment } from "@prisma/client";
 
 const openai = new OpenAI();
-const prisma = new PrismaClient();
 
-const mealTypeToPolishLabel: Record<MealType, string> = {
-  BREAKFAST: "śniadania",
-  LUNCH: "obiady",
-  DINNER: "kolacje",
-  SNACK: "przekąski",
+interface GenerationContext {
+  userPrompt: string | null;
+  availableIngredients: string[];
+  mealType: MealType;
+  prepTime: number;
+  servingSize: number;
+  equipment: Equipment[];
+  diet: Diet;
+  allergies: string[];
+  dislikedIngredients: string[];
+  favoriteCuisines: string[];
+  cookingSkill: CookingSkill;
+  budget: Budget;
+}
+
+const mealTypeToPolish: Record<string, string> = {
+  BREAKFAST: "śniadanie",
+  LUNCH: "obiad/lunch",
+  DINNER: "kolacja",
+  SNACK: "przekąska",
+  DESSERT: "deser",
+  ANY: "dowolny posiłek",
 };
 
-export async function generateMealSuggestions(
-  userId: string,
-  mealType: MealType,
-  prepTime: number,
-  servingSize: number,
-) {
-  const preferences = await prisma.preferences.findUnique({
-    where: { userId },
-  });
-
-  if (!preferences) {
-    throw new Error("User preferences not found");
-  }
-
+export async function generateMealSuggestions(context: GenerationContext) {
+  // Budowanie opisu sprzętu
   const equipmentList =
-    preferences.kitchenEquipment.length > 0
-      ? preferences.kitchenEquipment.join(", ")
-      : "Brak";
+    context.equipment.length > 0
+      ? context.equipment.join(", ")
+      : "Standardowe wyposażenie (garnki, patelnia, piekarnik)";
 
-  const thermomixContext = preferences.useThermomix
-    ? "UŻYTKOWNIK POSIADA THERMOMIX. Preferuj przepisy wykorzystujące to urządzenie, podawaj ustawienia (obroty, temperatura)."
+  const hasThermomix = context.equipment.includes("THERMOMIX");
+  const thermomixNote = hasThermomix
+    ? "WAŻNE: Użytkownik posiada THERMOMIX. Przynajmniej jeden przepis powinien wykorzystywać to urządzenie. Podawaj ustawienia (obroty, czas)."
     : "";
 
+  // Budowanie promptu z kontekstu
   const promptContext = `
-    Profil użytkownika:
-    - Dieta: ${preferences.diet}
-    - Alergie: ${preferences.allergies.join(", ") || "Brak"}
-    - Kuchnie: ${preferences.favCuisines.join(", ") || "Brak"}
-    - Wykluczenia: ${preferences.dislikedIngredients.join(", ") || "Brak"}
-    - Skill: ${preferences.cookingSkill}
-    - Sprzęt: ${equipmentList}
-    - Budżet: ${preferences.budget}
+    DANE UŻYTKOWNIKA:
+    - Dieta: ${context.diet}
+    - Alergie (BEZWZGLĘDNIE UNIKAJ): ${context.allergies.join(", ") || "Brak"}
+    - Wykluczenia (nie lubi): ${context.dislikedIngredients.join(", ") || "Brak"}
+    - Umiejętności: ${context.cookingSkill}
+    - Budżet: ${context.budget}
+    - Dostępny sprzęt: ${equipmentList}
     
-    PARAMETRY TEGO POSIŁKU (Lokalne):
-    - Czas: max ${prepTime} minut
-    - Liczba porcji: ${servingSize}
+    PARAMETRY TEGO POSIŁKU:
+    - Typ: ${mealTypeToPolish[context.mealType] || "Dowolny"}
+    - Czas przygotowania: max ${context.prepTime} minut
+    - Liczba porcji: ${context.servingSize}
     
-    SPECJALNE:
-    ${thermomixContext}
-  `;
+    INTENT UŻYTKOWNIKA (Najważniejsze!):
+    ${
+      context.userPrompt
+        ? `👉 Użytkownik napisał: "${context.userPrompt}". Dopasuj propozycje do tego życzenia.`
+        : "Brak specyficznego życzenia - zaproponuj coś zbalansowanego."
+    }
+    
+    ${
+      context.availableIngredients.length > 0
+        ? `🥕 UŻYTKOWNIK MA W LODÓWCE: ${context.availableIngredients.join(", ")}. Postaraj się wykorzystać te składniki w przepisach.`
+        : ""
+    }
 
-  const mealTypeLabel = mealTypeToPolishLabel[mealType];
+    ${thermomixNote}
+  `;
 
   const systemMessage = `
-    Jesteś profesjonalnym szefem kuchni i dietetykiem w aplikacji MealGenie.
-    Twoim zadaniem jest generowanie idealnie dopasowanych propozycji kulinarnych.
+    Jesteś profesjonalnym szefem kuchni w aplikacji MealGenie.
+    Tworzysz dokładnie 3 propozycje posiłków.
     
     Zasady:
-    1. Posiłki muszą ściśle przestrzegać diety i wykluczeń (alergii).
-    2. Czas przygotowania nie może przekraczać limitu z parametrów generowania.
-    3. Uwzględniaj wymaganą liczbę porcji.
-    4. Wykorzystuj podany sprzęt kuchenny.
-    5. Jeśli dostępny jest Thermomix, preferuj przepisy pod to urządzenie (z ustawieniami obrotów/temperatury).
-    6. Opisy mają być po polsku, zachęcające i "smaczne".
-    7. Składniki mają być ogólnodostępne w Polsce.
+    1. Bezpieczeństwo: Absolutnie żadnych alergenów z listy.
+    2. Czas: Musi być realny do wykonania w ${context.prepTime} minut.
+    3. Język: Polski. Opisy mają być smaczne i zachęcające.
+    4. Składniki: Dostępne w polskich sklepach (Biedronka, Lidl).
+    5. Jeśli użytkownik podał składniki, które ma w lodówce -> priorytetowo je wykorzystaj.
   `;
+
+  console.log("Generowanie AI dla kontekstu:", {
+    type: context.mealType,
+    prompt: context.userPrompt,
+    ingredients: context.availableIngredients,
+  });
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -79,7 +99,7 @@ export async function generateMealSuggestions(
       { role: "system", content: systemMessage },
       {
         role: "user",
-        content: `Zaproponuj 3 ${mealTypeLabel} dla tego profilu: ${promptContext}`,
+        content: `Zaproponuj 3 posiłki na podstawie tego profilu:\n${promptContext}`,
       },
     ],
     response_format: zodResponseFormat(
@@ -90,19 +110,17 @@ export async function generateMealSuggestions(
 
   const firstChoice = completion.choices[0];
 
-  if (!firstChoice || !firstChoice.message || !firstChoice.message.content) {
-    console.error("OpenAI zwróciło pustą wiadomość:", completion);
+  if (!firstChoice?.message?.content) {
     throw new Error("AI returned empty response");
   }
 
-  const content = firstChoice.message.content;
-
   try {
-    const json = JSON.parse(content);
+    const json = JSON.parse(firstChoice.message.content);
+    // Walidacja odpowiedzi AI przez Zod
     const parsed = MealSuggestionsResponseSchema.parse(json);
     return parsed.meals;
   } catch (err) {
-    console.error("Błąd parsowania odpowiedzi AI:", { content, err });
+    console.error("Błąd parsowania AI:", err);
     throw new Error("Failed to parse AI response");
   }
 }

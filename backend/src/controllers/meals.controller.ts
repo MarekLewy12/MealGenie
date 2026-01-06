@@ -1,13 +1,9 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { z } from "zod";
+import { PrismaClient } from "@prisma/client";
+import { SuggestMealsRequestSchema } from "../schemas/meal.schema.js";
 import { generateMealSuggestions } from "../services/ai.service.js";
-import { MealTypeSchema } from "../schemas/meal.schema.js";
 
-export const suggestMealsSchema = z.object({
-  mealType: MealTypeSchema,
-  prepTime: z.number().min(5).max(180),
-  servingSize: z.number().min(1).max(10),
-});
+const prisma = new PrismaClient();
 
 export async function suggestMealsController(
   req: Request,
@@ -16,21 +12,54 @@ export async function suggestMealsController(
 ) {
   try {
     const userId = req.user?.userId;
-
     if (!userId) {
       throw new Error("User ID missing in request context");
     }
 
-    const { mealType, prepTime, servingSize } = suggestMealsSchema.parse(
-      req.body,
-    );
+    //Walidacja danych wejściowych (Zod)
+    const input = SuggestMealsRequestSchema.parse(req.body);
 
-    const meals = await generateMealSuggestions(
-      userId,
-      mealType,
-      prepTime,
-      servingSize,
-    );
+    // Pobranie preferencji z bazy
+    const preferences = await prisma.preference.findUnique({
+      where: { userId },
+    });
+
+    if (!preferences) {
+      // Jeśli user nie ma preferencji
+      return res.status(400).json({
+        error: "Brak preferencji. Uzupełnij onboarding.",
+        code: "NO_PREFERENCES",
+      });
+    }
+
+    // Dane z inputu (Lokalne) > Dane z bazy (Globalne) > Wartości domyślne
+    const context = {
+      // --- Dane z formularza (priorytet) ---
+      userPrompt: input.userPrompt || null,
+      availableIngredients: input.availableIngredients || [],
+      mealType: input.mealType,
+
+      // --- Parametry (Input -> Baza -> Default) ---
+      prepTime: input.prepTime ?? preferences.defaultMaxTime ?? 30,
+      servingSize: input.servingSize ?? preferences.defaultServings ?? 2,
+
+      // --- Sprzęt (Input -> Baza) ---
+      equipment:
+        input.useEquipment && input.useEquipment.length > 0
+          ? input.useEquipment
+          : preferences.equipment,
+
+      // --- Stałe preferencje z bazy ---
+      diet: preferences.diet,
+      allergies: preferences.allergies,
+      dislikedIngredients: preferences.dislikedIngredients,
+      favoriteCuisines: preferences.favoriteCuisines,
+      cookingSkill: preferences.cookingSkill,
+      budget: preferences.budget,
+    };
+
+    // Wywołanie serwisu AI z kontekstem
+    const meals = await generateMealSuggestions(context);
 
     res.json({ meals });
   } catch (error) {

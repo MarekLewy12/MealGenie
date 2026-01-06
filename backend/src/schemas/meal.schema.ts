@@ -1,13 +1,36 @@
 import { z } from "zod";
+import { Equipment } from "@prisma/client";
 
 export const MealTypeSchema = z.enum([
   "BREAKFAST",
   "LUNCH",
   "DINNER",
   "SNACK",
+  "DESSERT",
+  "ANY",
 ]);
 
-// Pojedyncza propozycja dania
+export const SuggestMealsRequestSchema = z.object({
+  userPrompt: z
+    .string()
+    .max(500, "Opis jest zbyt długi (max 500 znaków)")
+    .optional(),
+
+  availableIngredients: z
+    .array(z.string())
+    .optional()
+    .transform((arr) => arr?.map((s) => s.trim()).filter(Boolean) || []),
+
+  useEquipment: z.array(z.nativeEnum(Equipment)).optional(),
+
+  // Standardowe parametry
+  mealType: MealTypeSchema.default("ANY"),
+  prepTime: z.number().min(5).max(180).optional(),
+  servingSize: z.number().min(1).max(10).optional(),
+});
+
+export type SuggestMealsRequest = z.infer<typeof SuggestMealsRequestSchema>;
+
 export const MealTeaserSchema = z.object({
   name: z.string().describe("Nazwa dania, kreatywna i zachęcająca"),
   description: z
@@ -20,23 +43,20 @@ export const MealTeaserSchema = z.object({
     .describe("Całkowity czas przygotowania w minutach"),
   calories: z.number().int().describe("Szacunkowa liczba kalorii na porcję"),
 
-  // Lista składników
   ingredients: z
     .array(
       z.object({
-        name: z.string().describe("Nazwa produktu, np. 'Pomidory w puszce'"),
-        amount: z.string().describe("Ilość, np. '1 puszka', '200g'"),
+        name: z.string().describe("Nazwa produktu"),
+        amount: z.string().describe("Ilość"),
       }),
     )
-    .describe("Lista głównych składników potrzebnych do dania"),
+    .describe("Lista głównych składników"),
 
-  // Skrócona instrukcja
   stepsSummary: z
     .array(z.string())
     .describe("3-4 główne kroki przygotowania (skrót)"),
 });
 
-// cała odpowiedź od AI (lista 3 dań)
 export const MealSuggestionsResponseSchema = z.object({
   meals: z
     .array(MealTeaserSchema)
@@ -47,5 +67,4 @@ export const MealSuggestionsResponseSchema = z.object({
 export type MealSuggestionsResponse = z.infer<
   typeof MealSuggestionsResponseSchema
 >;
-
 export type MealType = z.infer<typeof MealTypeSchema>;
