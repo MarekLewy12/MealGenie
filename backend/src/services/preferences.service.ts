@@ -1,8 +1,8 @@
 import {
-  type BudgetLevel,
+  type Budget,
   type CookingSkill,
   type Diet,
-  type KitchenEquipment,
+  type Equipment,
   PrismaClient,
 } from "@prisma/client";
 
@@ -15,8 +15,8 @@ export type SavePreferencesInput = {
   favCuisines: string[];
   dislikedIngredients: string[];
   cookingSkill: CookingSkill;
-  kitchenEquipment: KitchenEquipment[];
-  budget: BudgetLevel;
+  kitchenEquipment: Equipment[];
+  budget: Budget;
   useThermomix: boolean;
 };
 

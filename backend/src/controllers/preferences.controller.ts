@@ -1,8 +1,8 @@
 import {
-  BudgetLevel,
+  Budget,
   CookingSkill,
   Diet,
-  KitchenEquipment,
+  Equipment,
 } from "@prisma/client";
 import { type NextFunction, type Request, type Response } from "express";
 import { z } from "zod";
@@ -19,8 +19,8 @@ export const savePreferencesSchema = z.object({
   favCuisines: z.array(z.string()),
   dislikedIngredients: z.array(z.string()),
   cookingSkill: z.nativeEnum(CookingSkill),
-  kitchenEquipment: z.array(z.nativeEnum(KitchenEquipment)),
-  budget: z.nativeEnum(BudgetLevel),
+  kitchenEquipment: z.array(z.nativeEnum(Equipment)),
+  budget: z.nativeEnum(Budget),
   useThermomix: z.boolean(),
 });
 

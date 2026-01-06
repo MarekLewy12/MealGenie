@@ -1,4 +1,4 @@
-import {Diet, CookingSkill, KitchenEquipment, BudgetLevel} from './enums.ts';
+import { Diet, CookingSkill, Equipment, Budget } from './enums.ts';
 
 export const DIET_LABELS: Record<keyof typeof Diet, string> = {
     NONE: 'Brak',
@@ -15,7 +15,7 @@ export const SKILL_LABELS: Record<keyof typeof CookingSkill, string> = {
     ADVANCED: 'Zaawansowany',
 }
 
-export const EQUIPMENT_LABELS: Record<keyof typeof KitchenEquipment, string> = {
+export const EQUIPMENT_LABELS: Record<keyof typeof Equipment, string> = {
     OVEN: 'Piekarnik',
     STOVE: 'Kuchenka',
     MICROWAVE: 'Mikrofalówka',
@@ -25,8 +25,9 @@ export const EQUIPMENT_LABELS: Record<keyof typeof KitchenEquipment, string> = {
     GRILL: 'Grill',
 }
 
-export const BUDGET_LABELS: Record<keyof typeof BudgetLevel, string> = {
-    CHEAP: 'Tani',
-    MODERATE: 'Średni',
-    EXPENSIVE: 'Drogi',
+export const BUDGET_LABELS: Record<keyof typeof Budget, string> = {
+    NONE: 'Bez ograniczeń',
+    ECONOMICAL: 'Ekonomiczny',
+    MEDIUM: 'Średni',
+    PREMIUM: 'Premium',
 }

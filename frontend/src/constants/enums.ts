@@ -13,7 +13,7 @@ export const CookingSkill = {
     ADVANCED: 'ADVANCED',
 } as const;
 
-export const KitchenEquipment = {
+export const Equipment = {
     OVEN: 'OVEN',
     STOVE: 'STOVE',
     MICROWAVE: 'MICROWAVE',
@@ -23,8 +23,9 @@ export const KitchenEquipment = {
     GRILL: 'GRILL'
 } as const;
 
-export const BudgetLevel = {
-    CHEAP: 'CHEAP',
-    MODERATE: 'MODERATE',
-    EXPENSIVE: 'EXPENSIVE',
+export const Budget = {
+    NONE: 'NONE',
+    ECONOMICAL: 'ECONOMICAL',
+    MEDIUM: 'MEDIUM',
+    PREMIUM: 'PREMIUM',
 } as const;

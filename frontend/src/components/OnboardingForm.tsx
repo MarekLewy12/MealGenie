@@ -12,8 +12,8 @@ import { TagInput } from "./TagInput.tsx";
 import {
   Diet,
   CookingSkill,
-  KitchenEquipment,
-  BudgetLevel,
+  Equipment,
+  Budget,
 } from "../constants/enums";
 import {
   DIET_LABELS,
@@ -28,8 +28,8 @@ const preferencesSchema = z.object({
   favCuisines: z.array(z.string()).default([]),
   dislikedIngredients: z.array(z.string()).default([]),
   cookingSkill: z.nativeEnum(CookingSkill),
-  kitchenEquipment: z.array(z.nativeEnum(KitchenEquipment)).default([]),
-  budget: z.nativeEnum(BudgetLevel),
+  kitchenEquipment: z.array(z.nativeEnum(Equipment)).default([]),
+  budget: z.nativeEnum(Budget),
   useThermomix: z.boolean().default(false),
 });
 
@@ -69,7 +69,7 @@ export function OnboardingForm({
       dislikedIngredients: [],
       cookingSkill: CookingSkill.BEGINNER,
       kitchenEquipment: [],
-      budget: BudgetLevel.MODERATE,
+      budget: Budget.MEDIUM,
       useThermomix: false,
     },
   });
@@ -107,7 +107,7 @@ export function OnboardingForm({
     }
   };
 
-  const equipmentOptions = Object.values(KitchenEquipment).map((eq) => ({
+  const equipmentOptions = Object.values(Equipment).map((eq) => ({
     value: eq,
     label: EQUIPMENT_LABELS[eq],
   }));
@@ -141,7 +141,7 @@ export function OnboardingForm({
           <div>
             <label className={labelStyles}>Budżet</label>
             <select className={inputStyles} {...register("budget")}>
-              {Object.values(BudgetLevel).map((value) => (
+              {Object.values(Budget).map((value) => (
                 <option key={value} value={value}>
                   {BUDGET_LABELS[value]}
                 </option>
