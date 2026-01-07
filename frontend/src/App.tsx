@@ -26,8 +26,8 @@ function App() {
       <div className="relative z-10">
         <Header />
 
-        <main>
-          <AnimatePresence mode="wait">
+        <main className="relative overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
             <Routes location={location} key={location.pathname}>
               <Route
                 path="/"
