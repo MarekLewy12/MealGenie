@@ -20,9 +20,13 @@ export function MultiSelectPills({ options, value, onChange, label }: MultiSelec
   };
 
   return (
-    <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-4">
+      {label ? (
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          {label}
+        </label>
+      ) : null}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {options.map((option) => {
           const active = value.includes(option.value);
           return (
@@ -30,10 +34,11 @@ export function MultiSelectPills({ options, value, onChange, label }: MultiSelec
               key={option.value}
               type="button"
               onClick={() => toggle(option.value)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+              aria-pressed={active}
+              className={`group flex w-full items-center justify-center rounded-2xl border px-4 py-3 text-sm font-semibold tracking-tight transition-all duration-200 ${
                 active
-                  ? "border-indigo-300 bg-indigo-600 text-white ring-2 ring-indigo-300 shadow-md shadow-indigo-200/60 dark:border-indigo-500 dark:ring-indigo-400 dark:shadow-indigo-900/40"
-                  : "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  ? "border-indigo-500/70 bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-lg shadow-indigo-200/70 ring-1 ring-white/20 dark:border-indigo-400/70 dark:shadow-indigo-900/50"
+                  : "border-slate-200/80 bg-white/80 text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-white dark:border-slate-700/70 dark:bg-slate-800/70 dark:text-slate-200 dark:hover:border-indigo-400/60"
               }`}
             >
               {option.label}
