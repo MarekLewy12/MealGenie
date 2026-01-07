@@ -3,6 +3,7 @@ import type { MealSuggestion } from "../types/meal";
 type MealCardProps = {
   meal: MealSuggestion;
   onSelect: () => void;
+  showAction?: boolean;
 };
 
 const difficultyColors: Record<MealSuggestion["difficulty"], string> = {
@@ -14,19 +15,22 @@ const difficultyColors: Record<MealSuggestion["difficulty"], string> = {
     "border border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-200",
 };
 
-export function MealCard({ meal, onSelect }: MealCardProps) {
+export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
   const displayedIngredients = meal.ingredients.slice(0, 4);
   const remainingCount = meal.ingredients.length - displayedIngredients.length;
 
   return (
     <div className="group flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-0 shadow-xl shadow-indigo-100/60 transition hover:-translate-y-1 hover:border-indigo-400/50 hover:shadow-indigo-200/70 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/40 dark:hover:border-indigo-500/50 dark:hover:shadow-indigo-900/30">
-      <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
+      <div className="relative h-48 w-full overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800">
         {meal.imageUrl ? (
-          <img
-            src={meal.imageUrl}
-            alt={meal.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          <>
+            <img
+              src={meal.imageUrl}
+              alt={meal.name}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 brightness-[0.92] contrast-[1.08] saturate-[1.05]"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
+          </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-600">
             <svg
@@ -95,14 +99,16 @@ export function MealCard({ meal, onSelect }: MealCardProps) {
           </ul>
         </div>
 
-        <div className="mt-auto pt-2">
-          <button
-            onClick={onSelect}
-            className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-200/70 transition hover:-translate-y-0.5 hover:shadow-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-300 dark:shadow-amber-900/30 dark:hover:shadow-amber-900/50"
-          >
-            Wybieram to danie
-          </button>
-        </div>
+        {showAction && (
+          <div className="mt-auto pt-2">
+            <button
+              onClick={onSelect}
+              className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-200/70 transition hover:-translate-y-0.5 hover:shadow-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-300 dark:shadow-amber-900/30 dark:hover:shadow-amber-900/50"
+            >
+              Wybieram to danie
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -191,12 +191,16 @@ export function HomePage() {
                   >
                     <div className="absolute inset-0 translate-y-4 scale-95 rounded-3xl bg-indigo-100/50 blur-sm dark:bg-indigo-900/20" />
                     <div className="relative rounded-3xl shadow-2xl shadow-indigo-200/50 dark:shadow-black/50">
-                      <MealCard meal={currentMeal} onSelect={() => {}} />
+                      <MealCard
+                        meal={currentMeal}
+                        onSelect={() => {}}
+                        showAction={false}
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute top-32 -right-4 lg:-right-12 animate-float delay-100">
+                <div className="absolute top-52 -right-4 lg:-right-12 animate-float delay-100">
                   <div className="flex items-center gap-2 rounded-xl border border-white/50 bg-white/80 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-800/90">
                     <div className="rounded-lg bg-blue-100 p-1.5 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
                       <Clock className="h-4 w-4" />
@@ -207,7 +211,7 @@ export function HomePage() {
                   </div>
                 </div>
 
-                <div className="absolute bottom-10 -left-4 lg:-left-12 animate-float delay-300">
+                <div className="absolute -bottom-8 -left-4 lg:-left-12 animate-float delay-300">
                   <div className="flex items-center gap-2 rounded-xl border border-white/50 bg-white/80 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-800/90">
                     <div className="rounded-lg bg-orange-100 p-1.5 text-orange-600 dark:bg-orange-500/20 dark:text-orange-300">
                       <Flame className="h-4 w-4" />
