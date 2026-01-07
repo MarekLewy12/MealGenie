@@ -35,12 +35,12 @@ export const MealTeaserSchema = z.object({
   name: z.string().describe("Nazwa dania, kreatywna i zachęcająca"),
   description: z
     .string()
-    .describe("Krótki opis marketingowy (1-2 zdania), dlaczego warto to zjeść"),
+    .describe("Krótki opis marketingowy (1-2 zdania)"),
   difficulty: z.enum(["Easy", "Medium", "Hard"]).describe("Poziom trudności"),
   cookingTimeMinutes: z
     .number()
     .int()
-    .describe("Całkowity czas przygotowania w minutach"),
+    .describe("Całkowity czas w minutach"),
   calories: z.number().int().describe("Szacunkowa liczba kalorii na porcję"),
 
   ingredients: z
@@ -54,7 +54,7 @@ export const MealTeaserSchema = z.object({
 
   stepsSummary: z
     .array(z.string())
-    .describe("3-4 główne kroki przygotowania (skrót)"),
+    .describe("3-4 główne kroki przygotowania"),
 });
 
 export const MealSuggestionsResponseSchema = z.object({
@@ -64,7 +64,12 @@ export const MealSuggestionsResponseSchema = z.object({
     .describe("Lista dokładnie 3 propozycji posiłków"),
 });
 
+export type MealTeaser = z.infer<typeof MealTeaserSchema>;
 export type MealSuggestionsResponse = z.infer<
   typeof MealSuggestionsResponseSchema
 >;
 export type MealType = z.infer<typeof MealTypeSchema>;
+
+export type MealWithImage = MealTeaser & {
+  imageUrl: string | null;
+};

@@ -14,6 +14,7 @@ export interface MealSuggestion {
   calories?: number;
   ingredients: Ingredient[];
   stepsSummary: string[];
+  imageUrl?: string | null;
 }
 
 export interface MealResponse {

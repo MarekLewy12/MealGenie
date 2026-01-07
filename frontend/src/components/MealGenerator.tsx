@@ -43,6 +43,22 @@ export function MealGenerator() {
 
   const handleGenerate = () => mutate();
 
+  const SkeletonCard = () => (
+    <div className="flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-0">
+      <div className="h-48 w-full animate-pulse rounded-t-2xl bg-slate-200 dark:bg-slate-700" />
+      <div className="flex flex-col gap-4 p-6">
+        <div className="h-6 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="h-4 w-full animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="flex gap-2">
+          <div className="h-6 w-16 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+          <div className="h-6 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+        </div>
+        <div className="h-32 w-full animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700" />
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-indigo-100/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/50 md:p-8">
       <div className="mb-8">
@@ -186,6 +202,14 @@ export function MealGenerator() {
         <div className="flex flex-col items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-8 py-8 text-center text-indigo-800 dark:border-indigo-500/30 dark:bg-indigo-500/5 dark:text-indigo-50">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-300/70 border-t-transparent dark:border-indigo-400/60" />
           <p className="font-semibold">Tworzę magię...</p>
+        </div>
+      )}
+
+      {status === "pending" && (
+        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       )}
 

@@ -2,9 +2,12 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import {
   MealSuggestionsResponseSchema,
+  type MealTeaser,
+  type MealWithImage,
   type MealType,
 } from "../schemas/meal.schema.js";
 import { Diet, CookingSkill, Budget, Equipment } from "@prisma/client";
+import { generateMealImages } from "./image.service.js";
 
 const openai = new OpenAI();
 
@@ -32,7 +35,9 @@ const mealTypeToPolish: Record<string, string> = {
   ANY: "dowolny posiłek",
 };
 
-export async function generateMealSuggestions(context: GenerationContext) {
+export async function generateMealSuggestions(
+  context: GenerationContext,
+): Promise<MealWithImage[]> {
   // Budowanie opisu sprzętu
   const equipmentList =
     context.equipment.length > 0
@@ -118,7 +123,17 @@ export async function generateMealSuggestions(context: GenerationContext) {
     const json = JSON.parse(firstChoice.message.content);
     // Walidacja odpowiedzi AI przez Zod
     const parsed = MealSuggestionsResponseSchema.parse(json);
-    return parsed.meals;
+    const teasers: MealTeaser[] = parsed.meals;
+
+    console.log("[AI] Generating images...");
+    const imageUrls = await generateMealImages(teasers);
+
+    const mealsWithImages: MealWithImage[] = teasers.map((meal, index) => ({
+      ...meal,
+      imageUrl: imageUrls[index] ?? null,
+    }));
+
+    return mealsWithImages;
   } catch (err) {
     console.error("Błąd parsowania AI:", err);
     throw new Error("Failed to parse AI response");
