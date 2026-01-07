@@ -18,9 +18,12 @@ export const Equipment = {
     STOVE: 'STOVE',
     MICROWAVE: 'MICROWAVE',
     BLENDER: 'BLENDER',
+    THERMOMIX: 'THERMOMIX',
+    MULTICOOKER: 'MULTICOOKER',
     AIR_FRYER: 'AIR_FRYER',
-    SLOW_COOKER: 'SLOW_COOKER',
-    GRILL: 'GRILL'
+    SOUS_VIDE: 'SOUS_VIDE',
+    STEAMER: 'STEAMER',
+    ELECTRIC_GRILL: 'ELECTRIC_GRILL',
 } as const;
 
 export const Budget = {

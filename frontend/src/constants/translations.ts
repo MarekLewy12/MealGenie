@@ -17,12 +17,15 @@ export const SKILL_LABELS: Record<keyof typeof CookingSkill, string> = {
 
 export const EQUIPMENT_LABELS: Record<keyof typeof Equipment, string> = {
     OVEN: 'Piekarnik',
-    STOVE: 'Kuchenka',
+    STOVE: 'Kuchenka (Gaz/Indukcja)',
     MICROWAVE: 'Mikrofalówka',
     BLENDER: 'Blender',
-    AIR_FRYER: 'Frytkownica powietrzna',
-    SLOW_COOKER: 'Wolnowar',
-    GRILL: 'Grill',
+    THERMOMIX: 'Thermomix',
+    MULTICOOKER: 'Multicooker',
+    AIR_FRYER: 'Frytkownica beztłuszczowa',
+    SOUS_VIDE: 'Sous Vide',
+    STEAMER: 'Parowar',
+    ELECTRIC_GRILL: 'Grill elektryczny',
 }
 
 export const BUDGET_LABELS: Record<keyof typeof Budget, string> = {

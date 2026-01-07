@@ -52,8 +52,8 @@ export async function loginUser({ email, password }: AuthInput) {
     where: { email },
     include: {
       // czy użytkownik ma już globalne ustawienia?
-      preferences: {
-        select: { id: true },
+      preference: {
+        select: { userId: true },
       },
     },
   });
@@ -75,7 +75,7 @@ export async function loginUser({ email, password }: AuthInput) {
 
   const { passwordHash: _ignored, ...safeUser } = user;
 
-  const hasCompletedOnboarding = Boolean(user.preferences);
+  const hasCompletedOnboarding = Boolean(user.preference);
 
   return { user: safeUser, token, hasCompletedOnboarding };
 }
