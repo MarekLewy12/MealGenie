@@ -18,8 +18,9 @@ const difficultyColors: Record<MealSuggestion["difficulty"], string> = {
 export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
   const displayedIngredients = meal.ingredients.slice(0, 4);
   const remainingCount = meal.ingredients.length - displayedIngredients.length;
+  const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
   const imageSrc = meal.imageUrl?.startsWith("/meal-images/")
-    ? `http://localhost:3000${meal.imageUrl}`
+    ? `${apiBaseUrl}${meal.imageUrl}`
     : meal.imageUrl;
 
   return (
