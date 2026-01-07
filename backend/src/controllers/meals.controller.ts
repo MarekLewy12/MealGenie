@@ -32,6 +32,13 @@ export async function suggestMealsController(
       });
     }
 
+    const finalEquipment = [...preferences.equipment];
+    if (input.useEquipment?.includes("THERMOMIX")) {
+      if (!finalEquipment.includes("THERMOMIX")) {
+        finalEquipment.push("THERMOMIX");
+      }
+    }
+
     // Dane z inputu (Lokalne) > Dane z bazy (Globalne) > Wartości domyślne
     const context = {
       // --- Dane z formularza (priorytet) ---
@@ -44,10 +51,7 @@ export async function suggestMealsController(
       servingSize: input.servingSize ?? preferences.defaultServings ?? 2,
 
       // --- Sprzęt (Input -> Baza) ---
-      equipment:
-        input.useEquipment && input.useEquipment.length > 0
-          ? input.useEquipment
-          : preferences.equipment,
+      equipment: finalEquipment,
 
       // --- Stałe preferencje z bazy ---
       diet: preferences.diet,

@@ -30,7 +30,6 @@ const preferencesSchema = z.object({
   cookingSkill: z.nativeEnum(CookingSkill),
   kitchenEquipment: z.array(z.nativeEnum(Equipment)).default([]),
   budget: z.nativeEnum(Budget),
-  useThermomix: z.boolean().default(false),
 });
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
@@ -70,7 +69,6 @@ export function OnboardingForm({
       cookingSkill: CookingSkill.BEGINNER,
       kitchenEquipment: [],
       budget: Budget.MEDIUM,
-      useThermomix: false,
     },
   });
 
@@ -226,27 +224,6 @@ export function OnboardingForm({
           </span>
           Twój Arsenał
         </h3>
-
-        <div className="mb-6 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-900/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-semibold text-slate-900 dark:text-white">
-                Thermomix / Lidlomix
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Czy chcesz przepisy dedykowane pod robota kuchennego?
-              </p>
-            </div>
-            <label className="relative inline-flex cursor-pointer items-center">
-              <input
-                type="checkbox"
-                className="peer sr-only"
-                {...register("useThermomix")}
-              />
-              <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-indigo-800"></div>
-            </label>
-          </div>
-        </div>
 
         <Controller
           control={control}

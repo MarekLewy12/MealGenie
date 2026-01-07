@@ -17,13 +17,12 @@ export type SavePreferencesInput = {
   cookingSkill: CookingSkill;
   kitchenEquipment: Equipment[];
   budget: Budget;
-  useThermomix: boolean;
 };
 
 export async function savePreferences(input: SavePreferencesInput) {
   const { userId, ...preferencesData } = input;
 
-  return prisma.preferences.upsert({
+  return prisma.preference.upsert({
     where: { userId },
     update: preferencesData,
     create: {
@@ -34,7 +33,7 @@ export async function savePreferences(input: SavePreferencesInput) {
 }
 
 export async function getPreferences(userId: string) {
-  return prisma.preferences.findUnique({
+  return prisma.preference.findUnique({
     where: { userId },
   });
 }

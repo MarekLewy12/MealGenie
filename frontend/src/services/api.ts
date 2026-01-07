@@ -24,7 +24,6 @@ export type SavePreferencesPayload = {
   cookingSkill: string;
   kitchenEquipment: string[];
   budget: string;
-  useThermomix: boolean;
 };
 
 export async function savePreferences(payload: SavePreferencesPayload) {

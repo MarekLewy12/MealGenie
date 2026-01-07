@@ -46,8 +46,14 @@ export async function generateMealSuggestions(
 
   const hasThermomix = context.equipment.includes("THERMOMIX");
   const thermomixNote = hasThermomix
-    ? "WAŻNE: Użytkownik posiada THERMOMIX. Przynajmniej jeden przepis powinien wykorzystywać to urządzenie. Podawaj ustawienia (obroty, czas)."
-    : "";
+    ? `
+      🔥 TRYB THERMOMIX AKTYWNY:
+      1. Przepisy MUSZĄ wykorzystywać Thermomix do głównych czynności (siekanie, gotowanie sosów, wyrabianie ciasta).
+      2. Podawaj konkretne ustawienia: "Czas: 10min, Temp: Varoma, Obroty: 2".
+      3. Bądź pragmatyczny: Jeśli coś lepiej zrobić na patelni (np. smażenie steka) lub w piekarniku, napisz to.
+      Przykład: "Sos przygotuj w TM, ale mięso usmaż na patelni dla lepszego smaku".
+      `
+    : "Nie używaj instrukcji dla Thermomixa.";
 
   // Budowanie promptu z kontekstu
   const promptContext = `

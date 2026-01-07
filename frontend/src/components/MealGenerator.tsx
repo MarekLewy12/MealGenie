@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Sparkles, Refrigerator, PenLine } from "lucide-react";
+import { Sparkles, Refrigerator, PenLine, ChefHat } from "lucide-react";
 
 import { generateMealSuggestions } from "../services/api";
 import { MealCard } from "./MealCard";
@@ -24,6 +24,7 @@ export function MealGenerator() {
   const [servingSize, setServingSize] = useState(2);
   const [userPrompt, setUserPrompt] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const [isThermomixMode, setIsThermomixMode] = useState(false);
 
   const { mutate, data, status, isError, error } = useMutation({
     mutationFn: () =>
@@ -33,6 +34,7 @@ export function MealGenerator() {
         servingSize,
         userPrompt: userPrompt.length > 0 ? userPrompt : undefined,
         availableIngredients: ingredients,
+        useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
       }),
   });
 
@@ -99,6 +101,33 @@ export function MealGenerator() {
             onChange={setIngredients}
           />
         </div>
+      </div>
+
+      <div className="mb-6 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-900/10">
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${isThermomixMode ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500 dark:bg-slate-700"}`}
+          >
+            <ChefHat className="h-6 w-6" />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white">
+              Tryb Thermomix
+            </h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              AI przygotuje przepisy wykorzystujące robota.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsThermomixMode(!isThermomixMode)}
+          className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${isThermomixMode ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
+        >
+          <span
+            className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isThermomixMode ? "translate-x-7" : "translate-x-1"}`}
+          />
+        </button>
       </div>
 
       <div className="mb-8 grid gap-6 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 md:grid-cols-2">
