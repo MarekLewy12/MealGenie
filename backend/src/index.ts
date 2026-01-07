@@ -1,4 +1,5 @@
 import cors from "cors";
+import path from "path";
 import dotenv from "dotenv";
 import express, {
   type NextFunction,
@@ -30,6 +31,11 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use(
+  "/meal-images",
+  express.static(path.join(process.cwd(), "public", "meal-images")),
+);
 
 const echoBodySchema = z.object({
   message: z.string().min(1, "message is required"),
