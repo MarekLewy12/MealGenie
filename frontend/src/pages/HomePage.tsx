@@ -7,12 +7,14 @@ import {
   Heart,
   ShieldCheck,
   Smile,
-  Sparkles,
-  Wand2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FloatingFoodElements } from "../components/home/FloatingFoodElements";
+import { PainPointsSection } from "../components/home/PainPointsSection";
+import { ScrollIndicator } from "../components/home/ScrollIndicator";
+import { StatsSection } from "../components/home/StatsSection";
 import { MealCard } from "../components/MealCard";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 import type { MealSuggestion } from "../types/meal";
@@ -152,14 +154,14 @@ export function HomePage() {
 
   return (
     <div className="relative isolate overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-[#020617]">
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
-        <div className="absolute left-1/2 top-[-10%] h-[780px] w-[780px] -translate-x-1/2 rounded-full bg-indigo-200/40 blur-[100px] dark:bg-indigo-500/15 dark:blur-[140px]" />
-        <div className="absolute left-[15%] top-[18%] h-[520px] w-[520px] rounded-full bg-fuchsia-200/30 blur-[90px] dark:bg-fuchsia-600/20 dark:blur-[120px]" />
-        <div className="absolute right-[12%] top-[8%] h-[480px] w-[480px] rounded-full bg-blue-200/30 blur-[90px] dark:bg-blue-600/20 dark:blur-[120px]" />
-      </div>
-
       <section className="relative overflow-visible pt-20 pb-16 lg:pt-32 lg:pb-32">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
+          <div className="absolute left-1/2 top-[-10%] h-[780px] w-[780px] -translate-x-1/2 rounded-full bg-indigo-200/40 blur-[100px] dark:bg-indigo-500/15 dark:blur-[140px]" />
+          <div className="absolute left-[15%] top-[18%] h-[520px] w-[520px] rounded-full bg-fuchsia-200/30 blur-[90px] dark:bg-fuchsia-600/20 dark:blur-[120px]" />
+          <div className="absolute right-[12%] top-[8%] h-[480px] w-[480px] rounded-full bg-blue-200/30 blur-[90px] dark:bg-blue-600/20 dark:blur-[120px]" />
+        </div>
+        <FloatingFoodElements />
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="relative z-10 text-center lg:col-span-7 lg:text-left">
@@ -258,7 +260,11 @@ export function HomePage() {
             </div>
           </div>
         </div>
+        <ScrollIndicator />
       </section>
+
+      <StatsSection />
+      <PainPointsSection />
 
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent shadow-[0_0_12px_rgba(79,70,229,0.25)] dark:via-indigo-500/70 dark:shadow-[0_0_16px_rgba(99,102,241,0.35)]" />
