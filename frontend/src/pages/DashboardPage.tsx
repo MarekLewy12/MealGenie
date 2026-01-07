@@ -8,6 +8,7 @@ import {
     ShoppingCart,
     Sparkles,
     Utensils,
+    Wand2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
@@ -71,12 +72,12 @@ export function DashboardPage() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Link to="/settings" className="group flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:border-indigo-300 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
+                            <Link to="/settings" className="group flex flex-col items-center justify-center rounded-3xl border border-indigo-200/90 bg-white p-6 text-center shadow-sm transition hover:border-fuchsia-300/80 dark:border-indigo-400/30 dark:bg-white/5 dark:hover:bg-white/10">
                                 <Settings className="mb-3 h-6 w-6 text-slate-400 transition-colors group-hover:text-indigo-500" />
                                 <span className="text-sm font-semibold">Preferencje</span>
                                 <span className="text-xs text-slate-500">Edytuj globalne ustawienia</span>
                             </Link>
-                            <div className="group flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm transition dark:border-white/10 dark:bg-white/5">
+                            <div className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition dark:border-rose-400/30 dark:bg-white/5">
                                 <Heart className="mb-3 h-6 w-6 text-slate-400 group-hover:text-red-500" />
                                 <span className="text-sm font-semibold">Ulubione</span>
                                 <span className="text-xs text-slate-500">0 przepisów</span>
@@ -84,7 +85,7 @@ export function DashboardPage() {
                         </div>
 
                         {/* Feedback */}
-                        <div className="rounded-2xl bg-indigo-50 p-6 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-500/20">
+                        <div className="rounded-2xl border border-indigo-200/90 bg-indigo-50 p-6 dark:border-indigo-400/40 dark:bg-indigo-900/10">
                             <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-2">Beta Testy</h4>
                             <p className="text-xs text-indigo-700/80 dark:text-indigo-300/70 mb-3">
                                 Twoja opinia kształtuje tę aplikację. Masz pomysł?
@@ -108,7 +109,7 @@ export function DashboardPage() {
                             </div>
 
                             {/* Pusty stan historii */}
-                            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50/50 py-16 text-center dark:border-white/10 dark:bg-white/5">
+                            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-indigo-300/70 bg-indigo-50/40 py-16 text-center dark:border-indigo-400/30 dark:bg-white/5">
                                 <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-white/5">
                                     <Utensils className="h-8 w-8 text-slate-400" />
                                 </div>
@@ -119,25 +120,72 @@ export function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* Warto wiedzieć */}
+                        {/* Szybki Start - NOWA SEKCJA */}
                         <div>
-                            <h3 className="mb-4 text-lg font-bold">Warto wiedzieć</h3>
-                            <div className="space-y-4">
-                                {[
-                                    { title: "Zmień czas w generatorze", desc: "Możesz wymusić szybki obiad (15 min) w ustawieniach suwaka." },
-                                    { title: "Thermomix ready", desc: "Włącz obsługę robota w preferencjach, by widzieć dedykowane kroki." },
-                                    { title: "Eksperymentuj", desc: "AI uczy się Twoich smaków z każdym wyborem." }
-                                ].map((tip, i) => (
-                                    <div key={i} className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                                            <ChefHat className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-slate-900 dark:text-white">{tip.title}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{tip.desc}</p>
-                                        </div>
+                            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+                                <Wand2 className="h-5 w-5 text-indigo-500" />
+                                Szybki Start
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Link
+                                    to="/generator?mealType=SNACK&prepTime=15"
+                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                >
+                                    <div className="text-4xl">🚀</div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                            Szybki posiłek
+                                        </h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            Gotowe w 15 minut
+                                        </p>
                                     </div>
-                                ))}
+                                </Link>
+
+                                <Link
+                                    to="/generator?mealType=BREAKFAST&prepTime=30"
+                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                >
+                                    <div className="text-4xl">🌅</div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                            Śniadanie
+                                        </h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            Dobry start dnia
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    to="/generator?mealType=LUNCH&prepTime=45"
+                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                >
+                                    <div className="text-4xl">🍽️</div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                            Pełny obiad
+                                        </h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            Czas na ucztę
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    to="/generator?mealType=DINNER&prepTime=30"
+                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                >
+                                    <div className="text-4xl">🌙</div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                            Lekka kolacja
+                                        </h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            Spokojne zakończenie dnia
+                                        </p>
+                                    </div>
+                                </Link>
                             </div>
                         </div>
 
@@ -145,7 +193,7 @@ export function DashboardPage() {
 
                     {/* Kolumna prawa: lista zakupów */}
                     <div className="hidden xl:col-span-3 xl:flex flex-col gap-6">
-                        <div className="sticky top-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-[#0c0f1d] dark:shadow-none">
+                        <div className="sticky top-24 rounded-3xl border border-indigo-200/80 bg-white p-6 shadow-xl shadow-slate-200/50 dark:border-indigo-400/30 dark:bg-[#0c0f1d] dark:shadow-none">
                             <div className="mb-6 flex items-center justify-between">
                                 <h3 className="font-bold flex items-center gap-2">
                                     <ShoppingCart className="h-5 w-5 text-indigo-500" />
@@ -164,7 +212,7 @@ export function DashboardPage() {
                                 </p>
                             </div>
 
-                            <div className="mt-6 border-t border-slate-100 pt-4 dark:border-white/5">
+                            <div className="mt-6 border-t border-indigo-200/80 pt-4 dark:border-indigo-500/20">
                                 <button disabled className="w-full rounded-xl bg-slate-100 py-3 text-xs font-bold uppercase tracking-wide text-slate-400 dark:bg-white/5">
                                     Idę na zakupy
                                 </button>

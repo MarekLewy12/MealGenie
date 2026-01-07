@@ -16,10 +16,10 @@ export function Header() {
   const logoutTitle = user?.name ? `Wyloguj ${user.name}` : "Wyloguj";
 
   const linkBaseClasses =
-    "text-sm font-semibold uppercase tracking-wide transition-colors duration-200";
+    "cursor-pointer text-sm font-semibold uppercase tracking-wide transition-colors duration-200";
   const desktopLinkClasses = `${linkBaseClasses} hover:text-indigo-600 dark:hover:text-indigo-400 text-slate-700 dark:text-slate-200`;
   const mobileLinkClasses =
-    "block w-full p-4 text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50";
+    "block w-full cursor-pointer border-b border-slate-100 p-4 text-lg font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-800 dark:text-white dark:hover:bg-slate-800/50";
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#0c0f1d]/80">

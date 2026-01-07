@@ -23,7 +23,7 @@ export function MealCard({ meal, onSelect }: MealCardProps) {
       <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
         {meal.imageUrl ? (
           <img
-            src={`http://localhost:3000${meal.imageUrl}`}
+            src={meal.imageUrl}
             alt={meal.name}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />

@@ -35,6 +35,7 @@ const sampleMeals: MealSuggestion[] = [
       "Podsmaż jarmuż na chrupko",
       "Podaj z dressingiem cytrynowym",
     ],
+    imageUrl: "/hero-images/keto-salmon-bowl.jpg",
   },
   {
     name: "Pho z tygodniowym prepem",
@@ -55,6 +56,7 @@ const sampleMeals: MealSuggestion[] = [
       "Dodaj mięso i zioła",
       "Wykończ limonką i chili",
     ],
+    imageUrl: "/hero-images/pho-chicken.jpg",
   },
   {
     name: "Szakszuka nocna zmiana",
@@ -75,6 +77,7 @@ const sampleMeals: MealSuggestion[] = [
       "Wbij jajka, przykryj",
       "Posyp fetą i oliwkami",
     ],
+    imageUrl: "/hero-images/shakshuka.jpg",
   },
 ];
 

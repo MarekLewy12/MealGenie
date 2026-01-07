@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, Refrigerator, PenLine, ChefHat } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 import { generateMealSuggestions } from "../services/api";
 import { LoadingExperience } from "./LoadingExperience";
@@ -20,6 +21,10 @@ const mealTypeOptions: Array<{
   { value: "SNACK", label: "Przekąska", hint: "małe co nieco" },
 ];
 
+const mealTypeValues = new Set<MealType>(
+  mealTypeOptions.map((option) => option.value),
+);
+
 export function MealGenerator() {
   const [mealType, setMealType] = useState<MealType>("LUNCH");
   const [prepTime, setPrepTime] = useState(30);
@@ -28,6 +33,7 @@ export function MealGenerator() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [isThermomixMode, setIsThermomixMode] = useState(false);
   const [showGenerator, setShowGenerator] = useState(true);
+  const [searchParams] = useSearchParams();
 
   const { mutate, data, status, isError, error } = useMutation({
     mutationFn: () =>
@@ -56,6 +62,28 @@ export function MealGenerator() {
       setShowGenerator(true);
     }
   }, [status, mealsToDisplay]);
+
+  useEffect(() => {
+    const mealTypeParam = searchParams.get("mealType");
+    const prepTimeParam = searchParams.get("prepTime");
+    const servingSizeParam = searchParams.get("servingSize");
+
+    if (mealTypeParam && mealTypeValues.has(mealTypeParam as MealType)) {
+      setMealType(mealTypeParam as MealType);
+    }
+    if (prepTimeParam) {
+      const parsedPrepTime = Number(prepTimeParam);
+      if (Number.isFinite(parsedPrepTime)) {
+        setPrepTime(Math.min(120, Math.max(15, parsedPrepTime)));
+      }
+    }
+    if (servingSizeParam) {
+      const parsedServingSize = Number(servingSizeParam);
+      if (Number.isFinite(parsedServingSize)) {
+        setServingSize(Math.min(10, Math.max(1, parsedServingSize)));
+      }
+    }
+  }, [searchParams]);
 
   const LoadingSkeletons = () => (
     <div className="mx-auto mt-10 grid w-full max-w-6xl gap-6 md:grid-cols-3">
