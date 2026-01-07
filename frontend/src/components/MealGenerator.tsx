@@ -1,7 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Refrigerator, PenLine, ChefHat } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChefHat,
+  PenLine,
+  Refrigerator,
+  RefreshCw,
+  Sparkles,
+  XCircle,
+} from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
 import { generateMealSuggestions } from "../services/api";
@@ -25,6 +34,132 @@ const mealTypeValues = new Set<MealType>(
   mealTypeOptions.map((option) => option.value),
 );
 
+type GeneratorView = "form" | "loading" | "success" | "error";
+
+const pageVariants = {
+  initial: { opacity: 0, y: 30, scale: 0.98 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    transition: { duration: 0.3 },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
+const successIconVariants = {
+  hidden: { scale: 0, rotate: -180 },
+  visible: {
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 15,
+      delay: 0.2,
+    },
+  },
+};
+
+type SuccessViewProps = {
+  meals: MealSuggestion[];
+  onReset: () => void;
+};
+
+function SuccessView({ meals, onReset }: SuccessViewProps) {
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="space-y-8"
+    >
+      <div className="space-y-4 text-center">
+        <motion.div
+          variants={successIconVariants}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30"
+        >
+          <CheckCircle2 className="h-10 w-10 text-white" />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Gotowe! 🎉
+          </h2>
+          <p className="mt-1 text-slate-600 dark:text-slate-300">
+            Szef kuchni skończył pracę. Oto propozycje dopasowane do Ciebie:
+          </p>
+        </motion.div>
+      </div>
+
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+      >
+        {meals.map((meal, index) => (
+          <motion.div key={`${meal.name}-${index}`} variants={staggerItem}>
+            <MealCard
+              meal={meal}
+              onSelect={() => console.log("Wybrano:", meal.name)}
+            />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="flex justify-center pt-4"
+      >
+        <button
+          onClick={onReset}
+          className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-indigo-500"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          Wróć do generatora i spróbuj ponownie
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export function MealGenerator() {
   const [mealType, setMealType] = useState<MealType>("LUNCH");
   const [prepTime, setPrepTime] = useState(30);
@@ -32,10 +167,10 @@ export function MealGenerator() {
   const [userPrompt, setUserPrompt] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [isThermomixMode, setIsThermomixMode] = useState(false);
-  const [showGenerator, setShowGenerator] = useState(true);
+  const [view, setView] = useState<GeneratorView>("form");
   const [searchParams] = useSearchParams();
 
-  const { mutate, data, status, isError, error } = useMutation({
+  const { mutate, data, error } = useMutation({
     mutationFn: () =>
       generateMealSuggestions({
         mealType,
@@ -45,23 +180,22 @@ export function MealGenerator() {
         availableIngredients: ingredients,
         useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
       }),
+    onSuccess: () => {
+      setTimeout(() => setView("success"), 500);
+    },
+    onError: () => {
+      setView("error");
+    },
   });
 
-  const mealsToDisplay = useMemo<MealSuggestion[] | null>(() => {
-    if (!data) return null;
-    return data.meals.slice(0, 3);
-  }, [data]);
-
   const handleGenerate = () => {
-    setShowGenerator(false);
+    setView("loading");
     mutate();
   };
 
-  useEffect(() => {
-    if ((status === "success" && mealsToDisplay) || status === "error") {
-      setShowGenerator(true);
-    }
-  }, [status, mealsToDisplay]);
+  const handleBackToForm = () => {
+    setView("form");
+  };
 
   useEffect(() => {
     const mealTypeParam = searchParams.get("mealType");
@@ -88,18 +222,17 @@ export function MealGenerator() {
   const LoadingSkeletons = () => (
     <div className="mx-auto mt-10 grid w-full max-w-6xl gap-6 md:grid-cols-3">
       {[1, 2, 3].map((i) => (
-        <div
+        <motion.div
           key={i}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1 }}
           className="flex flex-col gap-4 rounded-2xl border border-indigo-100/70 bg-white/90 p-6 shadow-lg shadow-indigo-100/50 dark:border-indigo-500/20 dark:bg-slate-900/80 dark:shadow-slate-950/40"
         >
           <div className="h-48 animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-700/60" />
           <div className="h-6 w-3/4 animate-pulse rounded bg-slate-200/80 dark:bg-slate-700/60" />
           <div className="h-4 w-full animate-pulse rounded bg-slate-200/70 dark:bg-slate-700/50" />
-          <div className="flex gap-2">
-            <div className="h-6 w-16 animate-pulse rounded-full bg-slate-200/70 dark:bg-slate-700/50" />
-            <div className="h-6 w-20 animate-pulse rounded-full bg-slate-200/70 dark:bg-slate-700/50" />
-          </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -107,12 +240,13 @@ export function MealGenerator() {
   return (
     <div className="w-full rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-indigo-100/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/50 md:p-8">
       <AnimatePresence mode="wait">
-        {showGenerator ? (
+        {view === "form" && (
           <motion.div
             key="generator-form"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
           >
             <div className="mb-8">
               <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-300/70">
@@ -259,67 +393,77 @@ export function MealGenerator() {
               </div>
             </div>
 
-            {isError && (
-              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
-                {error instanceof Error
-                  ? error.message
-                  : "Nie udało się wygenerować posiłków."}
-              </div>
-            )}
-
-            {status === "idle" || status === "success" || status === "error" ? (
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={handleGenerate}
-                  className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-900/40 active:scale-95"
-                >
-                  <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
-                  Generuj Posiłki
-                </button>
-                <p className="mt-3 text-xs text-slate-400">
-                  Kliknij, a AI połączy Twoje składniki z preferencjami.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-8 py-8 text-center text-indigo-800 dark:border-indigo-500/30 dark:bg-indigo-500/5 dark:text-indigo-50">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-300/70 border-t-transparent dark:border-indigo-400/60" />
-                <p className="font-semibold">Tworzę magię...</p>
-              </div>
-            )}
+            <div className="flex flex-col items-center">
+              <button
+                onClick={handleGenerate}
+                className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-900/40 active:scale-95"
+              >
+                <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
+                Generuj Posiłki
+              </button>
+              <p className="mt-3 text-xs text-slate-400">
+                Kliknij, a AI połączy Twoje składniki z preferencjami.
+              </p>
+            </div>
           </motion.div>
-        ) : (
+        )}
+
+        {view === "loading" && (
           <motion.div
             key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
           >
             <LoadingExperience />
             <LoadingSkeletons />
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {status === "success" && mealsToDisplay && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-12 space-y-8 border-t border-slate-100 pt-8 dark:border-slate-800"
-        >
-          <h3 className="text-center text-xl font-bold text-slate-900 dark:text-white">
-            Oto propozycje szefa kuchni:
-          </h3>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {mealsToDisplay.map((meal, index) => (
-              <MealCard
-                key={`${meal.name}-${index}`}
-                meal={meal}
-                onSelect={() => console.log("Wybrano posiłek:", meal.name)}
-              />
-            ))}
-          </div>
-        </motion.div>
-      )}
+        {view === "success" && data?.meals && (
+          <SuccessView key="success" meals={data.meals} onReset={handleBackToForm} />
+        )}
+
+        {view === "error" && (
+          <motion.div
+            key="error"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="space-y-6 py-16 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/20"
+            >
+              <XCircle className="h-10 w-10 text-red-500" />
+            </motion.div>
+
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                Ups! Coś poszło nie tak 😅
+              </h2>
+              <p className="mt-2 text-slate-600 dark:text-slate-400">
+                {error instanceof Error
+                  ? error.message
+                  : "Nie udało się wygenerować posiłków."}
+              </p>
+            </div>
+
+            <button
+              onClick={handleBackToForm}
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Spróbuj ponownie
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

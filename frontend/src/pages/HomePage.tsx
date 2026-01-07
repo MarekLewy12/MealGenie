@@ -10,9 +10,11 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MealCard } from "../components/MealCard";
+import { useScrollAnimation } from "../hooks/useScrollAnimation";
 import type { MealSuggestion } from "../types/meal";
 
 const sampleMeals: MealSuggestion[] = [
@@ -105,8 +107,39 @@ const trustPoints = [
   "Transparentne źródła: dieta, alergie, sprzęt kuchenny zawsze na pierwszym miejscu.",
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2, delayChildren: 0.2 },
+  },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
 export function HomePage() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const shoppingView = useScrollAnimation(0.3);
+  const howItWorksView = useScrollAnimation(0.3);
+  const systemView = useScrollAnimation(0.25);
+  const trustView = useScrollAnimation(0.25);
+  const ctaView = useScrollAnimation(0.25);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -231,11 +264,22 @@ export function HomePage() {
         <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent shadow-[0_0_12px_rgba(79,70,229,0.25)] dark:via-indigo-500/70 dark:shadow-[0_0_16px_rgba(99,102,241,0.35)]" />
       </div>
 
-      <section className="relative overflow-hidden py-24 lg:py-32">
+      <section
+        ref={shoppingView.ref}
+        className="relative overflow-hidden py-24 lg:py-32"
+      >
         <div className="absolute inset-0 origin-bottom-right scale-110 skew-y-3 bg-gradient-to-br from-indigo-50 via-white to-emerald-50 opacity-80 dark:from-slate-900/20 dark:via-slate-900/20 dark:to-slate-900/30" />
         <div className="relative mx-auto max-w-7xl px-6">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
-            <div className="order-2 space-y-6 lg:order-1">
+          <motion.div
+            className="grid items-center gap-16 lg:grid-cols-2"
+            variants={staggerContainer}
+            initial="hidden"
+            animate={shoppingView.isInView ? "visible" : "hidden"}
+          >
+            <motion.div
+              className="order-2 space-y-6 lg:order-1"
+              variants={staggerItem}
+            >
               <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-emerald-500">
                 <CheckCircle2 className="h-4 w-4" />
                 Logistyka z głowy
@@ -264,9 +308,12 @@ export function HomePage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
 
-            <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
+            <motion.div
+              className="order-1 flex justify-center lg:order-2 lg:justify-end"
+              variants={staggerItem}
+            >
               <div className="relative h-[500px] w-72 rotate-3 rounded-[3rem] border-8 border-slate-200 bg-white shadow-2xl transition-transform duration-500 hover:rotate-0 dark:border-slate-800 dark:bg-slate-950">
                 <div className="absolute left-1/2 top-0 z-20 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-slate-200 dark:bg-slate-800" />
                 <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] bg-slate-50 p-6 pt-12 dark:bg-slate-900">
@@ -318,25 +365,36 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="relative py-24">
+      <section ref={howItWorksView.ref} className="relative py-24">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center mb-16">
+          <motion.div
+            className="mb-16 text-center"
+            variants={fadeUp}
+            initial="hidden"
+            animate={howItWorksView.isInView ? "visible" : "hidden"}
+          >
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
               Jak to działa?
             </h2>
             <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mt-3">
               Trzy proste kroki dzielą Cię od idealnego posiłku. Bez skomplikowanych formularzy.
             </p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
+          </motion.div>
+          <motion.div
+            className="grid gap-6 md:grid-cols-3"
+            variants={staggerContainer}
+            initial="hidden"
+            animate={howItWorksView.isInView ? "visible" : "hidden"}
+          >
             {howItWorks.map((step, index) => (
-              <div
+              <motion.div
                 key={step.title}
+                variants={staggerItem}
                 className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-lg shadow-indigo-100/50 backdrop-blur transition-all hover:-translate-y-1 hover:border-indigo-300 dark:border-white/10 dark:bg-white/5 dark:shadow-indigo-900/30"
               >
                 <div className="flex items-center gap-3">
@@ -348,21 +406,34 @@ export function HomePage() {
                 <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-white">{step.title}</h3>
                 <p className="mt-3 text-sm text-slate-600 dark:text-slate-200">{step.description}</p>
                 <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-indigo-200/30 blur-3xl transition-all group-hover:bg-indigo-200/50 dark:bg-indigo-600/20" />
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-7xl px-6 py-24">
-        <div className="mb-16 text-center">
+      <section ref={systemView.ref} className="relative mx-auto max-w-7xl px-6 py-24">
+        <motion.div
+          className="mb-16 text-center"
+          variants={fadeUp}
+          initial="hidden"
+          animate={systemView.isInView ? "visible" : "hidden"}
+        >
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
             Więcej niż przepisy. <span className="text-indigo-500">System.</span>
           </h2>
-        </div>
+        </motion.div>
 
-        <div className="grid auto-rows-[250px] grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="group relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-slate-100 p-8 text-slate-900 shadow-lg shadow-indigo-100 transition-transform dark:border-indigo-500/20 dark:bg-gradient-to-br dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-950 dark:text-white dark:shadow-indigo-900/40 md:col-span-2">
+        <motion.div
+          className="grid auto-rows-[250px] grid-cols-1 gap-6 md:grid-cols-3"
+          variants={staggerContainer}
+          initial="hidden"
+          animate={systemView.isInView ? "visible" : "hidden"}
+        >
+          <motion.div
+            variants={staggerItem}
+            className="group relative overflow-hidden rounded-3xl border border-indigo-200/60 bg-gradient-to-br from-indigo-50 via-white to-slate-100 p-8 text-slate-900 shadow-lg shadow-indigo-100 transition-transform dark:border-indigo-500/20 dark:bg-gradient-to-br dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-950 dark:text-white dark:shadow-indigo-900/40 md:col-span-2"
+          >
             <div className="absolute top-0 right-0 p-8 opacity-10 transition-opacity group-hover:opacity-20">
               <Brain className="h-40 w-40 text-indigo-400 dark:text-indigo-600" />
             </div>
@@ -378,25 +449,34 @@ export function HomePage() {
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="group rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-lg shadow-indigo-100 transition hover:border-orange-300 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:shadow-indigo-900/30 hover:shadow-orange-200/50">
+          <motion.div
+            variants={staggerItem}
+            className="group rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-lg shadow-indigo-100 transition hover:border-orange-300 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:shadow-indigo-900/30 hover:shadow-orange-200/50"
+          >
             <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-500 transition-transform group-hover:scale-110 dark:bg-orange-500/20 dark:text-orange-200">
               <Smile />
             </div>
             <h3 className="mb-2 text-xl font-bold">Tylko Twój sprzęt</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">Masz tylko Thermomix i mikrofalę? Dostaniesz przepisy tylko pod to.</p>
-          </div>
+          </motion.div>
 
-          <div className="group rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-lg shadow-indigo-100 transition hover:border-pink-300 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:shadow-indigo-900/30">
+          <motion.div
+            variants={staggerItem}
+            className="group rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-lg shadow-indigo-100 transition hover:border-pink-300 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:shadow-indigo-900/30"
+          >
             <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-pink-500 transition-transform group-hover:scale-110 dark:bg-pink-500/20 dark:text-pink-200">
               <Heart />
             </div>
             <h3 className="mb-2 text-xl font-bold">Full personalizacja</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">Dieta keto, bez glutenu, nienawidzisz kolendry? AI o tym pamięta.</p>
-          </div>
+          </motion.div>
 
-          <div className="group relative overflow-hidden rounded-3xl border border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-slate-100 p-8 text-slate-900 shadow-lg shadow-indigo-100 transition-transform dark:border-fuchsia-500/25 dark:bg-gradient-to-br dark:from-fuchsia-950/50 dark:via-slate-900 dark:to-slate-950 dark:text-white dark:shadow-indigo-900/40 md:col-span-2">
+          <motion.div
+            variants={staggerItem}
+            className="group relative overflow-hidden rounded-3xl border border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-slate-100 p-8 text-slate-900 shadow-lg shadow-indigo-100 transition-transform dark:border-fuchsia-500/25 dark:bg-gradient-to-br dark:from-fuchsia-950/50 dark:via-slate-900 dark:to-slate-950 dark:text-white dark:shadow-indigo-900/40 md:col-span-2"
+          >
             <div className="pointer-events-none absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-fuchsia-300/30 blur-[100px] dark:bg-fuchsia-500/15" />
             <div className="relative flex h-full flex-col justify-between">
               <div>
@@ -410,12 +490,20 @@ export function HomePage() {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
-      <section className="relative mx-auto max-w-screen-2xl px-6 pb-16">
-        <div className="mb-6 flex items-center gap-3">
+      <section
+        ref={trustView.ref}
+        className="relative mx-auto max-w-screen-2xl px-6 pb-16"
+      >
+        <motion.div
+          className="mb-6 flex items-center gap-3"
+          variants={fadeUp}
+          initial="hidden"
+          animate={trustView.isInView ? "visible" : "hidden"}
+        >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 ring-1 ring-emerald-200 dark:bg-emerald-500/15 dark:ring-emerald-400/30">
             <ShieldCheck className="h-5 w-5 text-emerald-700 dark:text-emerald-100" />
           </span>
@@ -427,21 +515,35 @@ export function HomePage() {
               Dlaczego możesz zaufać MealGenie
             </h2>
           </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        </motion.div>
+        <motion.div
+          className="grid gap-4 md:grid-cols-3"
+          variants={staggerContainer}
+          initial="hidden"
+          animate={trustView.isInView ? "visible" : "hidden"}
+        >
           {trustPoints.map((point) => (
-            <div
+            <motion.div
               key={point}
+              variants={staggerItem}
               className="rounded-2xl border border-slate-200 bg-white/80 p-5 text-sm shadow-lg shadow-indigo-100/50 backdrop-blur dark:border-white/10 dark:bg-white/5 dark:shadow-indigo-900/30"
             >
               <p className="text-slate-700 dark:text-slate-100">{point}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
-      <section className="relative mx-auto max-w-screen-2xl px-6 pb-20">
-        <div className="overflow-hidden rounded-3xl border border-indigo-200 bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-fuchsia-600/10 p-10 shadow-2xl shadow-indigo-100/60 backdrop-blur-xl dark:border-indigo-500/30 dark:from-indigo-600/40 dark:via-purple-600/40 dark:to-fuchsia-600/40 dark:shadow-indigo-900/40">
+      <section
+        ref={ctaView.ref}
+        className="relative mx-auto max-w-screen-2xl px-6 pb-20"
+      >
+        <motion.div
+          className="overflow-hidden rounded-3xl border border-indigo-200 bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-fuchsia-600/10 p-10 shadow-2xl shadow-indigo-100/60 backdrop-blur-xl dark:border-indigo-500/30 dark:from-indigo-600/40 dark:via-purple-600/40 dark:to-fuchsia-600/40 dark:shadow-indigo-900/40"
+          variants={fadeUp}
+          initial="hidden"
+          animate={ctaView.isInView ? "visible" : "hidden"}
+        >
           <div className="grid gap-8 md:grid-cols-2 md:items-center">
             <div className="space-y-4">
               <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-100">
@@ -470,7 +572,7 @@ export function HomePage() {
               </Link>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <footer className="border-t border-slate-200 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-white/5">
