@@ -20,7 +20,6 @@ export const EQUIPMENT_LABELS: Record<keyof typeof Equipment, string> = {
     STOVE: 'Kuchenka (Gaz/Indukcja)',
     MICROWAVE: 'Mikrofalówka',
     BLENDER: 'Blender',
-    THERMOMIX: 'Thermomix',
     MULTICOOKER: 'Multicooker',
     AIR_FRYER: 'Frytkownica beztłuszczowa',
     SOUS_VIDE: 'Sous Vide',

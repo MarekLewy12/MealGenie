@@ -1,6 +1,9 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
-import { SuggestMealsRequestSchema } from "../schemas/meal.schema.js";
+import {
+  SuggestMealsRequestSchema,
+  type EquipmentInput,
+} from "../schemas/meal.schema.js";
 import { generateMealSuggestions } from "../services/ai.service.js";
 
 const prisma = new PrismaClient();
@@ -32,7 +35,7 @@ export async function suggestMealsController(
       });
     }
 
-    const finalEquipment = [...preferences.equipment];
+    const finalEquipment: EquipmentInput[] = [...preferences.equipment];
     if (input.useEquipment?.includes("THERMOMIX")) {
       if (!finalEquipment.includes("THERMOMIX")) {
         finalEquipment.push("THERMOMIX");

@@ -5,8 +5,9 @@ import {
   type MealTeaser,
   type MealWithImage,
   type MealType,
+  type EquipmentInput,
 } from "../schemas/meal.schema.js";
-import { Diet, CookingSkill, Budget, Equipment } from "@prisma/client";
+import { Diet, CookingSkill, Budget } from "@prisma/client";
 import { generateMealImages } from "./image.service.js";
 
 const openai = new OpenAI();
@@ -17,7 +18,7 @@ interface GenerationContext {
   mealType: MealType;
   prepTime: number;
   servingSize: number;
-  equipment: Equipment[];
+  equipment: EquipmentInput[];
   diet: Diet;
   allergies: string[];
   dislikedIngredients: string[];

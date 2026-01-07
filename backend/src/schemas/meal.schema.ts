@@ -10,6 +10,18 @@ export const MealTypeSchema = z.enum([
   "ANY",
 ]);
 
+export type EquipmentInput = Equipment | "THERMOMIX";
+
+const allowedEquipmentInputs = new Set<string>([
+  ...Object.values(Equipment),
+  "THERMOMIX",
+]);
+
+export const EquipmentInputSchema = z.custom<EquipmentInput>(
+  (value) => typeof value === "string" && allowedEquipmentInputs.has(value),
+  { message: "Nieznany sprzęt" },
+);
+
 export const SuggestMealsRequestSchema = z.object({
   userPrompt: z
     .string()
@@ -21,7 +33,7 @@ export const SuggestMealsRequestSchema = z.object({
     .optional()
     .transform((arr) => arr?.map((s) => s.trim()).filter(Boolean) || []),
 
-  useEquipment: z.array(z.nativeEnum(Equipment)).optional(),
+  useEquipment: z.array(EquipmentInputSchema).optional(),
 
   // Standardowe parametry
   mealType: MealTypeSchema.default("ANY"),

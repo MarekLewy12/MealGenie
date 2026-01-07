@@ -19,21 +19,44 @@ export type SavePreferencesInput = {
   budget: Budget;
 };
 
+export type PreferencesResponse = Omit<SavePreferencesInput, "userId">;
+
 export async function savePreferences(input: SavePreferencesInput) {
-  const { userId, ...preferencesData } = input;
+  const { userId, favCuisines, kitchenEquipment, ...preferencesData } = input;
+  const dbData = {
+    ...preferencesData,
+    favoriteCuisines: favCuisines,
+    equipment: kitchenEquipment,
+  };
 
   return prisma.preference.upsert({
     where: { userId },
-    update: preferencesData,
+    update: dbData,
     create: {
-      ...preferencesData,
+      ...dbData,
       userId,
     },
   });
 }
 
-export async function getPreferences(userId: string) {
-  return prisma.preference.findUnique({
+export async function getPreferences(
+  userId: string,
+): Promise<PreferencesResponse | null> {
+  const preferences = await prisma.preference.findUnique({
     where: { userId },
   });
+
+  if (!preferences) {
+    return null;
+  }
+
+  return {
+    diet: preferences.diet,
+    allergies: preferences.allergies,
+    favCuisines: preferences.favoriteCuisines,
+    dislikedIngredients: preferences.dislikedIngredients,
+    cookingSkill: preferences.cookingSkill,
+    kitchenEquipment: preferences.equipment,
+    budget: preferences.budget,
+  };
 }
