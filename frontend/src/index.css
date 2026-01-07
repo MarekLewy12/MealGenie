@@ -4,17 +4,17 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Zabezpieczenie przed poziomym overflow na mobile */
-html,
-body {
+html {
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   width: 100%;
   position: relative;
+  scrollbar-gutter: stable;
 }
 
-html {
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
+body {
+  width: 100%;
+  position: relative;
 }
 
 :root {
