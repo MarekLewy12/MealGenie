@@ -2,7 +2,12 @@ import axios from "axios";
 
 import type { LoginFormData, RegisterFormData } from "../schemas/auth";
 import { useAuthStore } from "../store/authStore";
-import type { MealResponse, MealType } from "../types/meal";
+import type {
+  FullRecipe,
+  MealResponse,
+  MealSuggestion,
+  MealType,
+} from "../types/meal";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -50,6 +55,19 @@ export async function generateMealSuggestions(
   });
 
   return data;
+}
+
+export async function generateFullRecipe(
+  mealTeaser: MealSuggestion,
+  servings: number = 2,
+): Promise<FullRecipe> {
+  const { data } = await api.post<{ recipe: FullRecipe }>(
+    "/meals/recipe",
+    { mealTeaser, servings },
+    { timeout: 60_000 },
+  );
+
+  return data.recipe;
 }
 
 export async function registerUser(data: RegisterFormData) {

@@ -31,15 +31,18 @@ export const FullRecipeIngredientSchema = z.object({
   category: z
     .string()
     .describe("Kategoria: Mieso, Warzywa, Nabial, Przyprawy, Inne"),
-  notes: z.string().optional().describe("Notatka, np. 'pokrojone w kostke'"),
+  notes: z
+    .string()
+    .nullable()
+    .describe("Notatka, np. 'pokrojone w kostke'"),
 });
 
 export const RecipeStepSchema = z.object({
   stepNumber: z.number().int().describe("Numer kroku"),
   title: z.string().describe("Krotki tytul kroku, np. 'Przygotowanie warzyw'"),
   instruction: z.string().describe("Szczegolowa instrukcja tego kroku"),
-  duration: z.string().optional().describe("Czas trwania, np. '5 minut'"),
-  tip: z.string().optional().describe("Opcjonalna wskazowka do tego kroku"),
+  duration: z.string().nullable().describe("Czas trwania, np. '5 minut'"),
+  tip: z.string().nullable().describe("Opcjonalna wskazowka do tego kroku"),
 });
 
 export const NutritionSchema = z.object({
@@ -47,7 +50,7 @@ export const NutritionSchema = z.object({
   protein: z.number().int().describe("Bialko w gramach"),
   carbs: z.number().int().describe("Weglowodany w gramach"),
   fat: z.number().int().describe("Tluszcze w gramach"),
-  fiber: z.number().int().optional().describe("Blonnik w gramach"),
+  fiber: z.number().int().nullable().describe("Blonnik w gramach"),
 });
 
 export const FullRecipeSchema = z.object({
@@ -72,8 +75,14 @@ export const FullRecipeSchema = z.object({
     .min(2)
     .max(5)
     .describe("Wskazowki szefa kuchni"),
-  servingSuggestion: z.string().optional().describe("Sugestia podania dania"),
-  storageInfo: z.string().optional().describe("Jak przechowywac pozostalosci"),
+  servingSuggestion: z
+    .string()
+    .nullable()
+    .describe("Sugestia podania dania"),
+  storageInfo: z
+    .string()
+    .nullable()
+    .describe("Jak przechowywac pozostalosci"),
 });
 
 export type FullRecipe = z.infer<typeof FullRecipeSchema>;

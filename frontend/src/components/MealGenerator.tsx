@@ -11,7 +11,7 @@ import {
   Sparkles,
   XCircle,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { generateMealSuggestions } from "../services/api";
 import { LoadingExperience } from "./LoadingExperience";
@@ -91,9 +91,10 @@ const successIconVariants = {
 type SuccessViewProps = {
   meals: MealSuggestion[];
   onReset: () => void;
+  onSelectMeal: (meal: MealSuggestion) => void;
 };
 
-function SuccessView({ meals, onReset }: SuccessViewProps) {
+function SuccessView({ meals, onReset, onSelectMeal }: SuccessViewProps) {
   return (
     <motion.div
       variants={pageVariants}
@@ -136,7 +137,7 @@ function SuccessView({ meals, onReset }: SuccessViewProps) {
           <motion.div key={`${meal.name}-${index}`} variants={staggerItem}>
             <MealCard
               meal={meal}
-              onSelect={() => console.log("Wybrano:", meal.name)}
+              onSelect={() => onSelectMeal(meal)}
             />
           </motion.div>
         ))}
@@ -169,6 +170,7 @@ export function MealGenerator() {
   const [isThermomixMode, setIsThermomixMode] = useState(false);
   const [view, setView] = useState<GeneratorView>("form");
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const { mutate, data, error } = useMutation({
     mutationFn: () =>
@@ -422,7 +424,14 @@ export function MealGenerator() {
         )}
 
         {view === "success" && data?.meals && (
-          <SuccessView key="success" meals={data.meals} onReset={handleBackToForm} />
+          <SuccessView
+            key="success"
+            meals={data.meals}
+            onReset={handleBackToForm}
+            onSelectMeal={(meal) =>
+              navigate("/recipe", { state: { teaser: meal } })
+            }
+          />
         )}
 
         {view === "error" && (

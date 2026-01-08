@@ -5,6 +5,7 @@ import { GeneratorPage } from "./pages/GeneratorPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { RecipePage } from "./pages/RecipePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { Header } from "./components/Header";
@@ -86,6 +87,14 @@ function App() {
                     element={
                       <PageTransition>
                         <GeneratorPage />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/recipe"
+                    element={
+                      <PageTransition>
+                        <RecipePage />
                       </PageTransition>
                     }
                   />
