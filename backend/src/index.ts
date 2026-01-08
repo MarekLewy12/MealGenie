@@ -17,6 +17,7 @@ import {
   registerController,
   loginController,
 } from "./controllers/auth.controller.js";
+import { generateRecipeController } from "./controllers/recipe.controller.js";
 import { authenticateToken } from "./middlewares/authMiddleware.js";
 import { cleanupOldImages } from "./services/image.service.js";
 
@@ -59,6 +60,7 @@ app.post("/api/echo", (req: Request, res: Response, next: NextFunction) => {
 app.post("/api/preferences", authenticateToken, savePreferencesController);
 app.get("/api/preferences", authenticateToken, getPreferencesController);
 app.post("/api/meals/suggest", authenticateToken, suggestMealsController);
+app.post("/api/meals/recipe", authenticateToken, generateRecipeController);
 
 // Auth
 app.post("/api/auth/register", registerController);
