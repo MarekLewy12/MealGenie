@@ -13,16 +13,18 @@ export async function getMealHistory(
 ): Promise<{ items: MealHistoryItem[]; total: number }> {
   const { limit, offset, favoritesOnly } = options;
 
+  // Filtracja zawsze po userId, opcjonalnie po ulubionych.
   const whereClause = {
     userId,
     ...(favoritesOnly ? { isFavorite: true } : {}),
   };
 
+  // Lista + count w jednym przebiegu, bez czekania na drugie zapytanie.
   const [items, total] = await Promise.all([
     prisma.mealHistory.findMany({
       where: whereClause,
       select: {
-        // Keep list payload small; fullRecipeJson can be large.
+        // Lista ma byc lekka; fullRecipeJson potrafi byc duzy.
         id: true,
         name: true,
         description: true,
@@ -41,6 +43,7 @@ export async function getMealHistory(
 
   const mappedItems: MealHistoryItem[] = items.map((item) => ({
     ...item,
+    // API wystawia ISO string, Prisma zwraca Date.
     createdAt: item.createdAt.toISOString(),
   }));
 
@@ -92,6 +95,7 @@ export async function toggleFavorite(
 
   const updated = await prisma.mealHistory.update({
     where: { id: mealId },
+    // Prosty toggle na bazie aktualnego stanu.
     data: { isFavorite: !existing.isFavorite },
     select: { isFavorite: true },
   });

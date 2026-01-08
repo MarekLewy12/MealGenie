@@ -39,15 +39,22 @@ export async function generateRecipeController(
       },
     });
 
-    await prisma.mealHistory.create({
+    // Zapis pelnego przepisu do historii, lacznie z JSON-em i obrazkiem.
+    const savedMeal = await prisma.mealHistory.create({
       data: {
         userId,
         name: recipe.name,
         description: recipe.description,
-        ingredients: recipe.ingredients.map((i) => i.name),
+        // Uproszczona lista skladnikow do widoku listy.
+        ingredients: recipe.ingredients.map(
+          (i) => `${i.amount} ${i.unit} ${i.name}`,
+        ),
         estimatedTime: recipe.totalTimeMinutes,
         category: "LUNCH",
         userPrompt: null,
+        imageUrl: mealTeaser.imageUrl ?? null,
+        fullRecipeJson: recipe,
+        isFavorite: false,
         wasSelected: true,
         selectedAt: new Date(),
       },
@@ -58,6 +65,7 @@ export async function generateRecipeController(
         ...recipe,
         imageUrl: mealTeaser.imageUrl || null,
       },
+      mealHistoryId: savedMeal.id,
     });
   } catch (error) {
     next(error);
