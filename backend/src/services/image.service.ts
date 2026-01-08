@@ -8,14 +8,14 @@ if (!TOGETHER_API_KEY) {
   throw new Error("TOGETHER_API_KEY environment variable is not set");
 }
 
-// Folder na obrazki
+// Katalog na cache obrazkow dla frontendu (serwowany z /public)
 const IMAGE_DIR = path.join(process.cwd(), "public", "meal-images");
 
 if (!fs.existsSync(IMAGE_DIR)) {
   fs.mkdirSync(IMAGE_DIR, { recursive: true });
 }
 
-// Typ odpowiedzi z Together.ai
+// Minimalny typ odpowiedzi Together.ai potrzebny do odczytu base64
 type TogetherImageResponse = {
   id: string;
   model: string;
@@ -26,9 +26,43 @@ type TogetherImageResponse = {
   >;
 };
 
-/**
- * Generuje obrazki dla wielu posiłków równolegle
- */
+// Usuwa obrazy starsze niz zadany wiek, aby ograniczyc rozrost cache
+export function cleanupOldImages(maxAgeDays: number = 7): void {
+  try {
+    if (!fs.existsSync(IMAGE_DIR)) {
+      return;
+    }
+
+    const files = fs.readdirSync(IMAGE_DIR);
+    const now = Date.now();
+    const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
+    let deletedCount = 0;
+
+    for (const file of files) {
+      if (!file.endsWith(".jpg") && !file.endsWith(".png")) {
+        continue;
+      }
+
+      const filePath = path.join(IMAGE_DIR, file);
+      const stats = fs.statSync(filePath);
+      const fileAge = now - stats.mtimeMs;
+
+      if (fileAge > maxAgeMs) {
+        fs.unlinkSync(filePath);
+        deletedCount++;
+        console.log(`[CLEANUP] Usunieto stary obrazek: ${file}`);
+      }
+    }
+
+    if (deletedCount > 0) {
+      console.log(`[CLEANUP] Lacznie usunieto ${deletedCount} starych obrazkow`);
+    }
+  } catch (error) {
+    console.error("[CLEANUP] Blad podczas czyszczenia obrazkow:", error);
+  }
+}
+
+// Generuje obrazki dla wielu posilkow rownolegle
 export async function generateMealImages(
   meals: Array<{ name: string; ingredients: Array<{ name: string }> }>,
 ): Promise<Array<string | null>> {
@@ -37,7 +71,6 @@ export async function generateMealImages(
     meals.map((m) => m.name),
   );
 
-  // 3 obrazki równolegle
   const promises = meals.map(async (meal) => {
     try {
       return await generateMealImage(meal);
@@ -47,34 +80,27 @@ export async function generateMealImages(
     }
   });
 
-  // oczekiwanie na wszystkie (nawet jeśli niektóre się nie powiodą)
   return Promise.allSettled(promises).then((results) =>
     results.map((r) => (r.status === "fulfilled" ? r.value : null)),
   );
 }
 
-/**
- * Generuje POJEDYNCZY obrazek (sprawdza cache)
- */
+// Generuje pojedynczy obrazek z cache
 async function generateMealImage(meal: {
   name: string;
   ingredients: Array<{ name: string }>;
 }): Promise<string | null> {
-  // cache key (hash z nazwy + składników)
   const cacheKey = getCacheKey(meal);
   const filePath = path.join(IMAGE_DIR, `${cacheKey}.jpg`);
 
-  // Czy ten obrazek już istnieje?
   if (fs.existsSync(filePath)) {
     console.log("[IMAGE] Cache hit:", cacheKey);
     return `/meal-images/${cacheKey}.jpg`;
   }
 
-  // Cache miss → generuj nowy
   console.log("[IMAGE] Cache miss, generating:", meal.name);
   const prompt = buildImagePrompt(meal);
 
-  // Together.ai Images API
   const b64 = await togetherGenerateBase64Jpeg(prompt);
 
   if (!b64) {
@@ -82,20 +108,15 @@ async function generateMealImage(meal: {
     return null;
   }
 
-  // Decode base64 → Buffer (bajty)
   const buffer = Buffer.from(b64, "base64");
 
-  // Zapisz plik .jpg
   fs.writeFileSync(filePath, buffer);
   console.log("[IMAGE] Saved:", filePath);
 
-  // URL dla frontendu
   return `/meal-images/${cacheKey}.jpg`;
 }
 
-/**
- * Wywołanie Together.ai API
- */
+// Wywolanie Together.ai i zwrot base64
 async function togetherGenerateBase64Jpeg(
   prompt: string,
 ): Promise<string | null> {
@@ -106,16 +127,19 @@ async function togetherGenerateBase64Jpeg(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "black-forest-labs/FLUX.1-schnell",
+      model: "black-forest-labs/FLUX.1-dev",
       prompt,
-      steps: 4,
+      steps: 20,
       n: 1,
       response_format: "base64",
       output_format: "jpeg",
       width: 1344,
       height: 768,
       negative_prompt:
-        "text, watermark, logo, low quality, blurry, distorted, extra fingers, ugly",
+        "illustration, cartoon, drawing, painting, sketch, 3d render, " +
+        "CGI, anime, wrong ingredients, inaccurate food, plastic looking, " +
+        "artificial, watermark, text overlay, blurry, out of focus, " +
+        "oversaturated, underexposed, low quality, ugly",
     }),
   });
 
@@ -133,53 +157,49 @@ async function togetherGenerateBase64Jpeg(
   return typeof b64 === "string" ? b64 : null;
 }
 
-/**
- * Oblicza STABILNY cache key:
- * SHA256(nazwa + top3składniki_alfabetycznie)
- */
+// Stabilny cache key: nazwa + top3 skladniki (alfabetycznie)
 function getCacheKey(meal: {
   name: string;
   ingredients: Array<{ name: string }>;
 }): string {
-  // Weź top 3 składniki, lowercase, sortuj alfabetycznie
   const top3 = meal.ingredients
     .slice(0, 3)
     .map((i) => i.name.toLowerCase())
     .sort()
     .join(",");
 
-  // Hash SHA256
   const hash = crypto
     .createHash("sha256")
     .update(`${meal.name}:${top3}`)
     .digest("hex");
 
-  // Pierwsze 16 znaków (wystarczy do unikalności)
   return hash.slice(0, 16);
 }
 
-/**
- * Buduje prompt dla Together (food photography style)
- */
+// Prompt pod food photography z wyroznieniem skladnikow kluczowych
 function buildImagePrompt(meal: {
   name: string;
   ingredients: Array<{ name: string }>;
 }): string {
-  const mainIngredients = meal.ingredients
-    .slice(0, 5)
+  const allIngredients = meal.ingredients.map((i) => i.name).join(", ");
+  const heroIngredients = meal.ingredients
+    .slice(0, 3)
     .map((i) => i.name)
-    .join(", ");
+    .join(" and ");
 
-  return `Food photography, professional culinary shot.
-Dish name: "${meal.name}"
-Main ingredients: ${mainIngredients}
+  return `Photorealistic food photography of "${meal.name}".
 
-Style:
-- Overhead view (bird's eye perspective)
-- Natural lighting, soft shadows
-- Clean white background
-- Restaurant quality plating
-- Appetizing, vibrant colors
-- No text, no watermarks
-- Sharp focus on the dish`;
+IMPORTANT - Must clearly show these main ingredients: ${heroIngredients}.
+Complete ingredients list: ${allIngredients}.
+
+Photography style:
+- Professional restaurant food photography
+- Appetizing 45-degree angle composition
+- Soft natural window lighting with gentle shadows
+- Shallow depth of field, tack-sharp focus on the dish
+- Beautiful plating on clean ceramic plate
+- Rustic wooden table background
+- Vibrant, mouth-watering colors
+- 8K resolution, highly detailed food textures
+- Steam rising if hot dish`;
 }
