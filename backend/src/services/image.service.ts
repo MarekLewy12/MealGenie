@@ -8,14 +8,25 @@ if (!TOGETHER_API_KEY) {
   throw new Error("TOGETHER_API_KEY environment variable is not set");
 }
 
-// Katalog na cache obrazkow dla frontendu (serwowany z /public)
+// Parametry generatora obrazkow.
+const IMAGE_MODEL = "black-forest-labs/FLUX.2-dev";
+const IMAGE_STEPS = 28;
+const IMAGE_GUIDANCE = 7;
+const IMAGE_WIDTH = 1344;
+const IMAGE_HEIGHT = 768;
+const IMAGE_NEGATIVE_PROMPT =
+  "illustration, cartoon, drawing, painting, sketch, 3d render, " +
+  "CGI, anime, wrong ingredients, inaccurate food, plastic looking, " +
+  "artificial, watermark, text overlay, blurry, out of focus, " +
+  "oversaturated, underexposed, low quality, ugly";
+
+// Katalog na obrazki dla frontendu (serwowany z /public)
 const IMAGE_DIR = path.join(process.cwd(), "public", "meal-images");
 
 if (!fs.existsSync(IMAGE_DIR)) {
   fs.mkdirSync(IMAGE_DIR, { recursive: true });
 }
 
-// Minimalny typ odpowiedzi Together.ai potrzebny do odczytu base64
 type TogetherImageResponse = {
   id: string;
   model: string;
@@ -26,7 +37,12 @@ type TogetherImageResponse = {
   >;
 };
 
-// Usuwa obrazy starsze niz zadany wiek, aby ograniczyc rozrost cache
+type MealImageInput = {
+  name: string;
+  ingredients: Array<{ name: string }>;
+  imagePromptEn?: string | null;
+};
+
 export function cleanupOldImages(maxAgeDays: number = 7): void {
   try {
     if (!fs.existsSync(IMAGE_DIR)) {
@@ -62,9 +78,8 @@ export function cleanupOldImages(maxAgeDays: number = 7): void {
   }
 }
 
-// Generuje obrazki dla wielu posilkow rownolegle
 export async function generateMealImages(
-  meals: Array<{ name: string; ingredients: Array<{ name: string }> }>,
+  meals: MealImageInput[],
 ): Promise<Array<string | null>> {
   console.log(
     "[IMAGE] Generating images for meals:",
@@ -85,20 +100,8 @@ export async function generateMealImages(
   );
 }
 
-// Generuje pojedynczy obrazek z cache
-async function generateMealImage(meal: {
-  name: string;
-  ingredients: Array<{ name: string }>;
-}): Promise<string | null> {
-  const cacheKey = getCacheKey(meal);
-  const filePath = path.join(IMAGE_DIR, `${cacheKey}.jpg`);
-
-  if (fs.existsSync(filePath)) {
-    console.log("[IMAGE] Cache hit:", cacheKey);
-    return `/meal-images/${cacheKey}.jpg`;
-  }
-
-  console.log("[IMAGE] Cache miss, generating:", meal.name);
+async function generateMealImage(meal: MealImageInput): Promise<string | null> {
+  console.log("[IMAGE] Generating image:", meal.name);
   const prompt = buildImagePrompt(meal);
 
   const b64 = await togetherGenerateBase64Jpeg(prompt);
@@ -108,15 +111,16 @@ async function generateMealImage(meal: {
     return null;
   }
 
+  const fileName = `${crypto.randomUUID()}.jpg`;
+  const filePath = path.join(IMAGE_DIR, fileName);
   const buffer = Buffer.from(b64, "base64");
 
   fs.writeFileSync(filePath, buffer);
   console.log("[IMAGE] Saved:", filePath);
 
-  return `/meal-images/${cacheKey}.jpg`;
+  return `/meal-images/${fileName}`;
 }
 
-// Wywolanie Together.ai i zwrot base64
 async function togetherGenerateBase64Jpeg(
   prompt: string,
 ): Promise<string | null> {
@@ -127,19 +131,16 @@ async function togetherGenerateBase64Jpeg(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "black-forest-labs/FLUX.1-dev",
+      model: IMAGE_MODEL,
       prompt,
-      steps: 20,
+      steps: IMAGE_STEPS,
+      guidance_scale: IMAGE_GUIDANCE,
       n: 1,
       response_format: "base64",
       output_format: "jpeg",
-      width: 1344,
-      height: 768,
-      negative_prompt:
-        "illustration, cartoon, drawing, painting, sketch, 3d render, " +
-        "CGI, anime, wrong ingredients, inaccurate food, plastic looking, " +
-        "artificial, watermark, text overlay, blurry, out of focus, " +
-        "oversaturated, underexposed, low quality, ugly",
+      width: IMAGE_WIDTH,
+      height: IMAGE_HEIGHT,
+      negative_prompt: IMAGE_NEGATIVE_PROMPT,
     }),
   });
 
@@ -157,49 +158,19 @@ async function togetherGenerateBase64Jpeg(
   return typeof b64 === "string" ? b64 : null;
 }
 
-// Stabilny cache key: nazwa + top3 skladniki (alfabetycznie)
-function getCacheKey(meal: {
-  name: string;
-  ingredients: Array<{ name: string }>;
-}): string {
-  const top3 = meal.ingredients
-    .slice(0, 3)
-    .map((i) => i.name.toLowerCase())
-    .sort()
-    .join(",");
+function buildImagePrompt(meal: MealImageInput): string {
+  const promptEn = meal.imagePromptEn?.trim();
+  if (promptEn) {
+    return promptEn.length > 300 ? promptEn.slice(0, 300) : promptEn;
+  }
 
-  const hash = crypto
-    .createHash("sha256")
-    .update(`${meal.name}:${top3}`)
-    .digest("hex");
-
-  return hash.slice(0, 16);
-}
-
-// Prompt pod food photography z wyroznieniem skladnikow kluczowych
-function buildImagePrompt(meal: {
-  name: string;
-  ingredients: Array<{ name: string }>;
-}): string {
-  const allIngredients = meal.ingredients.map((i) => i.name).join(", ");
   const heroIngredients = meal.ingredients
     .slice(0, 3)
     .map((i) => i.name)
     .join(" and ");
 
-  return `Photorealistic food photography of "${meal.name}".
-
-IMPORTANT - Must clearly show these main ingredients: ${heroIngredients}.
-Complete ingredients list: ${allIngredients}.
-
-Photography style:
-- Professional restaurant food photography
-- Appetizing 45-degree angle composition
-- Soft natural window lighting with gentle shadows
-- Shallow depth of field, tack-sharp focus on the dish
-- Beautiful plating on clean ceramic plate
-- Rustic wooden table background
-- Vibrant, mouth-watering colors
-- 8K resolution, highly detailed food textures
-- Steam rising if hot dish`;
+  return `Photorealistic food photo of "${meal.name}" featuring ${heroIngredients}. ` +
+    "Professional restaurant food photography, 45-degree angle, soft natural " +
+    "window light, shallow depth of field, clean ceramic plate, rustic wooden " +
+    "table, vibrant colors, highly detailed textures.";
 }

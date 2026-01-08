@@ -97,6 +97,10 @@ export async function generateMealSuggestions(
     3. Język: Polski. Opisy mają być smaczne i zachęcające.
     4. Składniki: Dostępne w polskich sklepach (Biedronka, Lidl).
     5. Jeśli użytkownik podał składniki, które ma w lodówce -> priorytetowo je wykorzystaj.
+    6. Składniki mają być surowcami, nie gotowymi daniami (np. "schab wieprzowy" zamiast "schabowy").
+    7. Każda propozycja ma być klasycznym daniem, bez łączenia dwóch różnych potraw w jedną.
+    8. Jeśli danie jest faszerowane, farsz ma być typowy (mięso mielone / ryż / warzywa), nie gotowy kotlet.
+    9. imagePromptEn ma być krótkim promptem po angielsku (max 300 znaków), z nazwą dania, 2-3 kluczowymi składnikami i stylem fotografii; bez polskich słów i bez pełnej listy składników.
   `;
 
   console.log("Generowanie AI dla kontekstu:", {
@@ -106,7 +110,7 @@ export async function generateMealSuggestions(
   });
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4.1",
     messages: [
       { role: "system", content: systemMessage },
       {
