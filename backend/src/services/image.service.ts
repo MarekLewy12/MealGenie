@@ -71,7 +71,9 @@ export function cleanupOldImages(maxAgeDays: number = 7): void {
     }
 
     if (deletedCount > 0) {
-      console.log(`[CLEANUP] Lacznie usunieto ${deletedCount} starych obrazkow`);
+      console.log(
+        `[CLEANUP] Lacznie usunieto ${deletedCount} starych obrazkow`,
+      );
     }
   } catch (error) {
     console.error("[CLEANUP] Blad podczas czyszczenia obrazkow:", error);
@@ -132,7 +134,7 @@ async function togetherGenerateBase64Jpeg(
     },
     body: JSON.stringify({
       model: IMAGE_MODEL,
-      prompt,
+      prompt: prompt,
       steps: IMAGE_STEPS,
       guidance_scale: IMAGE_GUIDANCE,
       n: 1,
@@ -150,9 +152,7 @@ async function togetherGenerateBase64Jpeg(
   }
 
   const json = (await res.json()) as TogetherImageResponse;
-  const first = json.data?.[0] as
-    | { b64_json?: string | null }
-    | undefined;
+  const first = json.data?.[0] as { b64_json?: string | null } | undefined;
   const b64 = first?.b64_json;
 
   return typeof b64 === "string" ? b64 : null;
@@ -169,8 +169,10 @@ function buildImagePrompt(meal: MealImageInput): string {
     .map((i) => i.name)
     .join(" and ");
 
-  return `Photorealistic food photo of "${meal.name}" featuring ${heroIngredients}. ` +
+  return (
+    `Photorealistic food photo of "${meal.name}" featuring ${heroIngredients}. ` +
     "Professional restaurant food photography, 45-degree angle, soft natural " +
     "window light, shallow depth of field, clean ceramic plate, rustic wooden " +
-    "table, vibrant colors, highly detailed textures.";
+    "table, vibrant colors, highly detailed textures."
+  );
 }

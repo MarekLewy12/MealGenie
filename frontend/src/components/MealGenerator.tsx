@@ -277,7 +277,7 @@ export function MealGenerator() {
               <div>
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <Refrigerator className="h-4 w-4 text-indigo-500" />
-                  Co masz w lodówce?
+                  Jakie składniki posiadasz?
                 </div>
                 <TagInput
                   label=""
