@@ -54,6 +54,12 @@ export const MealTeaserSchema = z.object({
     .int()
     .describe("Całkowity czas w minutach"),
   calories: z.number().int().describe("Szacunkowa liczba kalorii na porcję"),
+  imagePromptEn: z
+    .string()
+    .max(300, "Prompt EN jest zbyt długi (max 300 znaków)")
+    .describe(
+      "Krótki prompt po angielsku do generatora obrazów, z kluczowymi składnikami i stylem zdjęcia",
+    ),
 
   ingredients: z
     .array(

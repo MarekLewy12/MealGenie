@@ -15,6 +15,7 @@ export interface MealSuggestion {
   ingredients: Ingredient[];
   stepsSummary: string[];
   imageUrl?: string | null;
+  imagePromptEn?: string;
 }
 
 export interface MealResponse {

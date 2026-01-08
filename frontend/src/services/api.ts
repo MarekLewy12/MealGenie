@@ -46,7 +46,7 @@ export async function generateMealSuggestions(
   payload: GenerateMealSuggestionsPayload,
 ) {
   const { data } = await api.post<MealResponse>("/meals/suggest", payload, {
-    timeout: 30_000,
+    timeout: 120_000,
   });
 
   return data;
