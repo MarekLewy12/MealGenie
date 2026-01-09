@@ -16,6 +16,7 @@ interface RecipeGenerationContext {
     diet: Diet;
     allergies: string[];
     cookingSkill: CookingSkill;
+    spiceLevel: number;
   };
 }
 
@@ -23,6 +24,14 @@ const skillToPolish: Record<CookingSkill, string> = {
   BEGINNER: "poczatkujacy (proste techniki, podstawowe narzedzia)",
   INTERMEDIATE: "sredniozaawansowany (moze uzyc wiecej technik)",
   ADVANCED: "zaawansowany (zlozone techniki dozwolone)",
+};
+
+const spiceLevelToPolish: Record<number, string> = {
+  1: "lagodny",
+  2: "lekko pikantny",
+  3: "umiarkowany",
+  4: "ostry",
+  5: "bardzo ostry",
 };
 
 export async function generateFullRecipe(
@@ -40,7 +49,8 @@ TWOJE ZASADY:
 4. Dostosuj zlozonosc do poziomu: ${skillToPolish[userPreferences.cookingSkill]}
 5. BEZWZGLEDNIE unikaj tych alergenow: ${userPreferences.allergies.join(", ") || "BRAK"}
 6. Uwzglednij diete: ${userPreferences.diet}
-7. Przepis na ${servings} porcji
+7. Poziom pikantnosci: ${spiceLevelToPolish[userPreferences.spiceLevel] || "umiarkowany"}
+8. Przepis na ${servings} porcji
 
 STYL PISANIA:
 - Cieply, zachecajacy ton

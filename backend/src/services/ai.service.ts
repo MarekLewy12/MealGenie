@@ -27,6 +27,7 @@ interface GenerationContext {
   budget: Budget;
   targetWeightGrams?: number;
   hungerLevel?: number;
+  spiceLevel?: number;
 }
 
 const mealTypeToPolish: Record<string, string> = {
@@ -44,6 +45,14 @@ const hungerLevelDescriptions: Record<number, string> = {
   3: "standardowy posiłek, normalna porcja (ok. 450-600 kcal)",
   4: "sycący posiłek, większa porcja (ok. 600-800 kcal)",
   5: "bardzo sycący posiłek, duża porcja typu \"uczta\" (ok. 800-1100 kcal)",
+};
+
+const spiceLevelDescriptions: Record<number, string> = {
+  1: "łagodny smak, bez ostrości",
+  2: "delikatnie pikantny",
+  3: "umiarkowanie pikantny",
+  4: "wyraźnie pikantny",
+  5: "bardzo ostry, dla fanów ostrości",
 };
 
 export async function generateMealSuggestions(
@@ -94,6 +103,11 @@ export async function generateMealSuggestions(
       context.hungerLevel
         ? `- Poziom głodu: ${hungerLevelDescriptions[context.hungerLevel]}`
         : "- Poziom głodu: standardowy (ok. 500-600 kcal)"
+    }
+    ${
+      context.spiceLevel
+        ? `- Poziom pikantności: ${spiceLevelDescriptions[context.spiceLevel]}`
+        : "- Poziom pikantności: umiarkowany"
     }
     
     INTENT UŻYTKOWNIKA (Najważniejsze!):

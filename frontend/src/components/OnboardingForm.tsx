@@ -31,6 +31,7 @@ const preferencesSchema = z.object({
   cookingSkill: z.nativeEnum(CookingSkill),
   kitchenEquipment: z.array(z.nativeEnum(Equipment)).default([]),
   budget: z.nativeEnum(Budget),
+  spiceLevel: z.number().int().min(1).max(5).default(3),
 });
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
@@ -40,6 +41,13 @@ const inputStyles =
   "w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:focus:bg-slate-800 dark:focus:ring-indigo-500/20";
 const labelStyles =
   "block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2";
+const spiceLevelLabels: Record<number, string> = {
+  1: "Łagodny",
+  2: "Lekko pikantny",
+  3: "Umiarkowany",
+  4: "Pikantny",
+  5: "Bardzo ostry",
+};
 
 type OnboardingFormProps = {
   initialValues?: Partial<PreferencesFormData>;
@@ -58,10 +66,11 @@ export function OnboardingForm({
     control,
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
-    defaultValues: initialValues || {
+    defaultValues: {
       diet: Diet.NONE,
       allergies: [],
       favCuisines: [],
@@ -69,8 +78,12 @@ export function OnboardingForm({
       cookingSkill: CookingSkill.BEGINNER,
       kitchenEquipment: [],
       budget: Budget.MEDIUM,
+      spiceLevel: 3,
+      ...initialValues,
     },
   });
+
+  const spiceLevel = watch("spiceLevel") ?? 3;
 
   useEffect(
     () => () => {
@@ -157,6 +170,27 @@ export function OnboardingForm({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className={labelStyles}>
+              Poziom pikantności
+              <span className="ml-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                {spiceLevelLabels[spiceLevel] ?? "Umiarkowany"}
+              </span>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="5"
+              step="1"
+              {...register("spiceLevel", { valueAsNumber: true })}
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-rose-500 dark:bg-slate-700"
+            />
+            <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+              <span>Łagodnie</span>
+              <span>Ostro</span>
+            </div>
           </div>
         </div>
       </div>

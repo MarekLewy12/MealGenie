@@ -66,6 +66,7 @@ export async function generateRecipeController(
         diet: preferences.diet,
         allergies: preferences.allergies,
         cookingSkill: preferences.cookingSkill,
+        spiceLevel: preferences.spiceLevel,
       },
     });
 

@@ -35,6 +35,7 @@ export type SavePreferencesPayload = {
   cookingSkill: string;
   kitchenEquipment: string[];
   budget: string;
+  spiceLevel: number;
 };
 
 export async function savePreferences(payload: SavePreferencesPayload) {
