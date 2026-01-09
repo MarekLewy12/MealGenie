@@ -24,39 +24,20 @@ const loadingStages = [
   },
 ];
 
-const culinaryFacts = [
-  "🍯 Miód jest jedynym jedzeniem, które nigdy się nie psuje",
-  "🧀 Ser został odkryty przypadkowo około 4000 lat temu",
-  "🥑 Awokado to botanicznie... jagoda!",
-  "🌶️ Wasabi w większości sushi barów to barwiony chrzan",
-  "🍫 Czekolada była używana jako waluta u Azteków",
-  "🧈 Masło klarowane ma wyższą temperaturę dymienia niż zwykłe",
-  "🍝 Marco Polo NIE przywiózł makaronu z Chin - to mit!",
-  "🥕 Marchew pierwotnie była fioletowa, nie pomarańczowa",
-];
-
 type Props = {
   teaser?: MealSuggestion | null;
 };
 
 export function RecipeLoadingWithPreview({ teaser }: Props) {
   const [stageIndex, setStageIndex] = useState(0);
-  const [factIndex, setFactIndex] = useState(() =>
-    Math.floor(Math.random() * culinaryFacts.length),
-  );
 
   useEffect(() => {
     const stageInterval = setInterval(() => {
       setStageIndex((prev) => (prev + 1) % loadingStages.length);
     }, 3000);
 
-    const factInterval = setInterval(() => {
-      setFactIndex((prev) => (prev + 1) % culinaryFacts.length);
-    }, 5000);
-
     return () => {
       clearInterval(stageInterval);
-      clearInterval(factInterval);
     };
   }, []);
 
@@ -162,21 +143,6 @@ export function RecipeLoadingWithPreview({ teaser }: Props) {
           </AnimatePresence>
         </div>
       </motion.div>
-
-      <div className="h-12 w-full max-w-lg">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={factIndex}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4 }}
-            className="text-center text-sm text-slate-500 dark:text-slate-400"
-          >
-            {culinaryFacts[factIndex]}
-          </motion.p>
-        </AnimatePresence>
-      </div>
 
       <div className="w-full max-w-md">
         <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
