@@ -3,7 +3,7 @@ import { MealGenerator } from "../components/MealGenerator";
 
 export function GeneratorPage() {
   return (
-    <section className="mx-auto max-w-screen-2xl px-6 py-16">
+    <section className="mx-auto max-w-screen-2xl px-6 py-10">
       <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-200">

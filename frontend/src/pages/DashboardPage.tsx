@@ -1,8 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import {
     ArrowRight,
-    ChefHat,
+    Calendar,
     Clock3,
     Heart,
+    Loader2,
     Plus,
     Settings,
     ShoppingCart,
@@ -11,11 +13,29 @@ import {
     Wand2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getMealHistory } from "../services/api";
 import { useAuthStore } from "../store/authStore";
+import { MealHistoryCard } from "../components/MealHistoryCard";
+import type { MealHistoryItem } from "../types/meal";
 
 export function DashboardPage() {
     const user = useAuthStore((state) => state.user);
     const greetingName = user?.name || "Kucharzu";
+
+    const { data: historyData, isLoading: isHistoryLoading } = useQuery({
+        queryKey: ["mealHistory"],
+        queryFn: () => getMealHistory({ limit: 12 }),
+    });
+
+    const { data: favoritesData, isLoading: isFavoritesLoading } = useQuery({
+        queryKey: ["mealHistory", "favorites"],
+        queryFn: () => getMealHistory({ limit: 10, favoritesOnly: true }),
+    });
+
+    const recentMeals = (historyData?.items ?? [])
+        .filter((meal) => !meal.isFavorite)
+        .slice(0, 6);
+    const favoriteMeals = favoritesData?.items ?? [];
 
     return (
         // Layout główny
@@ -77,48 +97,90 @@ export function DashboardPage() {
                                 <span className="text-sm font-semibold">Preferencje</span>
                                 <span className="text-xs text-slate-500">Edytuj globalne ustawienia</span>
                             </Link>
-                            <div className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition dark:border-rose-400/30 dark:bg-white/5">
+                            <Link
+                                to="/favorites"
+                                className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition hover:border-rose-300/90 hover:bg-rose-50/40 dark:border-rose-400/30 dark:bg-white/5 dark:hover:bg-white/10"
+                            >
                                 <Heart className="mb-3 h-6 w-6 text-slate-400 group-hover:text-red-500" />
                                 <span className="text-sm font-semibold">Ulubione</span>
-                                <span className="text-xs text-slate-500">0 przepisów</span>
-                            </div>
+                                <span className="text-xs text-slate-500">
+                                    {isFavoritesLoading ? (
+                                        <Loader2 className="inline h-3 w-3 animate-spin" />
+                                    ) : (
+                                        `${favoriteMeals.length} przepisów`
+                                    )}
+                                </span>
+                            </Link>
                         </div>
 
-                        {/* Feedback */}
-                        <div className="rounded-2xl border border-indigo-200/90 bg-indigo-50 p-6 dark:border-indigo-400/40 dark:bg-indigo-900/10">
-                            <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-2">Beta Testy</h4>
-                            <p className="text-xs text-indigo-700/80 dark:text-indigo-300/70 mb-3">
-                                Twoja opinia kształtuje tę aplikację. Masz pomysł?
-                            </p>
-                            <a href="mailto:hello@mealgenie.ai" className="text-xs font-bold text-indigo-600 hover:underline dark:text-indigo-400">
-                                Napisz, co chcesz zobaczyć w aplikacji
-                            </a>
-                        </div>
                     </div>
 
                     {/* Kolumna środkowa */}
                     <div className="lg:col-span-8 xl:col-span-6 flex flex-col gap-8">
 
-                        {/* Ostatnie aktywności */}
-                        <div>
+                        {/* Ostatnie przepisy */}
+                        <section>
                             <div className="mb-4 flex items-center justify-between">
                                 <h3 className="text-lg font-bold flex items-center gap-2">
                                     <Clock3 className="h-5 w-5 text-slate-400" />
-                                    Ostatnie aktywności
+                                    Ostatnie przepisy
                                 </h3>
+                                {recentMeals.length > 0 && (
+                                    <span className="text-sm text-slate-500">
+                                        {historyData?.total || 0} łącznie
+                                    </span>
+                                )}
                             </div>
 
-                            {/* Pusty stan historii */}
-                            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-indigo-300/70 bg-indigo-50/40 py-16 text-center dark:border-indigo-400/30 dark:bg-white/5">
-                                <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-white/5">
-                                    <Utensils className="h-8 w-8 text-slate-400" />
+                            {isHistoryLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                                 </div>
-                                <h4 className="text-lg font-semibold">Pusto w kuchni?</h4>
-                                <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                    Nie wygenerowałeś jeszcze żadnego posiłku. Użyj generatora, aby zacząć.
-                                </p>
-                            </div>
-                        </div>
+                            ) : recentMeals.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-indigo-300/70 bg-indigo-50/40 py-16 text-center dark:border-indigo-400/30 dark:bg-white/5">
+                                    <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-white/5">
+                                        <Utensils className="h-8 w-8 text-slate-400" />
+                                    </div>
+                                    <h4 className="text-lg font-semibold">Pusto w kuchni?</h4>
+                                    <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        Nie wygenerowano jeszcze żadnego posiłku. Generator pomoże wystartować.
+                                    </p>
+                                    <Link
+                                        to="/generator"
+                                        className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                                    >
+                                        Wygeneruj pierwszy przepis
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <HeroMealCard meal={recentMeals[0]} />
+                                    {recentMeals.length > 1 && (
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            {recentMeals.slice(1).map((meal) => (
+                                                <MealHistoryCard key={meal.id} meal={meal} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </section>
+
+                        {favoriteMeals.length > 0 && (
+                            <section>
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <Heart className="h-5 w-5 text-red-400" />
+                                        Ulubione przepisy
+                                    </h3>
+                                </div>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    {favoriteMeals.slice(0, 4).map((meal) => (
+                                        <MealHistoryCard key={meal.id} meal={meal} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         {/* Szybki Start - NOWA SEKCJA */}
                         <div>
@@ -126,17 +188,17 @@ export function DashboardPage() {
                                 <Wand2 className="h-5 w-5 text-indigo-500" />
                                 Szybki Start
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                                 <Link
                                     to="/generator?mealType=SNACK&prepTime=15"
-                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
-                                    <div className="text-4xl">🚀</div>
+                                    <div className="text-3xl">🚀</div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
                                             Szybki posiłek
                                         </h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                                             Gotowe w 15 minut
                                         </p>
                                     </div>
@@ -144,14 +206,14 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=BREAKFAST&prepTime=30"
-                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
-                                    <div className="text-4xl">🌅</div>
+                                    <div className="text-3xl">🌅</div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
                                             Śniadanie
                                         </h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                                             Dobry start dnia
                                         </p>
                                     </div>
@@ -159,14 +221,14 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=LUNCH&prepTime=45"
-                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
-                                    <div className="text-4xl">🍽️</div>
+                                    <div className="text-3xl">🍽️</div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
                                             Pełny obiad
                                         </h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                                             Czas na ucztę
                                         </p>
                                     </div>
@@ -174,15 +236,30 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=DINNER&prepTime=30"
-                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-indigo-200/60 bg-white/80 p-6 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
-                                    <div className="text-4xl">🌙</div>
+                                    <div className="text-3xl">🌙</div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
                                             Lekka kolacja
                                         </h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            Spokojne zakończenie dnia
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                            Na koniec dnia
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    to="/generator?mealType=DESSERT&prepTime=30"
+                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                >
+                                    <div className="text-3xl">🍰</div>
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                            Deser
+                                        </h4>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                            Słodka chwila
                                         </p>
                                     </div>
                                 </Link>
@@ -223,5 +300,82 @@ export function DashboardPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+function HeroMealCard({ meal }: { meal: MealHistoryItem }) {
+    const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+    const imageUrl = meal.imageUrl?.startsWith("/")
+        ? `${apiBaseUrl}${meal.imageUrl}`
+        : meal.imageUrl;
+
+    return (
+        <Link
+            to={`/recipe/${meal.id}`}
+            className="group relative block overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/50"
+        >
+            <div className="flex flex-col md:flex-row">
+                <div className="relative h-56 w-full md:h-auto md:w-1/2">
+                    {imageUrl ? (
+                        <img
+                            src={imageUrl}
+                            alt={meal.name}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500">
+                            <Utensils className="h-16 w-16 text-white/50" />
+                        </div>
+                    )}
+
+                    <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-indigo-700 shadow-lg backdrop-blur dark:bg-slate-900/95 dark:text-indigo-300">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Ostatnio gotowane
+                    </div>
+
+                    {meal.isFavorite && (
+                        <div className="absolute right-4 top-4">
+                            <Heart className="h-6 w-6 fill-red-500 text-red-500 drop-shadow-lg" />
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex flex-1 flex-col justify-between p-6 md:p-8">
+                    <div>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                            {meal.name}
+                        </h3>
+                        {meal.description && (
+                            <p className="mt-3 line-clamp-2 text-slate-600 dark:text-slate-300">
+                                {meal.description}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                            {meal.estimatedTime && (
+                                <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+                                    <Clock3 className="h-4 w-4" />
+                                    {meal.estimatedTime} min
+                                </span>
+                            )}
+                            <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+                                <Calendar className="h-4 w-4" />
+                                {new Date(meal.createdAt).toLocaleDateString("pl-PL", {
+                                    day: "numeric",
+                                    month: "long",
+                                })}
+                            </span>
+                        </div>
+
+                        <span className="flex items-center gap-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                            Zobacz przepis
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </Link>
     );
 }

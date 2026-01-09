@@ -5,11 +5,15 @@ import { GeneratorPage } from "./pages/GeneratorPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { RecipePage } from "./pages/RecipePage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { FavoritesPage } from "./pages/FavoritesPage";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { Header } from "./components/Header";
 import { PageTransition } from "./components/PageTransition";
 import { useAuthStore } from "./store/authStore";
+import { AuthenticatedLayout } from "./components/AuthenticatedLayout";
+import { NotificationContainer } from "./components/NotificationContainer";
 
 function App() {
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
@@ -17,6 +21,7 @@ function App() {
 
   return (
     <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#05030f] dark:text-slate-50">
+      <NotificationContainer />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[-8%] top-[-10%] h-72 w-72 rounded-full bg-indigo-200/40 blur-[120px] dark:bg-indigo-500/15" />
         <div className="absolute right-[-6%] top-10 h-80 w-80 rounded-full bg-fuchsia-200/30 blur-[140px] dark:bg-fuchsia-500/12" />
@@ -54,26 +59,6 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                   {/* Chronione trasy */}
                   <Route
-                    path="/onboarding"
-                    element={
-                      <PageTransition>
-                        {hasCompletedOnboarding ? (
-                          <Navigate to="/settings" replace />
-                        ) : (
-                          <OnboardingPage />
-                        )}
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      <PageTransition>
-                        <SettingsPage />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
                     path="/dashboard"
                     element={
                       <PageTransition>
@@ -81,11 +66,58 @@ function App() {
                       </PageTransition>
                     }
                   />
+                  <Route element={<AuthenticatedLayout />}>
+                    <Route
+                      path="/onboarding"
+                      element={
+                        <PageTransition>
+                          {hasCompletedOnboarding ? (
+                            <Navigate to="/settings" replace />
+                          ) : (
+                            <OnboardingPage />
+                          )}
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <PageTransition>
+                          <SettingsPage />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/favorites"
+                      element={
+                        <PageTransition>
+                          <FavoritesPage />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/generator"
+                      element={
+                        <PageTransition>
+                          <GeneratorPage />
+                        </PageTransition>
+                      }
+                    />
+                  </Route>
+                  {/* /recipe/:id przed /recipe. */}
                   <Route
-                    path="/generator"
+                    path="/recipe/:id"
                     element={
                       <PageTransition>
-                        <GeneratorPage />
+                        <RecipePage />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/recipe"
+                    element={
+                      <PageTransition>
+                        <RecipePage />
                       </PageTransition>
                     }
                   />

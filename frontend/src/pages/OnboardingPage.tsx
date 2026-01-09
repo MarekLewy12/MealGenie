@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { OnboardingForm } from "../components/OnboardingForm";
 import { useAuthStore } from "../store/authStore";
 import { Sparkles } from "lucide-react";

@@ -39,6 +39,8 @@ export const SuggestMealsRequestSchema = z.object({
   mealType: MealTypeSchema.default("ANY"),
   prepTime: z.number().min(5).max(180).optional(),
   servingSize: z.number().min(1).max(10).optional(),
+  targetWeightGrams: z.number().min(50).max(5000).optional(),
+  hungerLevel: z.number().int().min(1).max(5).optional(),
 });
 
 export type SuggestMealsRequest = z.infer<typeof SuggestMealsRequestSchema>;
@@ -91,3 +93,35 @@ export type MealType = z.infer<typeof MealTypeSchema>;
 export type MealWithImage = MealTeaser & {
   imageUrl: string | null;
 };
+
+export const MealIdParamSchema = z.object({
+  id: z.string().uuid("Nieprawidłowy format ID przepisu"),
+});
+
+export const GetHistoryQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  offset: z.coerce.number().int().min(0).default(0),
+  favoritesOnly: z.coerce.boolean().default(false),
+});
+
+export const MealHistoryItemSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  estimatedTime: z.number().nullable(),
+  category: MealTypeSchema.nullable(),
+  isFavorite: z.boolean(),
+  createdAt: z.string().datetime(),
+});
+
+export const MealHistoryDetailSchema = MealHistoryItemSchema.extend({
+  fullRecipeJson: z.any().nullable(),
+  ingredients: z.array(z.string()),
+  rating: z.number().nullable(),
+});
+
+export type MealIdParam = z.infer<typeof MealIdParamSchema>;
+export type GetHistoryQuery = z.infer<typeof GetHistoryQuerySchema>;
+export type MealHistoryItem = z.infer<typeof MealHistoryItemSchema>;
+export type MealHistoryDetail = z.infer<typeof MealHistoryDetailSchema>;

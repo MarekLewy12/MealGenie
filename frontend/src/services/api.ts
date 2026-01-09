@@ -2,7 +2,16 @@ import axios from "axios";
 
 import type { LoginFormData, RegisterFormData } from "../schemas/auth";
 import { useAuthStore } from "../store/authStore";
-import type { MealResponse, MealType } from "../types/meal";
+import type {
+  FullRecipe,
+  MealResponse,
+  MealSuggestion,
+  MealType,
+  MealHistoryItem,
+  MealHistoryDetail,
+  MealHistoryResponse,
+  GenerateRecipeResponse,
+} from "../types/meal";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -26,6 +35,7 @@ export type SavePreferencesPayload = {
   cookingSkill: string;
   kitchenEquipment: string[];
   budget: string;
+  spiceLevel: number;
 };
 
 export async function savePreferences(payload: SavePreferencesPayload) {
@@ -36,10 +46,12 @@ export async function savePreferences(payload: SavePreferencesPayload) {
 export type GenerateMealSuggestionsPayload = {
   mealType: MealType;
   prepTime: number;
-  servingSize: number;
+  servingSize?: number;
   userPrompt?: string;
   availableIngredients?: string[];
   useEquipment?: string[];
+  targetWeightGrams?: number;
+  hungerLevel?: number;
 };
 
 export async function generateMealSuggestions(
@@ -50,6 +62,60 @@ export async function generateMealSuggestions(
   });
 
   return data;
+}
+
+export async function generateFullRecipe(
+  mealTeaser: MealSuggestion,
+  servings: number = 2,
+  unusedImageUrls?: string[],
+): Promise<GenerateRecipeResponse> {
+  const { data } = await api.post<GenerateRecipeResponse>(
+    "/meals/recipe",
+    { mealTeaser, servings, unusedImageUrls },
+    { timeout: 60_000 },
+  );
+
+  return data;
+}
+
+export interface GetHistoryOptions {
+  limit?: number;
+  offset?: number;
+  favoritesOnly?: boolean;
+}
+
+export async function getMealHistory(
+  options: GetHistoryOptions = {},
+): Promise<MealHistoryResponse> {
+  const params = new URLSearchParams();
+
+  if (options.limit !== undefined) params.set("limit", String(options.limit));
+  if (options.offset !== undefined) params.set("offset", String(options.offset));
+  if (options.favoritesOnly) params.set("favoritesOnly", "true");
+
+  const queryString = params.toString();
+  const url = queryString ? `/meals/history?${queryString}` : "/meals/history";
+
+  const { data } = await api.get<MealHistoryResponse>(url);
+  return data;
+}
+
+export async function getMealById(id: string): Promise<MealHistoryDetail> {
+  const { data } = await api.get<MealHistoryDetail>(`/meals/history/${id}`);
+  return data;
+}
+
+export async function toggleMealFavorite(
+  id: string,
+): Promise<{ isFavorite: boolean }> {
+  const { data } = await api.patch<{ isFavorite: boolean }>(
+    `/meals/${id}/favorite`,
+  );
+  return data;
+}
+
+export async function deleteMealHistory(id: string): Promise<void> {
+  await api.delete(`/meals/history/${id}`);
 }
 
 export async function registerUser(data: RegisterFormData) {

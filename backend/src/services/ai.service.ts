@@ -25,6 +25,9 @@ interface GenerationContext {
   favoriteCuisines: string[];
   cookingSkill: CookingSkill;
   budget: Budget;
+  targetWeightGrams?: number;
+  hungerLevel?: number;
+  spiceLevel?: number;
 }
 
 const mealTypeToPolish: Record<string, string> = {
@@ -34,6 +37,22 @@ const mealTypeToPolish: Record<string, string> = {
   SNACK: "przekąska",
   DESSERT: "deser",
   ANY: "dowolny posiłek",
+};
+
+const hungerLevelDescriptions: Record<number, string> = {
+  1: "bardzo lekki posiłek, mała porcja, niskokaloryczny (ok. 250-350 kcal)",
+  2: "lekki posiłek, umiarkowana porcja (ok. 350-450 kcal)",
+  3: "standardowy posiłek, normalna porcja (ok. 450-600 kcal)",
+  4: "sycący posiłek, większa porcja (ok. 600-800 kcal)",
+  5: "bardzo sycący posiłek, duża porcja typu \"uczta\" (ok. 800-1100 kcal)",
+};
+
+const spiceLevelDescriptions: Record<number, string> = {
+  1: "łagodny smak, bez ostrości",
+  2: "delikatnie pikantny",
+  3: "umiarkowanie pikantny",
+  4: "wyraźnie pikantny",
+  5: "bardzo ostry, dla fanów ostrości",
 };
 
 export async function generateMealSuggestions(
@@ -56,7 +75,17 @@ export async function generateMealSuggestions(
       `
     : "Nie używaj instrukcji dla Thermomixa.";
 
-  // Budowanie promptu z kontekstu
+  const portionInfo = context.targetWeightGrams
+    ? `
+      ⚖️ TRYB GRAMATUROWY (WAŻNE!):
+      - Przepis MUSI dać dokładnie ${context.targetWeightGrams}g gotowego produktu
+      - PRECYZYJNIE przelicz proporcje WSZYSTKICH składników
+      - Suma składników powinna dać finalny produkt o wadze ${context.targetWeightGrams}g
+      - To jest kluczowe dla profesjonalnego cukiernictwa/gastronomii
+      - W opisie składników podawaj DOKŁADNE gramy, nie "szczypta" czy "do smaku"
+      `
+    : `Przepis na ${context.servingSize} porcji.`;
+
   const promptContext = `
     DANE UŻYTKOWNIKA:
     - Dieta: ${context.diet}
@@ -69,7 +98,17 @@ export async function generateMealSuggestions(
     PARAMETRY TEGO POSIŁKU:
     - Typ: ${mealTypeToPolish[context.mealType] || "Dowolny"}
     - Czas przygotowania: max ${context.prepTime} minut
-    - Liczba porcji: ${context.servingSize}
+    ${portionInfo}
+    ${
+      context.hungerLevel
+        ? `- Poziom głodu: ${hungerLevelDescriptions[context.hungerLevel]}`
+        : "- Poziom głodu: standardowy (ok. 500-600 kcal)"
+    }
+    ${
+      context.spiceLevel
+        ? `- Poziom pikantności: ${spiceLevelDescriptions[context.spiceLevel]}`
+        : "- Poziom pikantności: umiarkowany"
+    }
     
     INTENT UŻYTKOWNIKA (Najważniejsze!):
     ${

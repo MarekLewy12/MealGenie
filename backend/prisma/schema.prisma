@@ -90,6 +90,9 @@ model MealHistory {
   ingredients   String[]
   estimatedTime Int?
   category      MealType?
+  fullRecipeJson Json?
+  imageUrl       String?
+  isFavorite     Boolean   @default(false)
   userPrompt    String?
   wasSelected   Boolean   @default(false)
   selectedAt    DateTime?
@@ -97,6 +100,7 @@ model MealHistory {
   createdAt     DateTime  @default(now())
 
   @@index([userId, createdAt])
+  @@index([userId, isFavorite])
 }
 
 model ShoppingItem {

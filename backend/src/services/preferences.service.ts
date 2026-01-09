@@ -17,6 +17,7 @@ export type SavePreferencesInput = {
   cookingSkill: CookingSkill;
   kitchenEquipment: Equipment[];
   budget: Budget;
+  spiceLevel: number;
 };
 
 export type PreferencesResponse = Omit<SavePreferencesInput, "userId">;
@@ -58,5 +59,6 @@ export async function getPreferences(
     cookingSkill: preferences.cookingSkill,
     kitchenEquipment: preferences.equipment,
     budget: preferences.budget,
+    spiceLevel: preferences.spiceLevel,
   };
 }

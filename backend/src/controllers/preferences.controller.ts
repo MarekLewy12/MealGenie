@@ -21,6 +21,7 @@ export const savePreferencesSchema = z.object({
   cookingSkill: z.nativeEnum(CookingSkill),
   kitchenEquipment: z.array(z.nativeEnum(Equipment)),
   budget: z.nativeEnum(Budget),
+  spiceLevel: z.number().int().min(1).max(5).default(3),
 });
 
 export async function savePreferencesController(

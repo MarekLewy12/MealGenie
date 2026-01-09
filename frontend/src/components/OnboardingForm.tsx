@@ -3,11 +3,12 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { savePreferences } from "../services/api";
 import { MultiSelectPills } from "./Form/MultiSelectPills";
 import { TagInput } from "./TagInput.tsx";
+import { notify } from "../store/notificationStore";
 
 import {
   Diet,
@@ -30,6 +31,7 @@ const preferencesSchema = z.object({
   cookingSkill: z.nativeEnum(CookingSkill),
   kitchenEquipment: z.array(z.nativeEnum(Equipment)).default([]),
   budget: z.nativeEnum(Budget),
+  spiceLevel: z.number().int().min(1).max(5).default(3),
 });
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
@@ -39,6 +41,13 @@ const inputStyles =
   "w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:focus:bg-slate-800 dark:focus:ring-indigo-500/20";
 const labelStyles =
   "block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2";
+const spiceLevelLabels: Record<number, string> = {
+  1: "Łagodny",
+  2: "Lekko pikantny",
+  3: "Umiarkowany",
+  4: "Pikantny",
+  5: "Bardzo ostry",
+};
 
 type OnboardingFormProps = {
   initialValues?: Partial<PreferencesFormData>;
@@ -50,7 +59,6 @@ export function OnboardingForm({
   isEditing = false,
 }: OnboardingFormProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const navigationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
@@ -58,10 +66,11 @@ export function OnboardingForm({
     control,
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
-    defaultValues: initialValues || {
+    defaultValues: {
       diet: Diet.NONE,
       allergies: [],
       favCuisines: [],
@@ -69,14 +78,12 @@ export function OnboardingForm({
       cookingSkill: CookingSkill.BEGINNER,
       kitchenEquipment: [],
       budget: Budget.MEDIUM,
+      spiceLevel: 3,
+      ...initialValues,
     },
   });
 
-  useEffect(() => {
-    if (!toastMessage) return;
-    const timer = setTimeout(() => setToastMessage(null), 2600);
-    return () => clearTimeout(timer);
-  }, [toastMessage]);
+  const spiceLevel = watch("spiceLevel") ?? 3;
 
   useEffect(
     () => () => {
@@ -92,16 +99,21 @@ export function OnboardingForm({
     try {
       await savePreferences(values);
       if (isEditing) {
-        setToastMessage("Zapisano zmiany!");
+        notify.success("Zapisano zmiany!", "Sukces");
         navigationTimerRef.current = setTimeout(() => {
           navigate("/dashboard");
         }, 800);
       } else {
+        notify.success("Preferencje zapisane!", "Witaj");
         navigate("/dashboard");
       }
     } catch (error: unknown) {
       console.error(error);
       setErrorMsg("Coś poszło nie tak przy zapisywaniu. Spróbuj ponownie.");
+      notify.error(
+        "Nie udało się zapisać preferencji. Spróbuj ponownie.",
+        "Błąd zapisu",
+      );
     }
   };
 
@@ -158,6 +170,27 @@ export function OnboardingForm({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className={labelStyles}>
+              Poziom pikantności
+              <span className="ml-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                {spiceLevelLabels[spiceLevel] ?? "Umiarkowany"}
+              </span>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="5"
+              step="1"
+              {...register("spiceLevel", { valueAsNumber: true })}
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-rose-500 dark:bg-slate-700"
+            />
+            <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+              <span>Łagodnie</span>
+              <span>Ostro</span>
+            </div>
           </div>
         </div>
       </div>
@@ -264,23 +297,6 @@ export function OnboardingForm({
         </button>
       </div>
 
-      {toastMessage && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex items-start gap-3 rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-2xl shadow-emerald-100/60 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-white dark:shadow-black/40"
-        >
-          <div className="mt-0.5 rounded-full bg-emerald-100 p-1 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300">
-            <CheckCircle2 className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
-              Sukces
-            </span>
-            <span className="font-medium">{toastMessage}</span>
-          </div>
-        </div>
-      )}
     </form>
   );
 }
