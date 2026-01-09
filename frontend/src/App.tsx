@@ -11,6 +11,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { Header } from "./components/Header";
 import { PageTransition } from "./components/PageTransition";
 import { useAuthStore } from "./store/authStore";
+import { AuthenticatedLayout } from "./components/AuthenticatedLayout";
 
 function App() {
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
@@ -55,26 +56,6 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                   {/* Chronione trasy */}
                   <Route
-                    path="/onboarding"
-                    element={
-                      <PageTransition>
-                        {hasCompletedOnboarding ? (
-                          <Navigate to="/settings" replace />
-                        ) : (
-                          <OnboardingPage />
-                        )}
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      <PageTransition>
-                        <SettingsPage />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
                     path="/dashboard"
                     element={
                       <PageTransition>
@@ -82,31 +63,53 @@ function App() {
                       </PageTransition>
                     }
                   />
-                  <Route
-                    path="/generator"
-                    element={
-                      <PageTransition>
-                        <GeneratorPage />
-                      </PageTransition>
-                    }
-                  />
-                  {/* /recipe/:id przed /recipe. */}
-                  <Route
-                    path="/recipe/:id"
-                    element={
-                      <PageTransition>
-                        <RecipePage />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/recipe"
-                    element={
-                      <PageTransition>
-                        <RecipePage />
-                      </PageTransition>
-                    }
-                  />
+                  <Route element={<AuthenticatedLayout />}>
+                    <Route
+                      path="/onboarding"
+                      element={
+                        <PageTransition>
+                          {hasCompletedOnboarding ? (
+                            <Navigate to="/settings" replace />
+                          ) : (
+                            <OnboardingPage />
+                          )}
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <PageTransition>
+                          <SettingsPage />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/generator"
+                      element={
+                        <PageTransition>
+                          <GeneratorPage />
+                        </PageTransition>
+                      }
+                    />
+                    {/* /recipe/:id przed /recipe. */}
+                    <Route
+                      path="/recipe/:id"
+                      element={
+                        <PageTransition>
+                          <RecipePage />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/recipe"
+                      element={
+                        <PageTransition>
+                          <RecipePage />
+                        </PageTransition>
+                      }
+                    />
+                  </Route>
                 </Route>
 
                 <Route

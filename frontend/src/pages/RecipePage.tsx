@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, type ElementType } from "react";
-import { useLocation, useParams, Link, Navigate } from "react-router-dom";
+import { useLocation, useParams, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  ArrowLeft,
   Clock,
   ChefHat,
   Flame,
@@ -137,13 +136,7 @@ export function RecipePage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
       <header className="sticky top-0 z-50 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Dashboard
-          </Link>
+          <div />
           {mealId && (
             <button
               onClick={() => favoriteMutation.mutate()}
