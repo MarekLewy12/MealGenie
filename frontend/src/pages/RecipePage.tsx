@@ -49,7 +49,14 @@ export function RecipePage() {
   const [mealId, setMealId] = useState<string | null>(routeId || null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const hasStartedRef = useRef(false);
+  const [localRecipe, setLocalRecipe] = useState<FullRecipe | null>(null);
+  const hasNotifiedRef = useRef(false);
+
+  useEffect(() => {
+    setLocalRecipe(null);
+    setErrorMessage("");
+    hasNotifiedRef.current = false;
+  }, [routeId, teaser]);
 
   useEffect(() => {
     if (routeId) {
@@ -100,33 +107,56 @@ export function RecipePage() {
   }, [isHistoryView, historyMeal, isHistoryError, historyError]);
 
   const {
-    mutate: generateRecipe,
     data: generatedData,
-  } = useMutation({
-    mutationFn: () => generateFullRecipe(teaser!, 2, unusedImageUrls),
-    onSuccess: (data) => {
-      // Id potrzebne do akcji ulubionych.
-      setMealId(data.mealHistoryId);
-      setView("recipe");
-      notify.success("Przepis jest gotowy!", "Generator");
+    isLoading: isGenerating,
+    isError: isGenerateError,
+    error: generateError,
+    refetch: refetchGenerate,
+  } = useQuery({
+    queryKey: ["generateRecipe", teaser?.name, teaser?.cookingTimeMinutes],
+    queryFn: async () => {
+      const result = await generateFullRecipe(teaser!, 2, unusedImageUrls);
+      return result;
     },
-    onError: (err) => {
-      setView("error");
-      setErrorMessage(
-        err instanceof Error
-          ? err.message
-          : "Nie udało się wygenerować przepisu.",
-      );
-      notify.error("Nie udało się wygenerować przepisu.", "Generator");
-    },
+    enabled: !!teaser && !routeId,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 5,
+    retry: false,
   });
 
   useEffect(() => {
-    if (!teaser || routeId || hasStartedRef.current) return;
-    hasStartedRef.current = true;
-    setView("loading");
-    generateRecipe();
-  }, [teaser, routeId, generateRecipe]);
+    if (isHistoryView) return;
+
+    if (isGenerating) {
+      setView("loading");
+      hasNotifiedRef.current = false;
+      return;
+    }
+
+    if (isGenerateError) {
+      setView("error");
+      setErrorMessage(
+        generateError instanceof Error
+          ? generateError.message
+          : "Nie udało się wygenerować przepisu.",
+      );
+      if (!hasNotifiedRef.current) {
+        notify.error("Nie udało się wygenerować przepisu.", "Generator");
+        hasNotifiedRef.current = true;
+      }
+      return;
+    }
+
+    if (generatedData) {
+      setLocalRecipe(generatedData.recipe);
+      setMealId(generatedData.mealHistoryId);
+      setView("recipe");
+      if (!hasNotifiedRef.current) {
+        notify.success("Przepis jest gotowy!", "Generator");
+        hasNotifiedRef.current = true;
+      }
+    }
+  }, [isHistoryView, isGenerating, isGenerateError, generateError, generatedData]);
 
   const favoriteMutation = useMutation({
     mutationFn: () => toggleMealFavorite(mealId!),
@@ -154,7 +184,7 @@ export function RecipePage() {
 
   const recipe: FullRecipe | null = isHistoryView
     ? historyMeal?.fullRecipeJson || null
-    : generatedData?.recipe || null;
+    : localRecipe || generatedData?.recipe || null;
 
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
   const headerData =
@@ -307,7 +337,7 @@ export function RecipePage() {
                   }
                   if (teaser) {
                     setView("loading");
-                    generateRecipe();
+                    refetchGenerate();
                   }
                 }}
               />

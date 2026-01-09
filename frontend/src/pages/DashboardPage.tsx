@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
     ArrowRight,
+    BookOpen,
     Calendar,
     Clock3,
     Heart,
@@ -37,8 +38,9 @@ export function DashboardPage() {
 
     const recentMeals = (historyData?.items ?? [])
         .filter((meal) => !meal.isFavorite)
-        .slice(0, 6);
+        .slice(0, 3);
     const favoriteMeals = favoritesData?.items ?? [];
+    const totalRecipes = historyData?.total ?? 0;
 
     return (
         // Layout główny
@@ -133,16 +135,16 @@ export function DashboardPage() {
                                 <span className="text-xs text-slate-500">Edytuj globalne ustawienia</span>
                             </Link>
                             <Link
-                                to="/favorites"
-                                className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition hover:border-rose-300/90 hover:bg-rose-50/40 dark:border-rose-400/30 dark:bg-white/5 dark:hover:bg-white/10"
+                                to="/recipes"
+                                className="group flex flex-col items-center justify-center rounded-3xl border border-indigo-200/80 bg-white p-6 text-center shadow-sm transition hover:border-indigo-300/90 hover:bg-indigo-50/40 dark:border-indigo-400/30 dark:bg-white/5 dark:hover:bg-white/10"
                             >
-                                <Heart className="mb-3 h-6 w-6 text-slate-400 group-hover:text-red-500" />
-                                <span className="text-sm font-semibold">Ulubione</span>
+                                <BookOpen className="mb-3 h-6 w-6 text-slate-400 group-hover:text-indigo-500" />
+                                <span className="text-sm font-semibold">Przepisy</span>
                                 <span className="text-xs text-slate-500">
-                                    {isFavoritesLoading ? (
+                                    {isHistoryLoading ? (
                                         <Loader2 className="inline h-3 w-3 animate-spin" />
                                     ) : (
-                                        `${favoriteMeals.length} przepisów`
+                                        `${totalRecipes} przepisów`
                                     )}
                                 </span>
                             </Link>
@@ -196,6 +198,15 @@ export function DashboardPage() {
                                                 <MealHistoryCard key={meal.id} meal={meal} />
                                             ))}
                                         </div>
+                                    )}
+                                    {totalRecipes > recentMeals.length && (
+                                        <Link
+                                            to="/recipes"
+                                            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-500"
+                                        >
+                                            Zobacz wszystkie przepisy
+                                            <ArrowRight className="h-4 w-4" />
+                                        </Link>
                                     )}
                                 </div>
                             )}

@@ -7,7 +7,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { RecipePage } from "./pages/RecipePage";
 import { SettingsPage } from "./pages/SettingsPage";
-import { FavoritesPage } from "./pages/FavoritesPage";
+import { RecipesPage } from "./pages/RecipesPage";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { Header } from "./components/Header";
 import { PageTransition } from "./components/PageTransition";
@@ -88,10 +88,10 @@ function App() {
                       }
                     />
                     <Route
-                      path="/favorites"
+                      path="/recipes"
                       element={
                         <PageTransition>
-                          <FavoritesPage />
+                          <RecipesPage />
                         </PageTransition>
                       }
                     />

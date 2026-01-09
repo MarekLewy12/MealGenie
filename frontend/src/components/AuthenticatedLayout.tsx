@@ -4,8 +4,9 @@ import { ChatDrawer } from "./ChatDrawer";
 
 export function AuthenticatedLayout() {
   const { pathname } = useLocation();
-  const showBackLink =
-    pathname !== "/dashboard" && !pathname.startsWith("/recipe");
+  const isRecipePath =
+    pathname === "/recipe" || pathname.startsWith("/recipe/");
+  const showBackLink = pathname !== "/dashboard" && !isRecipePath;
 
   return (
     <div className="relative">
