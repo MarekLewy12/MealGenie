@@ -94,7 +94,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 export { app };
 
 // Czyszczenie cache obrazkow przy starcie serwera (>7 dni).
-cleanupOldImages(7);
+// cleanupOldImages(7);
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(env.PORT, () => {
