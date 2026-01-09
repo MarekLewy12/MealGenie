@@ -13,6 +13,7 @@ import { Header } from "./components/Header";
 import { PageTransition } from "./components/PageTransition";
 import { useAuthStore } from "./store/authStore";
 import { AuthenticatedLayout } from "./components/AuthenticatedLayout";
+import { NotificationContainer } from "./components/NotificationContainer";
 
 function App() {
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
@@ -20,6 +21,7 @@ function App() {
 
   return (
     <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#05030f] dark:text-slate-50">
+      <NotificationContainer />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[-8%] top-[-10%] h-72 w-72 rounded-full bg-indigo-200/40 blur-[120px] dark:bg-indigo-500/15" />
         <div className="absolute right-[-6%] top-10 h-80 w-80 rounded-full bg-fuchsia-200/30 blur-[140px] dark:bg-fuchsia-500/12" />

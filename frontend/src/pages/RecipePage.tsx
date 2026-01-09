@@ -28,6 +28,7 @@ import {
 } from "../services/api";
 import { RecipeLoadingAnimation } from "../components/RecipeLoadingAnimation";
 import { DashboardBackLink } from "../components/DashboardBackLink";
+import { notify } from "../store/notificationStore";
 import type {
   MealSuggestion,
   FullRecipe,
@@ -75,6 +76,15 @@ export function RecipePage() {
     onSuccess: (data) => {
       // Id potrzebne do akcji ulubionych.
       setMealId(data.mealHistoryId);
+      notify.success("Przepis jest gotowy!");
+    },
+    onError: (err) => {
+      notify.error(
+        err instanceof Error
+          ? err.message
+          : "Nie udało się wygenerować przepisu.",
+        "Błąd generowania",
+      );
     },
   });
 
@@ -92,10 +102,33 @@ export function RecipePage() {
     }
   }, [historyMeal]);
 
+  useEffect(() => {
+    if (!isHistoryError) return;
+    notify.error(
+      historyError instanceof Error
+        ? historyError.message
+        : "Nie udało się załadować przepisu.",
+      "Błąd ładowania",
+    );
+  }, [isHistoryError, historyError]);
+
   const favoriteMutation = useMutation({
     mutationFn: () => toggleMealFavorite(mealId!),
     onSuccess: (data) => {
       setIsFavorite(data.isFavorite);
+      notify.info(
+        data.isFavorite
+          ? "Dodano do ulubionych."
+          : "Usunięto z ulubionych.",
+      );
+    },
+    onError: (err) => {
+      notify.error(
+        err instanceof Error
+          ? err.message
+          : "Nie udało się zaktualizować ulubionych.",
+        "Błąd ulubionych",
+      );
     },
   });
 

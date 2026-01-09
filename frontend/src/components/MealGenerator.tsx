@@ -19,6 +19,7 @@ import { LoadingExperience } from "./LoadingExperience";
 import { MealCard } from "./MealCard";
 import { TagInput } from "./TagInput";
 import type { MealSuggestion, MealType, PortionMode } from "../types/meal";
+import { notify } from "../store/notificationStore";
 
 const mealTypeOptions: Array<{
   value: MealType;
@@ -188,9 +189,16 @@ export function MealGenerator() {
         useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
       }),
     onSuccess: () => {
+      notify.success("Wygenerowano propozycje posiłków.");
       setTimeout(() => setView("success"), 500);
     },
-    onError: () => {
+    onError: (err) => {
+      notify.error(
+        err instanceof Error
+          ? err.message
+          : "Nie udało się wygenerować posiłków.",
+        "Błąd generatora",
+      );
       setView("error");
     },
   });

@@ -26,6 +26,7 @@ import {
 } from "../schemas/auth";
 import { loginUser, registerUser } from "../services/api";
 import { useAuthStore } from "../store/authStore";
+import { notify } from "../store/notificationStore";
 
 type AuthMode = "login" | "register";
 
@@ -61,6 +62,11 @@ export function LoginPage() {
         result = await registerUser(data);
       }
       setAuth(result.token, result.user, result.hasCompletedOnboarding);
+      if (mode === "login") {
+        notify.success("Zalogowano pomyślnie.", "Witaj!");
+      } else {
+        notify.success("Konto utworzone pomyślnie.", "Gotowe!");
+      }
       if (result.hasCompletedOnboarding) {
         navigate("/dashboard");
       } else {
@@ -71,6 +77,11 @@ export function LoginPage() {
       setErrorMsg(
         err.response?.data?.error ||
           (mode === "login" ? "Błędne dane logowania" : "Błąd rejestracji"),
+      );
+      notify.error(
+        err.response?.data?.error ||
+          (mode === "login" ? "Błędne dane logowania" : "Błąd rejestracji"),
+        "Autoryzacja",
       );
     }
   };

@@ -3,6 +3,7 @@ import { ArrowRight, Clock3, Heart, Loader2, Utensils } from "lucide-react";
 import { Link } from "react-router-dom";
 import { deleteMealHistory } from "../services/api";
 import type { MealHistoryItem } from "../types/meal";
+import { notify } from "../store/notificationStore";
 
 type MealHistoryCardProps = {
   meal: MealHistoryItem;
@@ -14,6 +15,15 @@ export function MealHistoryCard({ meal }: MealHistoryCardProps) {
     mutationFn: () => deleteMealHistory(meal.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mealHistory"] });
+      notify.success("Usunięto przepis z historii.");
+    },
+    onError: (err) => {
+      notify.error(
+        err instanceof Error
+          ? err.message
+          : "Nie udało się usunąć przepisu.",
+        "Błąd usuwania",
+      );
     },
   });
 

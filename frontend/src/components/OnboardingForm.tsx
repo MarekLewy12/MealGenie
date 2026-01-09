@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { savePreferences } from "../services/api";
 import { MultiSelectPills } from "./Form/MultiSelectPills";
 import { TagInput } from "./TagInput.tsx";
+import { notify } from "../store/notificationStore";
 
 import {
   Diet,
@@ -50,7 +51,6 @@ export function OnboardingForm({
   isEditing = false,
 }: OnboardingFormProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const navigationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
@@ -72,12 +72,6 @@ export function OnboardingForm({
     },
   });
 
-  useEffect(() => {
-    if (!toastMessage) return;
-    const timer = setTimeout(() => setToastMessage(null), 2600);
-    return () => clearTimeout(timer);
-  }, [toastMessage]);
-
   useEffect(
     () => () => {
       if (navigationTimerRef.current) {
@@ -92,16 +86,21 @@ export function OnboardingForm({
     try {
       await savePreferences(values);
       if (isEditing) {
-        setToastMessage("Zapisano zmiany!");
+        notify.success("Zapisano zmiany!", "Sukces");
         navigationTimerRef.current = setTimeout(() => {
           navigate("/dashboard");
         }, 800);
       } else {
+        notify.success("Preferencje zapisane!", "Witaj");
         navigate("/dashboard");
       }
     } catch (error: unknown) {
       console.error(error);
       setErrorMsg("Coś poszło nie tak przy zapisywaniu. Spróbuj ponownie.");
+      notify.error(
+        "Nie udało się zapisać preferencji. Spróbuj ponownie.",
+        "Błąd zapisu",
+      );
     }
   };
 
@@ -264,23 +263,6 @@ export function OnboardingForm({
         </button>
       </div>
 
-      {toastMessage && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex items-start gap-3 rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-800 shadow-2xl shadow-emerald-100/60 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-white dark:shadow-black/40"
-        >
-          <div className="mt-0.5 rounded-full bg-emerald-100 p-1 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300">
-            <CheckCircle2 className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
-              Sukces
-            </span>
-            <span className="font-medium">{toastMessage}</span>
-          </div>
-        </div>
-      )}
     </form>
   );
 }

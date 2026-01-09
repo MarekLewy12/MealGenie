@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import { notify } from "../store/notificationStore";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
@@ -10,6 +11,10 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
+  const handleLogout = () => {
+    logout();
+    notify.info("Wylogowano pomyślnie.");
+  };
 
   const homeLink = token ? "/dashboard" : "/";
   const homeLabel = token ? "Dashboard" : "Strona główna";
@@ -33,6 +38,9 @@ export function Header() {
           <div className="flex flex-col leading-none">
             <span className="bg-gradient-to-r from-slate-900 to-indigo-500 bg-clip-text text-xl font-bold tracking-tight text-transparent transition group-hover:drop-shadow-[0_6px_25px_rgba(99,102,241,0.25)] dark:from-white dark:to-indigo-200">
               MealGenie
+            </span>
+            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+              by Marek Lewandowski
             </span>
           </div>
         </Link>
@@ -58,7 +66,7 @@ export function Header() {
               Logowanie
             </Link>
           ) : (
-            <button onClick={logout} className={desktopLinkClasses} title={logoutTitle}>
+            <button onClick={handleLogout} className={desktopLinkClasses} title={logoutTitle}>
               Wyloguj
             </button>
           )}
@@ -113,7 +121,7 @@ export function Header() {
               ) : (
                 <button
                   onClick={() => {
-                    logout();
+                    handleLogout();
                     closeMenu();
                   }}
                   className={`${mobileLinkClasses} text-left text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20`}
