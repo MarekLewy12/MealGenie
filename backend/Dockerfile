@@ -18,9 +18,10 @@ RUN npm run build
 # Etap 2: Produkcja (Runner)
 FROM node:20-alpine
 
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-# Zmienna środowiskowa dla produkcji
 ENV NODE_ENV=production
 
 COPY package*.json ./
@@ -30,11 +31,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 
-RUN mkdir -p public/meal-images && chown -R node:node public
+RUN mkdir -p public/meal-images && chown -R node:node /app
 
 USER node
 
 EXPOSE 3000
 
-# Najpierw migracje bazy, potem start serwera
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
