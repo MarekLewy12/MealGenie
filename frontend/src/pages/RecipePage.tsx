@@ -16,6 +16,8 @@ import {
   Carrot,
   Milk,
   Sparkle,
+  Minus,
+  Plus,
   Heart,
   Loader2,
   RefreshCw,
@@ -29,6 +31,7 @@ import {
 import { RecipeLoadingWithPreview } from "../components/RecipeLoadingWithPreview";
 import { DashboardBackLink } from "../components/DashboardBackLink";
 import { notify } from "../store/notificationStore";
+import { useShoppingListStore } from "../store/shoppingListStore";
 import type {
   MealSuggestion,
   FullRecipe,
@@ -484,6 +487,12 @@ function IngredientsSection({
 }: {
   ingredients: FullRecipeIngredient[];
 }) {
+  const addItem = useShoppingListStore((state) => state.addItem);
+  const removeItem = useShoppingListStore((state) => state.removeItem);
+  const shoppingItems = useShoppingListStore((state) => state.items);
+  const normalize = (value: string) => value.trim().toLowerCase();
+  const buildKey = (item: FullRecipeIngredient) =>
+    [item.name, item.amount, item.unit].map(normalize).join("|");
   const grouped = ingredients.reduce(
     (acc, ing) => {
       const cat = ing.category || "Inne";
@@ -516,33 +525,86 @@ function IngredientsSection({
                 {category}
               </h3>
               <ul className="space-y-2">
-                {items.map((ing, idx) => (
-                  <li key={idx} className="group flex items-start gap-3">
-                    <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
-                    <div className="flex flex-1 items-center gap-2">
-                      <span className="font-medium text-slate-900 dark:text-white">
-                        {ing.name}
+                {items.map((ing, idx) => {
+                  const itemKey = buildKey(ing);
+                  const isInList = shoppingItems.some(
+                    (item) => item.key === itemKey,
+                  );
+
+                  return (
+                    <li key={idx} className="group flex items-start gap-3">
+                      <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
+                      <div className="flex flex-1 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isInList) {
+                              const wasRemoved = removeItem({
+                                name: ing.name,
+                                amount: ing.amount,
+                                unit: ing.unit,
+                                notes: ing.notes ?? null,
+                              });
+                              if (wasRemoved) {
+                                notify.success(
+                                  "Usunięto z listy zakupów.",
+                                );
+                              }
+                              return;
+                            }
+                            const wasAdded = addItem({
+                              name: ing.name,
+                              amount: ing.amount,
+                              unit: ing.unit,
+                              notes: ing.notes ?? null,
+                            });
+                            notify[wasAdded ? "success" : "info"](
+                              wasAdded
+                                ? "Dodano do listy zakupów."
+                                : "Ten składnik jest już na liście.",
+                            );
+                          }}
+                          className={`cursor-pointer rounded-lg border p-1 transition ${
+                            isInList
+                              ? "border-red-200/80 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/20"
+                              : "border-emerald-200/80 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                          }`}
+                          title={
+                            isInList
+                              ? "Usuń z listy zakupów"
+                              : "Dodaj do listy zakupów"
+                          }
+                        >
+                          {isInList ? (
+                            <Minus className="h-3.5 w-3.5" />
+                          ) : (
+                            <Plus className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <span className="font-medium text-slate-900 dark:text-white">
+                          {ing.name}
+                        </span>
+                        {ing.notes && (
+                          <span className="text-slate-500"> ({ing.notes})</span>
+                        )}
+                        <button
+                          type="button"
+                          title="Zamienniki - wkrótce dostępne!"
+                          className="ml-1 cursor-not-allowed rounded-lg p-1 opacity-0 transition-opacity hover:bg-slate-100 group-hover:opacity-100 dark:hover:bg-slate-800"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            alert("🔜 Funkcja zamienników będzie dostępna wkrótce!");
+                          }}
+                        >
+                          <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
+                        </button>
+                      </div>
+                      <span className="text-sm text-slate-500">
+                        {ing.amount} {ing.unit}
                       </span>
-                      {ing.notes && (
-                        <span className="text-slate-500"> ({ing.notes})</span>
-                      )}
-                      <button
-                        type="button"
-                        title="Zamienniki - wkrótce dostępne!"
-                        className="ml-1 cursor-not-allowed rounded-lg p-1 opacity-0 transition-opacity hover:bg-slate-100 group-hover:opacity-100 dark:hover:bg-slate-800"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          alert("🔜 Funkcja zamienników będzie dostępna wkrótce!");
-                        }}
-                      >
-                        <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
-                      </button>
-                    </div>
-                    <span className="text-sm text-slate-500">
-                      {ing.amount} {ing.unit}
-                    </span>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           );

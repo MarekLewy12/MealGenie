@@ -3,6 +3,7 @@ import {
     ArrowRight,
     BookOpen,
     Calendar,
+    CheckCircle2,
     Clock3,
     Heart,
     Loader2,
@@ -18,12 +19,16 @@ import { Link } from "react-router-dom";
 import { getMealHistory } from "../services/api";
 import { useAuthStore } from "../store/authStore";
 import { useChatStore } from "../store/chatStore";
+import { useShoppingListStore } from "../store/shoppingListStore";
 import { MealHistoryCard } from "../components/MealHistoryCard";
 import type { MealHistoryItem } from "../types/meal";
 
 export function DashboardPage() {
     const user = useAuthStore((state) => state.user);
     const openChat = useChatStore((state) => state.openChat);
+    const shoppingItems = useShoppingListStore((state) => state.items);
+    const toggleObtained = useShoppingListStore((state) => state.toggleObtained);
+    const clearShoppingList = useShoppingListStore((state) => state.clearAll);
     const greetingName = user?.name || "Kucharzu";
 
     const { data: historyData, isLoading: isHistoryLoading } = useQuery({
@@ -41,6 +46,25 @@ export function DashboardPage() {
         .slice(0, 3);
     const favoriteMeals = favoritesData?.items ?? [];
     const totalRecipes = historyData?.total ?? 0;
+
+    const handleExportShoppingList = () => {
+        if (shoppingItems.length === 0) return;
+        const lines = shoppingItems.map((item) => {
+            const amountPart = [item.amount, item.unit].filter(Boolean).join(" ");
+            const baseLabel = amountPart ? `${amountPart} ${item.name}` : item.name;
+            return `- [${item.obtained ? "x" : " "}] ${baseLabel}`;
+        });
+        const content = `Lista zakupów (MealGenie)\n\n${lines.join("\n")}`;
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `mealgenie-lista-zakupow-${new Date()
+            .toISOString()
+            .slice(0, 10)}.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         // Layout główny
@@ -322,23 +346,79 @@ export function DashboardPage() {
                                     <ShoppingCart className="h-5 w-5 text-indigo-500" />
                                     Lista Zakupów
                                 </h3>
-                                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-slate-500 dark:bg-white/10">0</span>
+                                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-slate-500 dark:bg-white/10">
+                                    {shoppingItems.length}
+                                </span>
                             </div>
 
-                            <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-center opacity-60">
-                                <div className="rounded-full bg-slate-100 p-3 dark:bg-white/5">
-                                    <Plus className="h-6 w-6 text-slate-400" />
+                            {shoppingItems.length === 0 ? (
+                                <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-center opacity-60">
+                                    <div className="rounded-full bg-slate-100 p-3 dark:bg-white/5">
+                                        <Plus className="h-6 w-6 text-slate-400" />
+                                    </div>
+                                    <p className="text-sm text-slate-500">Brak produktów.</p>
+                                    <p className="text-xs text-slate-400 max-w-[150px]">
+                                        Dodaj składniki z przepisu, aby pojawiły się tutaj.
+                                    </p>
                                 </div>
-                                <p className="text-sm text-slate-500">Brak produktów.</p>
-                                <p className="text-xs text-slate-400 max-w-[150px]">
-                                    Wybierz przepis, aby automatycznie dodać składniki.
-                                </p>
-                            </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Kliknij produkt, aby oznaczyć jako kupiony.
+                                    </p>
+                                    <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
+                                        {shoppingItems.map((item) => {
+                                            const amountPart = [item.amount, item.unit]
+                                                .filter(Boolean)
+                                                .join(" ");
+                                            const label = amountPart
+                                                ? `${amountPart} ${item.name}`
+                                                : item.name;
+                                            return (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    onClick={() => toggleObtained(item.id)}
+                                                    className={`flex w-full cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition ${
+                                                        item.obtained
+                                                            ? "border-slate-200 bg-slate-50 text-slate-400 line-through dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-500"
+                                                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900"
+                                                    }`}
+                                                >
+                                                    <CheckCircle2
+                                                        className={`h-4 w-4 ${
+                                                            item.obtained
+                                                                ? "text-emerald-400"
+                                                                : "text-slate-300"
+                                                        }`}
+                                                    />
+                                                    <span className="flex-1">{label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="mt-6 border-t border-indigo-200/80 pt-4 dark:border-indigo-500/20">
-                                <button disabled className="w-full rounded-xl bg-slate-100 py-3 text-xs font-bold uppercase tracking-wide text-slate-400 dark:bg-white/5">
-                                    Idę na zakupy
-                                </button>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={clearShoppingList}
+                                        disabled={shoppingItems.length === 0}
+                                        className="cursor-pointer rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+                                    >
+                                        Wyczyść
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleExportShoppingList}
+                                        disabled={shoppingItems.length === 0}
+                                        className="cursor-pointer rounded-xl bg-indigo-600 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+                                    >
+                                        Eksportuj
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
