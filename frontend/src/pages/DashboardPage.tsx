@@ -1,6 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
-    ArrowRight,
     Clock3,
     Heart,
     Loader2,
@@ -12,9 +11,9 @@ import {
     Wand2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { deleteMealHistory, getMealHistory } from "../services/api";
+import { getMealHistory } from "../services/api";
 import { useAuthStore } from "../store/authStore";
-import type { MealHistoryItem } from "../types/meal";
+import { MealHistoryCard } from "../components/MealHistoryCard";
 
 export function DashboardPage() {
     const user = useAuthStore((state) => state.user);
@@ -93,7 +92,10 @@ export function DashboardPage() {
                                 <span className="text-sm font-semibold">Preferencje</span>
                                 <span className="text-xs text-slate-500">Edytuj globalne ustawienia</span>
                             </Link>
-                            <div className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition dark:border-rose-400/30 dark:bg-white/5">
+                            <Link
+                                to="/favorites"
+                                className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition hover:border-rose-300/90 hover:bg-rose-50/40 dark:border-rose-400/30 dark:bg-white/5 dark:hover:bg-white/10"
+                            >
                                 <Heart className="mb-3 h-6 w-6 text-slate-400 group-hover:text-red-500" />
                                 <span className="text-sm font-semibold">Ulubione</span>
                                 <span className="text-xs text-slate-500">
@@ -103,7 +105,7 @@ export function DashboardPage() {
                                         `${favoriteMeals.length} przepisów`
                                     )}
                                 </span>
-                            </div>
+                            </Link>
                         </div>
 
                         {/* Feedback */}
@@ -283,93 +285,5 @@ export function DashboardPage() {
                 </div>
             </main>
         </div>
-    );
-}
-
-function MealHistoryCard({ meal }: { meal: MealHistoryItem }) {
-    const queryClient = useQueryClient();
-    const deleteMutation = useMutation({
-        mutationFn: () => deleteMealHistory(meal.id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["mealHistory"] });
-        },
-    });
-    const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-    const imageUrl = meal.imageUrl?.startsWith("/")
-        ? `${apiBaseUrl}${meal.imageUrl}`
-        : meal.imageUrl;
-
-    return (
-        <Link
-            to={`/recipe/${meal.id}`}
-            className="group relative flex gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
-        >
-            <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
-                {imageUrl ? (
-                    <img
-                        src={imageUrl}
-                        alt={meal.name}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500">
-                        <Utensils className="h-6 w-6 text-white/70" />
-                    </div>
-                )}
-            </div>
-
-            <div className="flex flex-1 flex-col justify-center min-w-0">
-                <h4 className="font-semibold text-slate-900 truncate dark:text-white">
-                    {meal.name}
-                </h4>
-                {meal.description && (
-                    <p className="text-sm text-slate-500 truncate dark:text-slate-400">
-                        {meal.description}
-                    </p>
-                )}
-                <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
-                    {meal.estimatedTime && (
-                        <span className="flex items-center gap-1">
-                            <Clock3 className="h-3 w-3" />
-                            {meal.estimatedTime} min
-                        </span>
-                    )}
-                    <span>
-                        {new Date(meal.createdAt).toLocaleDateString("pl-PL", {
-                            day: "numeric",
-                            month: "short",
-                        })}
-                    </span>
-                </div>
-            </div>
-
-            <div className="absolute right-3 top-3 flex items-center gap-2">
-                {meal.isFavorite && (
-                    <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                )}
-                <button
-                    type="button"
-                    onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        deleteMutation.mutate();
-                    }}
-                    disabled={deleteMutation.isPending}
-                    className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 cursor-pointer"
-                    aria-label="Usuń z historii"
-                    title="Usuń z historii"
-                >
-                    {deleteMutation.isPending ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                        "usuń"
-                    )}
-                </button>
-            </div>
-
-            <div className="flex items-center">
-                <ArrowRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-indigo-500" />
-            </div>
-        </Link>
     );
 }
