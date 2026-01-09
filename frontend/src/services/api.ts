@@ -12,6 +12,7 @@ import type {
   MealHistoryResponse,
   GenerateRecipeResponse,
 } from "../types/meal";
+import type { ChatRequest, ChatResponse } from "../types/chat";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -75,6 +76,11 @@ export async function generateFullRecipe(
     { timeout: 60_000 },
   );
 
+  return data;
+}
+
+export async function chatWithAssistant(payload: ChatRequest) {
+  const { data } = await api.post<ChatResponse>("/chat", payload);
   return data;
 }
 
