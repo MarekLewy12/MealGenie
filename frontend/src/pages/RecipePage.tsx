@@ -25,6 +25,7 @@ import {
   getMealById,
   toggleMealFavorite,
 } from "../services/api";
+import { LoadingExperience } from "../components/LoadingExperience";
 import type {
   MealSuggestion,
   FullRecipe,
@@ -104,7 +105,6 @@ export function RecipePage() {
     ? historyMeal?.fullRecipeJson || null
     : generatedData?.recipe || null;
 
-  const isPending = isGenerating || isLoadingHistory;
   const isError = isGenerateError || isHistoryError;
 
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
@@ -237,7 +237,17 @@ export function RecipePage() {
       )}
 
       <div className="mx-auto max-w-4xl px-4 pb-16">
-        {isPending && <RecipeLoadingSkeleton />}
+        {isGenerating && (
+          <LoadingExperience
+            title="Tworzę pełny przepis"
+            subtitle="To potrwa chwilę. Zbieram składniki, kroki i wartości odżywcze."
+            progressLabel="Układam szczegóły przepisu..."
+            progressDurationSec={28}
+            className="min-h-[420px] py-10"
+          />
+        )}
+
+        {!isGenerating && isLoadingHistory && <RecipeLoadingSkeleton />}
 
         {isError && (
           <ErrorCard

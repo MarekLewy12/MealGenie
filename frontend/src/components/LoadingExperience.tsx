@@ -11,21 +11,57 @@ const culinaryFacts = [
   "🥑 Awokado to botanicznie... jagoda!",
   "🍫 Czekolada była kiedyś używana jako waluta u Azteków",
   "🧀 Ser został odkryty przypadkowo ~4000 lat temu",
+  "🧂 Sól była kiedyś tak cenna, że służyła jako forma wynagrodzenia",
+  "🥔 Ziemniaki pochodzą z Andów i uprawiano je tam od tysięcy lat",
+  "🍞 Zakwas to jedna z najstarszych metod spulchniania pieczywa",
+  "🫒 Oliwa z oliwek była używana w starożytności także jako kosmetyk",
+  "🍵 Matcha to sproszkowane liście zielonej herbaty, a nie zwykła herbata",
+  "🥕 Marchew pierwotnie była fioletowa, a pomarańczowa pojawiła się później",
+  "🧈 Masło klarowane (ghee) ma wyższą temperaturę dymienia niż zwykłe masło",
+  "🫘 Fasola i soczewica są jednymi z najstarszych uprawianych roślin strączkowych",
+  "🍋 Sok z cytryny pomaga ograniczyć ciemnienie owoców po przekrojeniu",
+  "🍷 Wino było produkowane już ponad 6000 lat temu",
+  "🍚 Ryż jest podstawą diety dla ponad połowy ludności świata",
 ];
 
-export function LoadingExperience() {
+type LoadingExperienceProps = {
+  title?: string;
+  subtitle?: string;
+  progressLabel?: string;
+  facts?: string[];
+  progressDurationSec?: number;
+  className?: string;
+};
+
+export function LoadingExperience({
+  title,
+  subtitle,
+  progressLabel = "Tworzę personalizowane propozycje...",
+  facts,
+  progressDurationSec = 24,
+  className,
+}: LoadingExperienceProps) {
+  const factsToShow = facts && facts.length > 0 ? facts : culinaryFacts;
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentFactIndex((prev) => (prev + 1) % culinaryFacts.length);
+      setCurrentFactIndex((prev) => (prev + 1) % factsToShow.length);
     }, 3500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [factsToShow.length]);
+
+  useEffect(() => {
+    setCurrentFactIndex(0);
+  }, [factsToShow.length]);
+
+  const containerClassName = `flex min-h-[600px] flex-col items-center justify-center gap-12 px-6 py-16 ${
+    className ?? ""
+  }`;
 
   return (
-    <div className="flex min-h-[600px] flex-col items-center justify-center gap-12 px-6 py-16">
+    <div className={containerClassName}>
       <motion.div
         animate={{
           rotate: [0, 10, -10, 10, 0],
@@ -41,6 +77,21 @@ export function LoadingExperience() {
         <ChefHat className="h-16 w-16 text-white" />
       </motion.div>
 
+      {(title || subtitle) && (
+        <div className="text-center">
+          {title && (
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
+              {title}
+            </h2>
+          )}
+          {subtitle && (
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              {subtitle}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="relative h-24 w-full max-w-xl">
         <AnimatePresence mode="wait">
           <motion.div
@@ -52,7 +103,7 @@ export function LoadingExperience() {
             className="absolute inset-0 flex items-center justify-center text-center"
           >
             <p className="text-xl font-semibold text-slate-700 dark:text-slate-200">
-              {culinaryFacts[currentFactIndex]}
+              {factsToShow[currentFactIndex]}
             </p>
           </motion.div>
         </AnimatePresence>
@@ -64,11 +115,11 @@ export function LoadingExperience() {
             className="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
-            transition={{ duration: 15, ease: "linear" }}
+            transition={{ duration: progressDurationSec, ease: "linear" }}
           />
         </div>
         <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
-          Tworzę personalizowane propozycje...
+          {progressLabel}
         </p>
       </div>
 

@@ -21,7 +21,7 @@ export function DashboardPage() {
 
     const { data: historyData, isLoading: isHistoryLoading } = useQuery({
         queryKey: ["mealHistory"],
-        queryFn: () => getMealHistory({ limit: 6 }),
+        queryFn: () => getMealHistory({ limit: 12 }),
     });
 
     const { data: favoritesData, isLoading: isFavoritesLoading } = useQuery({
@@ -29,7 +29,9 @@ export function DashboardPage() {
         queryFn: () => getMealHistory({ limit: 10, favoritesOnly: true }),
     });
 
-    const recentMeals = historyData?.items ?? [];
+    const recentMeals = (historyData?.items ?? [])
+        .filter((meal) => !meal.isFavorite)
+        .slice(0, 6);
     const favoriteMeals = favoritesData?.items ?? [];
 
     return (
