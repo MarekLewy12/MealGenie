@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, MessageSquare, X } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { notify } from "../store/notificationStore";
+import { useChatStore } from "../store/chatStore";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   const { token, logout, user } = useAuthStore();
+  const openChat = useChatStore((state) => state.openChat);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -61,6 +63,17 @@ export function Header() {
             </>
           )}
 
+          {token && (
+            <button
+              onClick={openChat}
+              className="group flex cursor-pointer items-center gap-2 rounded-xl border border-emerald-200/50 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 hover:shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+              title="Asystent AI"
+            >
+              <MessageSquare className="h-4 w-4 transition-transform group-hover:scale-110" />
+              <span className="hidden lg:inline">Asystent</span>
+            </button>
+          )}
+
           {!token ? (
             <Link to="/login" className={desktopLinkClasses}>
               Logowanie
@@ -77,6 +90,15 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4 md:hidden">
+          {token && (
+            <button
+              onClick={openChat}
+              className="rounded-lg border border-emerald-200/60 bg-emerald-50 p-2 text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+              aria-label="Asystent AI"
+            >
+              <MessageSquare className="h-5 w-5" />
+            </button>
+          )}
           <ThemeToggle />
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}

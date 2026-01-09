@@ -57,16 +57,16 @@ function App() {
                 />
 
                 <Route element={<ProtectedRoute />}>
-                  {/* Chronione trasy */}
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <PageTransition>
-                        <DashboardPage />
-                      </PageTransition>
-                    }
-                  />
                   <Route element={<AuthenticatedLayout />}>
+                    {/* Chronione trasy */}
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <PageTransition>
+                          <DashboardPage />
+                        </PageTransition>
+                      }
+                    />
                     <Route
                       path="/onboarding"
                       element={
@@ -103,24 +103,24 @@ function App() {
                         </PageTransition>
                       }
                     />
+                    {/* /recipe/:id przed /recipe. */}
+                    <Route
+                      path="/recipe/:id"
+                      element={
+                        <PageTransition>
+                          <RecipePage />
+                        </PageTransition>
+                      }
+                    />
+                    <Route
+                      path="/recipe"
+                      element={
+                        <PageTransition>
+                          <RecipePage />
+                        </PageTransition>
+                      }
+                    />
                   </Route>
-                  {/* /recipe/:id przed /recipe. */}
-                  <Route
-                    path="/recipe/:id"
-                    element={
-                      <PageTransition>
-                        <RecipePage />
-                      </PageTransition>
-                    }
-                  />
-                  <Route
-                    path="/recipe"
-                    element={
-                      <PageTransition>
-                        <RecipePage />
-                      </PageTransition>
-                    }
-                  />
                 </Route>
 
                 <Route
