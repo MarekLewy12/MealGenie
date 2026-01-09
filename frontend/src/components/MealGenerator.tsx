@@ -9,6 +9,7 @@ import {
   Refrigerator,
   RefreshCw,
   Sparkles,
+  Scale,
   XCircle,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -17,7 +18,7 @@ import { generateMealSuggestions } from "../services/api";
 import { LoadingExperience } from "./LoadingExperience";
 import { MealCard } from "./MealCard";
 import { TagInput } from "./TagInput";
-import type { MealSuggestion, MealType } from "../types/meal";
+import type { MealSuggestion, MealType, PortionMode } from "../types/meal";
 
 const mealTypeOptions: Array<{
   value: MealType;
@@ -152,7 +153,7 @@ function SuccessView({ meals, onReset, onSelectMeal }: SuccessViewProps) {
       >
         <button
           onClick={onReset}
-          className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-indigo-500"
+          className="group flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-indigo-500"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Wróć do generatora i spróbuj ponownie
@@ -170,6 +171,8 @@ export function MealGenerator() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [isThermomixMode, setIsThermomixMode] = useState(false);
   const [view, setView] = useState<GeneratorView>("form");
+  const [portionMode, setPortionMode] = useState<PortionMode>("servings");
+  const [targetWeight, setTargetWeight] = useState(250);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -178,7 +181,8 @@ export function MealGenerator() {
       generateMealSuggestions({
         mealType,
         prepTime,
-        servingSize,
+        servingSize: portionMode === "servings" ? servingSize : undefined,
+        targetWeightGrams: portionMode === "weight" ? targetWeight : undefined,
         userPrompt: userPrompt.length > 0 ? userPrompt : undefined,
         availableIngredients: ingredients,
         useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
@@ -310,7 +314,7 @@ export function MealGenerator() {
               <button
                 type="button"
                 onClick={() => setIsThermomixMode(!isThermomixMode)}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${isThermomixMode ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
+                className={`relative inline-flex h-8 w-14 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${isThermomixMode ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
               >
                 <span
                   className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isThermomixMode ? "translate-x-7" : "translate-x-1"}`}
@@ -318,8 +322,8 @@ export function MealGenerator() {
               </button>
             </div>
 
-            <div className="mb-8 grid gap-6 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 md:grid-cols-2">
-              <div>
+            <div className="mb-8 grid grid-cols-1 gap-5 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 lg:grid-cols-3 lg:gap-4">
+              <div className="min-w-0 w-full">
                 <div className="mb-2 flex justify-between">
                   <label className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
                     Maksymalny czas: {prepTime} min
@@ -340,29 +344,87 @@ export function MealGenerator() {
                 </div>
               </div>
 
-              <div>
+              <div className="min-w-0 w-full">
                 <label className="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-                  Liczba osób: {servingSize}
+                  Tryb porcji
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex w-full gap-2">
                   <button
                     type="button"
-                    onClick={() => setServingSize((s) => Math.max(1, s - 1))}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                    onClick={() => setPortionMode("servings")}
+                    className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                      portionMode === "servings"
+                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200"
+                        : "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    }`}
                   >
-                    -
+                    👨‍👩‍👧‍👦 Na osoby
                   </button>
-                  <span className="w-8 text-center font-bold text-slate-900 dark:text-white">
-                    {servingSize}
-                  </span>
                   <button
                     type="button"
-                    onClick={() => setServingSize((s) => Math.min(10, s + 1))}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                    onClick={() => setPortionMode("weight")}
+                    className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                      portionMode === "weight"
+                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200"
+                        : "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    }`}
                   >
-                    +
+                    <Scale className="h-4 w-4" />
+                    Na gramaturę
                   </button>
                 </div>
+              </div>
+
+              <div className="min-w-0 w-full">
+                {portionMode === "servings" ? (
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                      Liczba osób: {servingSize}
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setServingSize((s) => Math.max(1, s - 1))}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                      >
+                        -
+                      </button>
+                      <span className="w-8 text-center font-bold text-slate-900 dark:text-white">
+                        {servingSize}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setServingSize((s) => Math.min(10, s + 1))}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                      Docelowa waga
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={50}
+                        max={5000}
+                        step={50}
+                        value={targetWeight}
+                        onChange={(e) => setTargetWeight(Number(e.target.value))}
+                        className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center font-bold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                      />
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        gramów
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-[10px] text-slate-400">
+                      Idealne dla cukiernictwa i profesjonalnej gastronomii
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -370,7 +432,7 @@ export function MealGenerator() {
               <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-100">
                 Typ posiłku (priorytet)
               </p>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {mealTypeOptions.map((option) => {
                   const isActive = option.value === mealType;
                   return (
@@ -378,10 +440,10 @@ export function MealGenerator() {
                       key={option.value}
                       type="button"
                       onClick={() => setMealType(option.value)}
-                      className={`flex flex-col items-start rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                      className={`flex cursor-pointer flex-col items-start rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                         isActive
                           ? "border-indigo-300 bg-indigo-50 text-indigo-800 shadow-md shadow-indigo-100/60 dark:border-indigo-400/80 dark:bg-indigo-500/20 dark:text-indigo-50"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-400/50"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-indigo-400/70 dark:hover:bg-slate-800 dark:hover:text-white"
                       }`}
                     >
                       <span className="text-xs font-semibold uppercase tracking-[0.25em] opacity-80">
@@ -399,7 +461,7 @@ export function MealGenerator() {
             <div className="flex flex-col items-center">
               <button
                 onClick={handleGenerate}
-                className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-900/40 active:scale-95"
+                className="group relative flex cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-900/40 active:scale-95"
               >
                 <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
                 Generuj Posiłki
@@ -466,7 +528,7 @@ export function MealGenerator() {
 
             <button
               onClick={handleBackToForm}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
             >
               <RefreshCw className="h-4 w-4" />
               Spróbuj ponownie

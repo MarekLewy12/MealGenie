@@ -39,6 +39,7 @@ export const SuggestMealsRequestSchema = z.object({
   mealType: MealTypeSchema.default("ANY"),
   prepTime: z.number().min(5).max(180).optional(),
   servingSize: z.number().min(1).max(10).optional(),
+  targetWeightGrams: z.number().min(50).max(5000).optional(),
 });
 
 export type SuggestMealsRequest = z.infer<typeof SuggestMealsRequestSchema>;

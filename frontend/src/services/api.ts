@@ -45,10 +45,11 @@ export async function savePreferences(payload: SavePreferencesPayload) {
 export type GenerateMealSuggestionsPayload = {
   mealType: MealType;
   prepTime: number;
-  servingSize: number;
+  servingSize?: number;
   userPrompt?: string;
   availableIngredients?: string[];
   useEquipment?: string[];
+  targetWeightGrams?: number;
 };
 
 export async function generateMealSuggestions(

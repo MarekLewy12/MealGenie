@@ -25,6 +25,7 @@ interface GenerationContext {
   favoriteCuisines: string[];
   cookingSkill: CookingSkill;
   budget: Budget;
+  targetWeightGrams?: number;
 }
 
 const mealTypeToPolish: Record<string, string> = {
@@ -56,7 +57,17 @@ export async function generateMealSuggestions(
       `
     : "Nie używaj instrukcji dla Thermomixa.";
 
-  // Budowanie promptu z kontekstu
+  const portionInfo = context.targetWeightGrams
+    ? `
+      ⚖️ TRYB GRAMATUROWY (WAŻNE!):
+      - Przepis MUSI dać dokładnie ${context.targetWeightGrams}g gotowego produktu
+      - PRECYZYJNIE przelicz proporcje WSZYSTKICH składników
+      - Suma składników powinna dać finalny produkt o wadze ${context.targetWeightGrams}g
+      - To jest kluczowe dla profesjonalnego cukiernictwa/gastronomii
+      - W opisie składników podawaj DOKŁADNE gramy, nie "szczypta" czy "do smaku"
+      `
+    : `Przepis na ${context.servingSize} porcji.`;
+
   const promptContext = `
     DANE UŻYTKOWNIKA:
     - Dieta: ${context.diet}
@@ -69,7 +80,7 @@ export async function generateMealSuggestions(
     PARAMETRY TEGO POSIŁKU:
     - Typ: ${mealTypeToPolish[context.mealType] || "Dowolny"}
     - Czas przygotowania: max ${context.prepTime} minut
-    - Liczba porcji: ${context.servingSize}
+    ${portionInfo}
     
     INTENT UŻYTKOWNIKA (Najważniejsze!):
     ${

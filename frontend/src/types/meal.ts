@@ -90,3 +90,5 @@ export interface GenerateRecipeResponse {
   recipe: FullRecipe;
   mealHistoryId: string;
 }
+
+export type PortionMode = "servings" | "weight";
