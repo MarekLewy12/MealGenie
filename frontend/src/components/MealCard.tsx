@@ -107,7 +107,7 @@ export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
           <div className="mt-auto pt-2">
             <button
               onClick={onSelect}
-              className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-200/70 transition hover:-translate-y-0.5 hover:shadow-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-300 dark:shadow-amber-900/30 dark:hover:shadow-amber-900/50"
+              className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-200/70 transition hover:-translate-y-0.5 hover:shadow-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-300 dark:shadow-amber-900/30 dark:hover:shadow-amber-900/50"
             >
               Wybieram to danie
             </button>
