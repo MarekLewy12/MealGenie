@@ -68,10 +68,10 @@ export function ChatDrawer() {
       addMessage("assistant", response.message.content);
     } catch (error) {
       console.error(error);
-      notify.error("Asystent mial problem z odpowiedzia.");
+      notify.error("Asystent miał problem z odpowiedzią.");
       addMessage(
         "assistant",
-        "Przepraszam, cos poszlo nie tak. Sprobuj ponownie.",
+        "Przepraszam, coś poszło nie tak. Spróbuj ponownie.",
       );
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ export function ChatDrawer() {
                     Asystent AI
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Twoj kulinarny ekspert
+                    Twój kulinarny ekspert
                   </p>
                 </div>
               </div>
@@ -132,15 +132,15 @@ export function ChatDrawer() {
                 <button
                   type="button"
                   onClick={clearHistory}
-                  className="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-red-500 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-red-400"
-                  title="Wyczysc historie"
+                  className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-red-500 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-red-400"
+                  title="Wyczyść historię"
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   onClick={closeChat}
-                  className="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                  className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   aria-label="Zamknij"
                 >
                   <X className="h-5 w-5" />
@@ -153,8 +153,8 @@ export function ChatDrawer() {
                 <div className="flex h-full flex-col items-center justify-center gap-4 text-center opacity-60">
                   <MessageSquare className="h-12 w-12 text-slate-300" />
                   <p className="text-sm text-slate-500">
-                    Zapytaj o przepis, zamienniki <br /> lub co zrobic z
-                    resztek w lodowce.
+                    Zapytaj o przepis, zamienniki <br /> lub co zrobić z
+                    resztek w lodówce.
                   </p>
                 </div>
               ) : (
@@ -213,14 +213,14 @@ export function ChatDrawer() {
                   disabled={isLoading}
                   rows={1}
                   placeholder={
-                    isLoading ? "Czekam na odpowiedz..." : "Napisz wiadomosc..."
+                    isLoading ? "Czekam na odpowiedź..." : "Napisz wiadomość..."
                   }
                   className="min-h-[48px] max-h-[120px] flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900"
                 />
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none dark:disabled:bg-slate-700"
+                  className="inline-flex h-12 w-12 cursor-pointer flex-shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none dark:disabled:bg-slate-700"
                 >
                   {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -230,7 +230,7 @@ export function ChatDrawer() {
                 </button>
               </div>
               <p className="mt-2 text-center text-[10px] text-slate-400">
-                Enter wysyla, Shift+Enter nowa linia
+                Enter wysyła, Shift+Enter nowa linia
               </p>
             </form>
           </motion.aside>

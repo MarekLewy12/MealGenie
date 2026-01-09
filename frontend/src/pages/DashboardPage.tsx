@@ -5,6 +5,7 @@ import {
     Clock3,
     Heart,
     Loader2,
+    MessageSquare,
     Plus,
     Settings,
     ShoppingCart,
@@ -15,11 +16,13 @@ import {
 import { Link } from "react-router-dom";
 import { getMealHistory } from "../services/api";
 import { useAuthStore } from "../store/authStore";
+import { useChatStore } from "../store/chatStore";
 import { MealHistoryCard } from "../components/MealHistoryCard";
 import type { MealHistoryItem } from "../types/meal";
 
 export function DashboardPage() {
     const user = useAuthStore((state) => state.user);
+    const openChat = useChatStore((state) => state.openChat);
     const greetingName = user?.name || "Kucharzu";
 
     const { data: historyData, isLoading: isHistoryLoading } = useQuery({
@@ -88,6 +91,38 @@ export function DashboardPage() {
                                 >
                                     Uruchom Generator &rarr;
                                 </Link>
+                            </div>
+                        </div>
+
+                        <div className="relative overflow-hidden rounded-3xl border border-emerald-200/80 bg-white p-6 shadow-lg shadow-emerald-100/60 dark:border-emerald-500/20 dark:bg-slate-900/60 dark:shadow-none">
+                            <div className="absolute -right-10 top-6 h-24 w-24 rounded-full bg-emerald-200/40 blur-2xl dark:bg-emerald-500/20" />
+                            <div className="absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-teal-200/40 blur-2xl dark:bg-teal-500/20" />
+                            <div className="relative flex flex-col gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200">
+                                        <MessageSquare className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                            Asystent AI
+                                        </h3>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            Zapytaj o przepisy i triki kuchenne
+                                        </p>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-slate-600 dark:text-slate-300">
+                                    Szybkie odpowiedzi, zamienniki składników i plan
+                                    na dziś bez wychodzenia z Dashboardu.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={openChat}
+                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-500"
+                                >
+                                    Otwórz asystenta
+                                    <ArrowRight className="h-4 w-4" />
+                                </button>
                             </div>
                         </div>
 
