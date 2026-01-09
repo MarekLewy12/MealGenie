@@ -22,6 +22,7 @@ import {
   getMealHistoryController,
   getMealByIdController,
   toggleFavoriteController,
+  deleteMealHistoryController,
 } from "./controllers/history.controller.js";
 import { authenticateToken } from "./middlewares/authMiddleware.js";
 import { cleanupOldImages } from "./services/image.service.js";
@@ -69,6 +70,7 @@ app.post("/api/meals/recipe", authenticateToken, generateRecipeController);
 // Kolejnosc ma znaczenie: /history przed /:id, zeby nie przechwycic "history" jako parametru.
 app.get("/api/meals/history", authenticateToken, getMealHistoryController);
 app.get("/api/meals/history/:id", authenticateToken, getMealByIdController);
+app.delete("/api/meals/history/:id", authenticateToken, deleteMealHistoryController);
 app.patch("/api/meals/:id/favorite", authenticateToken, toggleFavoriteController);
 
 // Auth

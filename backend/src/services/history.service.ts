@@ -102,3 +102,14 @@ export async function toggleFavorite(
 
   return { isFavorite: updated.isFavorite };
 }
+
+export async function deleteMealHistory(
+  userId: string,
+  mealId: string,
+): Promise<boolean> {
+  const result = await prisma.mealHistory.deleteMany({
+    where: { id: mealId, userId },
+  });
+
+  return result.count > 0;
+}

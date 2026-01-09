@@ -110,6 +110,10 @@ export async function toggleMealFavorite(
   return data;
 }
 
+export async function deleteMealHistory(id: string): Promise<void> {
+  await api.delete(`/meals/history/${id}`);
+}
+
 export async function registerUser(data: RegisterFormData) {
   const response = await api.post("/auth/register", data);
   return response.data;

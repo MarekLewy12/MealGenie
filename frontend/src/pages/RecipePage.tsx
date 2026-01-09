@@ -1,4 +1,4 @@
-import { useEffect, useState, type ElementType } from "react";
+import { useEffect, useRef, useState, type ElementType } from "react";
 import { useLocation, useParams, Link, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -39,6 +39,7 @@ export function RecipePage() {
 
   const [mealId, setMealId] = useState<string | null>(routeId || null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const lastTeaserKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (routeId) {
@@ -76,9 +77,11 @@ export function RecipePage() {
   });
 
   useEffect(() => {
-    if (teaser && !routeId) {
-      generateRecipe();
-    }
+    if (!teaser || routeId) return;
+    const teaserKey = JSON.stringify(teaser);
+    if (lastTeaserKeyRef.current === teaserKey) return;
+    lastTeaserKeyRef.current = teaserKey;
+    generateRecipe();
   }, [teaser, routeId, generateRecipe]);
 
   useEffect(() => {
