@@ -28,6 +28,7 @@ const mealTypeOptions: Array<{
   { value: "LUNCH", label: "Lunch/Obiad", hint: "mocno i treściwie" },
   { value: "DINNER", label: "Kolacja", hint: "wieczorne inspiracje" },
   { value: "SNACK", label: "Przekąska", hint: "małe co nieco" },
+  { value: "DESSERT", label: "Deser", hint: "słodkie inspiracje 🍰" },
 ];
 
 const mealTypeValues = new Set<MealType>(

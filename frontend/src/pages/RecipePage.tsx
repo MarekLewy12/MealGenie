@@ -18,6 +18,7 @@ import {
   Sparkle,
   Heart,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 
 import {
@@ -25,7 +26,7 @@ import {
   getMealById,
   toggleMealFavorite,
 } from "../services/api";
-import { LoadingExperience } from "../components/LoadingExperience";
+import { RecipeLoadingAnimation } from "../components/RecipeLoadingAnimation";
 import { DashboardBackLink } from "../components/DashboardBackLink";
 import type {
   MealSuggestion,
@@ -106,6 +107,10 @@ export function RecipePage() {
     ? historyMeal?.fullRecipeJson || null
     : generatedData?.recipe || null;
 
+  const isGeneratingNewRecipe =
+    !isHistoryView && (isGenerating || (!generatedData && !isGenerateError));
+  const isLoadingFromHistory = isHistoryView && isLoadingHistory;
+  const showLoading = isGeneratingNewRecipe || isLoadingFromHistory;
   const isError = isGenerateError || isHistoryError;
 
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
@@ -136,7 +141,7 @@ export function RecipePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
       <header className="border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <DashboardBackLink />
           {mealId && (
             <button
@@ -178,7 +183,7 @@ export function RecipePage() {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-6xl">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -201,7 +206,7 @@ export function RecipePage() {
       </div>
 
       {headerData && (
-        <div className="mx-auto max-w-4xl px-4 py-6">
+        <div className="mx-auto max-w-6xl px-4 py-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard
               icon={Clock}
@@ -237,20 +242,12 @@ export function RecipePage() {
         </div>
       )}
 
-      <div className="mx-auto max-w-4xl px-4 pb-16">
-        {isGenerating && (
-          <LoadingExperience
-            title="Tworzę pełny przepis"
-            subtitle="To potrwa chwilę. Zbieram składniki, kroki i wartości odżywcze."
-            progressLabel="Układam szczegóły przepisu..."
-            progressDurationSec={28}
-            className="min-h-[420px] py-10"
-          />
-        )}
+      <div className="mx-auto max-w-6xl px-4 pb-16">
+        {isGeneratingNewRecipe && <RecipeLoadingAnimation />}
 
-        {!isGenerating && isLoadingHistory && <RecipeLoadingSkeleton />}
+        {isLoadingFromHistory && <RecipeLoadingSkeleton />}
 
-        {isError && (
+        {isError && !showLoading && (
           <ErrorCard
             message={errorMessage}
             onRetry={() => {
@@ -266,7 +263,7 @@ export function RecipePage() {
         )}
 
         <AnimatePresence>
-          {recipe && (
+          {!showLoading && recipe && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -438,15 +435,26 @@ function IngredientsSection({
               </h3>
               <ul className="space-y-2">
                 {items.map((ing, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
+                  <li key={idx} className="group flex items-start gap-3">
                     <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
-                    <div className="flex-1">
+                    <div className="flex flex-1 items-center gap-2">
                       <span className="font-medium text-slate-900 dark:text-white">
                         {ing.name}
                       </span>
                       {ing.notes && (
                         <span className="text-slate-500"> ({ing.notes})</span>
                       )}
+                      <button
+                        type="button"
+                        title="Zamienniki - wkrótce dostępne!"
+                        className="ml-1 cursor-not-allowed rounded-lg p-1 opacity-0 transition-opacity hover:bg-slate-100 group-hover:opacity-100 dark:hover:bg-slate-800"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          alert("🔜 Funkcja zamienników będzie dostępna wkrótce!");
+                        }}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
+                      </button>
                     </div>
                     <span className="text-sm text-slate-500">
                       {ing.amount} {ing.unit}
