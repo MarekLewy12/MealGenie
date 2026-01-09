@@ -64,6 +64,7 @@ export async function suggestMealsController(
       cookingSkill: preferences.cookingSkill,
       budget: preferences.budget,
       targetWeightGrams: input.targetWeightGrams,
+      hungerLevel: input.hungerLevel,
     };
 
     // Wywołanie serwisu AI z kontekstem

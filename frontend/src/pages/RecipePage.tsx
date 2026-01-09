@@ -26,7 +26,7 @@ import {
   getMealById,
   toggleMealFavorite,
 } from "../services/api";
-import { RecipeLoadingAnimation } from "../components/RecipeLoadingAnimation";
+import { RecipeLoadingWithPreview } from "../components/RecipeLoadingWithPreview";
 import { DashboardBackLink } from "../components/DashboardBackLink";
 import { notify } from "../store/notificationStore";
 import type {
@@ -35,14 +35,21 @@ import type {
   FullRecipeIngredient,
 } from "../types/meal";
 
+type RecipeView = "loading" | "recipe" | "error";
+
 export function RecipePage() {
-  const { state } = useLocation() as { state?: { teaser?: MealSuggestion } };
+  const { state } = useLocation() as {
+    state?: { teaser?: MealSuggestion; unusedImageUrls?: string[] };
+  };
   const { id: routeId } = useParams<{ id: string }>();
   const teaser = state?.teaser;
+  const unusedImageUrls = state?.unusedImageUrls;
 
+  const [view, setView] = useState<RecipeView>("loading");
   const [mealId, setMealId] = useState<string | null>(routeId || null);
   const [isFavorite, setIsFavorite] = useState(false);
-  const lastTeaserKeyRef = useRef<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     if (routeId) {
@@ -55,7 +62,6 @@ export function RecipePage() {
 
   const {
     data: historyMeal,
-    isLoading: isLoadingHistory,
     isError: isHistoryError,
     error: historyError,
     refetch: refetchHistory,
@@ -65,52 +71,62 @@ export function RecipePage() {
     enabled: isHistoryView,
   });
 
-  const {
-    mutate: generateRecipe,
-    data: generatedData,
-    isPending: isGenerating,
-    isError: isGenerateError,
-    error: generateError,
-  } = useMutation({
-    mutationFn: () => generateFullRecipe(teaser!),
-    onSuccess: (data) => {
-      // Id potrzebne do akcji ulubionych.
-      setMealId(data.mealHistoryId);
-      notify.success("Przepis jest gotowy!");
-    },
-    onError: (err) => {
-      notify.error(
-        err instanceof Error
-          ? err.message
-          : "Nie udało się wygenerować przepisu.",
-        "Błąd generowania",
-      );
-    },
-  });
-
   useEffect(() => {
-    if (!teaser || routeId) return;
-    const teaserKey = JSON.stringify(teaser);
-    if (lastTeaserKeyRef.current === teaserKey) return;
-    lastTeaserKeyRef.current = teaserKey;
-    generateRecipe();
-  }, [teaser, routeId, generateRecipe]);
-
-  useEffect(() => {
-    if (historyMeal) {
-      setIsFavorite(historyMeal.isFavorite);
+    if (isHistoryView) {
+      setView("loading");
     }
-  }, [historyMeal]);
+  }, [isHistoryView, routeId]);
 
   useEffect(() => {
+    if (!isHistoryView) return;
+    if (historyMeal) {
+      setView("recipe");
+      setIsFavorite(historyMeal.isFavorite);
+      return;
+    }
     if (!isHistoryError) return;
+    setView("error");
+    setErrorMessage(
+      historyError instanceof Error
+        ? historyError.message
+        : "Nie udało się załadować przepisu.",
+    );
     notify.error(
       historyError instanceof Error
         ? historyError.message
         : "Nie udało się załadować przepisu.",
       "Błąd ładowania",
     );
-  }, [isHistoryError, historyError]);
+  }, [isHistoryView, historyMeal, isHistoryError, historyError]);
+
+  const {
+    mutate: generateRecipe,
+    data: generatedData,
+  } = useMutation({
+    mutationFn: () => generateFullRecipe(teaser!, 2, unusedImageUrls),
+    onSuccess: (data) => {
+      // Id potrzebne do akcji ulubionych.
+      setMealId(data.mealHistoryId);
+      setView("recipe");
+      notify.success("Przepis jest gotowy!", "Generator");
+    },
+    onError: (err) => {
+      setView("error");
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "Nie udało się wygenerować przepisu.",
+      );
+      notify.error("Nie udało się wygenerować przepisu.", "Generator");
+    },
+  });
+
+  useEffect(() => {
+    if (!teaser || routeId || hasStartedRef.current) return;
+    hasStartedRef.current = true;
+    setView("loading");
+    generateRecipe();
+  }, [teaser, routeId, generateRecipe]);
 
   const favoriteMutation = useMutation({
     mutationFn: () => toggleMealFavorite(mealId!),
@@ -140,12 +156,6 @@ export function RecipePage() {
     ? historyMeal?.fullRecipeJson || null
     : generatedData?.recipe || null;
 
-  const isGeneratingNewRecipe =
-    !isHistoryView && (isGenerating || (!generatedData && !isGenerateError));
-  const isLoadingFromHistory = isHistoryView && isLoadingHistory;
-  const showLoading = isGeneratingNewRecipe || isLoadingFromHistory;
-  const isError = isGenerateError || isHistoryError;
-
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
   const headerData =
     teaser ??
@@ -162,14 +172,6 @@ export function RecipePage() {
   const imageUrl = headerData?.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${headerData.imageUrl}`
     : headerData?.imageUrl;
-
-  const errorMessage = isGenerateError
-    ? generateError instanceof Error
-      ? generateError.message
-      : "Nie udało się wygenerować przepisu"
-    : historyError instanceof Error
-      ? historyError.message
-      : "Nie udało się załadować przepisu";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
@@ -276,28 +278,45 @@ export function RecipePage() {
       )}
 
       <div className="mx-auto max-w-6xl px-4 pb-16">
-        {isGeneratingNewRecipe && <RecipeLoadingAnimation />}
-
-        {isLoadingFromHistory && <RecipeLoadingSkeleton />}
-
-        {isError && !showLoading && (
-          <ErrorCard
-            message={errorMessage}
-            onRetry={() => {
-              if (isHistoryView) {
-                refetchHistory();
-                return;
-              }
-              if (teaser) {
-                generateRecipe();
-              }
-            }}
-          />
-        )}
-
-        <AnimatePresence>
-          {!showLoading && recipe && (
+        <AnimatePresence mode="wait">
+          {view === "loading" && (
             <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <RecipeLoadingWithPreview teaser={teaser} />
+            </motion.div>
+          )}
+
+          {view === "error" && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <ErrorCard
+                message={errorMessage}
+                onRetry={() => {
+                  if (isHistoryView) {
+                    setView("loading");
+                    refetchHistory();
+                    return;
+                  }
+                  if (teaser) {
+                    setView("loading");
+                    generateRecipe();
+                  }
+                }}
+              />
+            </motion.div>
+          )}
+
+          {view === "recipe" && recipe && (
+            <motion.div
+              key="recipe"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}

@@ -39,7 +39,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       type: opts.type,
       title: opts.title,
       message: opts.message,
-      duration: opts.duration ?? 5000,
+      duration: opts.duration ?? 3500,
       dismissible: opts.dismissible ?? true,
     };
 

@@ -50,6 +50,7 @@ export type GenerateMealSuggestionsPayload = {
   availableIngredients?: string[];
   useEquipment?: string[];
   targetWeightGrams?: number;
+  hungerLevel?: number;
 };
 
 export async function generateMealSuggestions(
@@ -65,10 +66,11 @@ export async function generateMealSuggestions(
 export async function generateFullRecipe(
   mealTeaser: MealSuggestion,
   servings: number = 2,
+  unusedImageUrls?: string[],
 ): Promise<GenerateRecipeResponse> {
   const { data } = await api.post<GenerateRecipeResponse>(
     "/meals/recipe",
-    { mealTeaser, servings },
+    { mealTeaser, servings, unusedImageUrls },
     { timeout: 60_000 },
   );
 

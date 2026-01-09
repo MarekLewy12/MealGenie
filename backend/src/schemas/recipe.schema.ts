@@ -19,6 +19,7 @@ export const MealTeaserInputSchema = z.object({
 export const GenerateRecipeRequestSchema = z.object({
   mealTeaser: MealTeaserInputSchema,
   servings: z.number().int().min(1).max(12).default(2),
+  unusedImageUrls: z.array(z.string()).optional(),
 });
 
 export type GenerateRecipeRequest = z.infer<typeof GenerateRecipeRequestSchema>;

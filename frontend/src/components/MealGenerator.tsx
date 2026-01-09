@@ -174,6 +174,7 @@ export function MealGenerator() {
   const [view, setView] = useState<GeneratorView>("form");
   const [portionMode, setPortionMode] = useState<PortionMode>("servings");
   const [targetWeight, setTargetWeight] = useState(250);
+  const [hungerLevel, setHungerLevel] = useState(3);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -184,6 +185,7 @@ export function MealGenerator() {
         prepTime,
         servingSize: portionMode === "servings" ? servingSize : undefined,
         targetWeightGrams: portionMode === "weight" ? targetWeight : undefined,
+        hungerLevel,
         userPrompt: userPrompt.length > 0 ? userPrompt : undefined,
         availableIngredients: ingredients,
         useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
@@ -210,6 +212,23 @@ export function MealGenerator() {
 
   const handleBackToForm = () => {
     setView("form");
+  };
+
+  const handleSelectMeal = (
+    selectedMeal: MealSuggestion,
+    allMeals: MealSuggestion[],
+  ) => {
+    const unusedImageUrls = allMeals
+      .filter((meal) => meal.imageUrl !== selectedMeal.imageUrl)
+      .map((meal) => meal.imageUrl)
+      .filter((url): url is string => Boolean(url));
+
+    navigate("/recipe", {
+      state: {
+        teaser: selectedMeal,
+        unusedImageUrls,
+      },
+    });
   };
 
   useEffect(() => {
@@ -330,7 +349,7 @@ export function MealGenerator() {
               </button>
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-5 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 lg:grid-cols-3 lg:gap-4">
+            <div className="mb-8 grid grid-cols-1 gap-5 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
               <div className="min-w-0 w-full">
                 <div className="mb-2 flex justify-between">
                   <label className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
@@ -434,6 +453,32 @@ export function MealGenerator() {
                   </div>
                 )}
               </div>
+
+              <div className="min-w-0 w-full">
+                <label className="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                  Poziom głodu
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg" title="Lekki posiłek">
+                    😋
+                  </span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    value={hungerLevel}
+                    onChange={(e) => setHungerLevel(Number(e.target.value))}
+                    className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-slate-200 accent-orange-500 dark:bg-slate-700"
+                  />
+                  <span className="text-lg" title="Uczta">
+                    🍖
+                  </span>
+                </div>
+                <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+                  <span>Lekko</span>
+                  <span>Uczta</span>
+                </div>
+              </div>
             </div>
 
             <div className="mb-8">
@@ -499,9 +544,7 @@ export function MealGenerator() {
             key="success"
             meals={data.meals}
             onReset={handleBackToForm}
-            onSelectMeal={(meal) =>
-              navigate("/recipe", { state: { teaser: meal } })
-            }
+            onSelectMeal={(meal) => handleSelectMeal(meal, data.meals)}
           />
         )}
 

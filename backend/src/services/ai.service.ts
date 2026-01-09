@@ -26,6 +26,7 @@ interface GenerationContext {
   cookingSkill: CookingSkill;
   budget: Budget;
   targetWeightGrams?: number;
+  hungerLevel?: number;
 }
 
 const mealTypeToPolish: Record<string, string> = {
@@ -35,6 +36,14 @@ const mealTypeToPolish: Record<string, string> = {
   SNACK: "przekąska",
   DESSERT: "deser",
   ANY: "dowolny posiłek",
+};
+
+const hungerLevelDescriptions: Record<number, string> = {
+  1: "bardzo lekki posiłek, mała porcja, niskokaloryczny (ok. 250-350 kcal)",
+  2: "lekki posiłek, umiarkowana porcja (ok. 350-450 kcal)",
+  3: "standardowy posiłek, normalna porcja (ok. 450-600 kcal)",
+  4: "sycący posiłek, większa porcja (ok. 600-800 kcal)",
+  5: "bardzo sycący posiłek, duża porcja typu \"uczta\" (ok. 800-1100 kcal)",
 };
 
 export async function generateMealSuggestions(
@@ -81,6 +90,11 @@ export async function generateMealSuggestions(
     - Typ: ${mealTypeToPolish[context.mealType] || "Dowolny"}
     - Czas przygotowania: max ${context.prepTime} minut
     ${portionInfo}
+    ${
+      context.hungerLevel
+        ? `- Poziom głodu: ${hungerLevelDescriptions[context.hungerLevel]}`
+        : "- Poziom głodu: standardowy (ok. 500-600 kcal)"
+    }
     
     INTENT UŻYTKOWNIKA (Najważniejsze!):
     ${
