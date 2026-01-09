@@ -26,6 +26,7 @@ import {
   toggleMealFavorite,
 } from "../services/api";
 import { LoadingExperience } from "../components/LoadingExperience";
+import { DashboardBackLink } from "../components/DashboardBackLink";
 import type {
   MealSuggestion,
   FullRecipe,
@@ -134,17 +135,17 @@ export function RecipePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
-      <header className="sticky top-0 z-50 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
+      <header className="border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <div />
+          <DashboardBackLink />
           {mealId && (
             <button
               onClick={() => favoriteMutation.mutate()}
               disabled={favoriteMutation.isPending}
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
                 isFavorite
-                  ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
-                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "border-red-200/80 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50 dark:hover:bg-red-500/20"
+                  : "border-slate-200/80 bg-white/90 text-slate-800 hover:border-indigo-300 hover:bg-white dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
               }`}
             >
               {favoriteMutation.isPending ? (

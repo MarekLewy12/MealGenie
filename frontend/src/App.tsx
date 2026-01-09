@@ -101,24 +101,24 @@ function App() {
                         </PageTransition>
                       }
                     />
-                    {/* /recipe/:id przed /recipe. */}
-                    <Route
-                      path="/recipe/:id"
-                      element={
-                        <PageTransition>
-                          <RecipePage />
-                        </PageTransition>
-                      }
-                    />
-                    <Route
-                      path="/recipe"
-                      element={
-                        <PageTransition>
-                          <RecipePage />
-                        </PageTransition>
-                      }
-                    />
                   </Route>
+                  {/* /recipe/:id przed /recipe. */}
+                  <Route
+                    path="/recipe/:id"
+                    element={
+                      <PageTransition>
+                        <RecipePage />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/recipe"
+                    element={
+                      <PageTransition>
+                        <RecipePage />
+                      </PageTransition>
+                    }
+                  />
                 </Route>
 
                 <Route
