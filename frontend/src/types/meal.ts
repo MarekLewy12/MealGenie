@@ -62,3 +62,31 @@ export interface FullRecipe {
   storageInfo?: string;
   imageUrl: string | null;
 }
+
+// Typy dla historii i ulubionych.
+export interface MealHistoryItem {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  estimatedTime: number | null;
+  category: MealType | null;
+  isFavorite: boolean;
+  createdAt: string;
+}
+
+export interface MealHistoryDetail extends MealHistoryItem {
+  fullRecipeJson: FullRecipe | null;
+  ingredients: string[];
+  rating: number | null;
+}
+
+export interface MealHistoryResponse {
+  items: MealHistoryItem[];
+  total: number;
+}
+
+export interface GenerateRecipeResponse {
+  recipe: FullRecipe;
+  mealHistoryId: string;
+}

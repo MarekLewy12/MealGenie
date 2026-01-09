@@ -90,6 +90,15 @@ function App() {
                       </PageTransition>
                     }
                   />
+                  {/* /recipe/:id przed /recipe. */}
+                  <Route
+                    path="/recipe/:id"
+                    element={
+                      <PageTransition>
+                        <RecipePage />
+                      </PageTransition>
+                    }
+                  />
                   <Route
                     path="/recipe"
                     element={

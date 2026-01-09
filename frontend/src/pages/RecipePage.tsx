@@ -1,7 +1,7 @@
-import { useEffect, type ElementType } from "react";
-import { useLocation, useNavigate, Navigate } from "react-router-dom";
+import { useEffect, useState, type ElementType } from "react";
+import { useLocation, useParams, Link, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Clock,
@@ -17,9 +17,15 @@ import {
   Carrot,
   Milk,
   Sparkle,
+  Heart,
+  Loader2,
 } from "lucide-react";
 
-import { generateFullRecipe } from "../services/api";
+import {
+  generateFullRecipe,
+  getMealById,
+  toggleMealFavorite,
+} from "../services/api";
 import type {
   MealSuggestion,
   FullRecipe,
@@ -28,43 +34,133 @@ import type {
 
 export function RecipePage() {
   const { state } = useLocation() as { state?: { teaser?: MealSuggestion } };
-  const navigate = useNavigate();
+  const { id: routeId } = useParams<{ id: string }>();
   const teaser = state?.teaser;
 
-  if (!teaser) {
-    return <Navigate to="/generator" replace />;
-  }
+  const [mealId, setMealId] = useState<string | null>(routeId || null);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    if (routeId) {
+      setMealId(routeId);
+    }
+  }, [routeId]);
+
+  // Widok historii tylko przy routeId i braku teasera.
+  const isHistoryView = Boolean(routeId) && !teaser;
 
   const {
-    mutate,
-    data: recipe,
-    isPending,
-    isError,
-    error,
+    data: historyMeal,
+    isLoading: isLoadingHistory,
+    isError: isHistoryError,
+    error: historyError,
+    refetch: refetchHistory,
+  } = useQuery({
+    queryKey: ["meal", routeId],
+    queryFn: () => getMealById(routeId!),
+    enabled: isHistoryView,
+  });
+
+  const {
+    mutate: generateRecipe,
+    data: generatedData,
+    isPending: isGenerating,
+    isError: isGenerateError,
+    error: generateError,
   } = useMutation({
-    mutationFn: () => generateFullRecipe(teaser),
+    mutationFn: () => generateFullRecipe(teaser!),
+    onSuccess: (data) => {
+      // Id potrzebne do akcji ulubionych.
+      setMealId(data.mealHistoryId);
+    },
   });
 
   useEffect(() => {
-    mutate();
-  }, [mutate]);
+    if (teaser && !routeId) {
+      generateRecipe();
+    }
+  }, [teaser, routeId, generateRecipe]);
+
+  useEffect(() => {
+    if (historyMeal) {
+      setIsFavorite(historyMeal.isFavorite);
+    }
+  }, [historyMeal]);
+
+  const favoriteMutation = useMutation({
+    mutationFn: () => toggleMealFavorite(mealId!),
+    onSuccess: (data) => {
+      setIsFavorite(data.isFavorite);
+    },
+  });
+
+  if (!teaser && !routeId) {
+    return <Navigate to="/generator" replace />;
+  }
+
+  const recipe: FullRecipe | null = isHistoryView
+    ? historyMeal?.fullRecipeJson || null
+    : generatedData?.recipe || null;
+
+  const isPending = isGenerating || isLoadingHistory;
+  const isError = isGenerateError || isHistoryError;
 
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-  const imageUrl = teaser.imageUrl?.startsWith("/")
-    ? `${apiBaseUrl}${teaser.imageUrl}`
-    : teaser.imageUrl;
+  const headerData =
+    teaser ??
+    (historyMeal
+      ? {
+          name: historyMeal.name,
+          description: historyMeal.description || "",
+          cookingTimeMinutes: historyMeal.estimatedTime || 0,
+          difficulty: "Medium" as const,
+          imageUrl: historyMeal.imageUrl,
+          calories: recipe?.nutrition?.calories,
+        }
+      : null);
+  const imageUrl = headerData?.imageUrl?.startsWith("/")
+    ? `${apiBaseUrl}${headerData.imageUrl}`
+    : headerData?.imageUrl;
+
+  const errorMessage = isGenerateError
+    ? generateError instanceof Error
+      ? generateError.message
+      : "Nie udało się wygenerować przepisu"
+    : historyError instanceof Error
+      ? historyError.message
+      : "Nie udało się załadować przepisu";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
       <header className="sticky top-0 z-50 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
-        <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-4">
-          <button
-            onClick={() => navigate(-1)}
+        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+          <Link
+            to="/dashboard"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <ArrowLeft className="h-4 w-4" />
-            Powrót
-          </button>
+            Dashboard
+          </Link>
+          {mealId && (
+            <button
+              onClick={() => favoriteMutation.mutate()}
+              disabled={favoriteMutation.isPending}
+              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                isFavorite
+                  ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              }`}
+            >
+              {favoriteMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Heart
+                  className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                />
+              )}
+              {isFavorite ? "Ulubione" : "Dodaj do ulubionych"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -73,7 +169,7 @@ export function RecipePage() {
           {imageUrl ? (
             <img
               src={imageUrl}
-              alt={teaser.name}
+              alt={headerData?.name || "Przepis"}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -91,66 +187,74 @@ export function RecipePage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-3xl font-bold md:text-4xl"
             >
-              {teaser.name}
+              {headerData?.name || "Ładowanie..."}
             </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-2 text-lg text-white/90"
-            >
-              {teaser.description}
-            </motion.p>
+            {headerData?.description && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mt-2 text-lg text-white/90"
+              >
+                {headerData.description}
+              </motion.p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 py-6">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard
-            icon={Clock}
-            label="Czas"
-            value={`${teaser.cookingTimeMinutes} min`}
-            color="blue"
-          />
-          <StatCard
-            icon={ChefHat}
-            label="Trudność"
-            value={
-              teaser.difficulty === "Easy"
-                ? "Łatwe"
-                : teaser.difficulty === "Medium"
-                  ? "Średnie"
-                  : "Trudne"
-            }
-            color="purple"
-          />
-          <StatCard
-            icon={Flame}
-            label="Kalorie"
-            value={teaser.calories ? `${teaser.calories} kcal` : "—"}
-            color="orange"
-          />
-          <StatCard
-            icon={Users}
-            label="Porcje"
-            value={recipe?.servings ? `${recipe.servings}` : "—"}
-            color="green"
-          />
+      {headerData && (
+        <div className="mx-auto max-w-4xl px-4 py-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard
+              icon={Clock}
+              label="Czas"
+              value={`${headerData.cookingTimeMinutes} min`}
+              color="blue"
+            />
+            <StatCard
+              icon={ChefHat}
+              label="Trudność"
+              value={
+                headerData.difficulty === "Easy"
+                  ? "Łatwe"
+                  : headerData.difficulty === "Medium"
+                    ? "Średnie"
+                    : "Trudne"
+              }
+              color="purple"
+            />
+            <StatCard
+              icon={Flame}
+              label="Kalorie"
+              value={headerData.calories ? `${headerData.calories} kcal` : "—"}
+              color="orange"
+            />
+            <StatCard
+              icon={Users}
+              label="Porcje"
+              value={recipe?.servings ? `${recipe.servings}` : "—"}
+              color="green"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mx-auto max-w-4xl px-4 pb-16">
         {isPending && <RecipeLoadingSkeleton />}
 
         {isError && (
           <ErrorCard
-            message={
-              error instanceof Error
-                ? error.message
-                : "Nie udało się wygenerować przepisu"
-            }
-            onRetry={() => mutate()}
+            message={errorMessage}
+            onRetry={() => {
+              if (isHistoryView) {
+                refetchHistory();
+                return;
+              }
+              if (teaser) {
+                generateRecipe();
+              }
+            }}
           />
         )}
 

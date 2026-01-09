@@ -7,6 +7,10 @@ import type {
   MealResponse,
   MealSuggestion,
   MealType,
+  MealHistoryItem,
+  MealHistoryDetail,
+  MealHistoryResponse,
+  GenerateRecipeResponse,
 } from "../types/meal";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
@@ -60,14 +64,50 @@ export async function generateMealSuggestions(
 export async function generateFullRecipe(
   mealTeaser: MealSuggestion,
   servings: number = 2,
-): Promise<FullRecipe> {
-  const { data } = await api.post<{ recipe: FullRecipe }>(
+): Promise<GenerateRecipeResponse> {
+  const { data } = await api.post<GenerateRecipeResponse>(
     "/meals/recipe",
     { mealTeaser, servings },
     { timeout: 60_000 },
   );
 
-  return data.recipe;
+  return data;
+}
+
+export interface GetHistoryOptions {
+  limit?: number;
+  offset?: number;
+  favoritesOnly?: boolean;
+}
+
+export async function getMealHistory(
+  options: GetHistoryOptions = {},
+): Promise<MealHistoryResponse> {
+  const params = new URLSearchParams();
+
+  if (options.limit !== undefined) params.set("limit", String(options.limit));
+  if (options.offset !== undefined) params.set("offset", String(options.offset));
+  if (options.favoritesOnly) params.set("favoritesOnly", "true");
+
+  const queryString = params.toString();
+  const url = queryString ? `/meals/history?${queryString}` : "/meals/history";
+
+  const { data } = await api.get<MealHistoryResponse>(url);
+  return data;
+}
+
+export async function getMealById(id: string): Promise<MealHistoryDetail> {
+  const { data } = await api.get<MealHistoryDetail>(`/meals/history/${id}`);
+  return data;
+}
+
+export async function toggleMealFavorite(
+  id: string,
+): Promise<{ isFavorite: boolean }> {
+  const { data } = await api.patch<{ isFavorite: boolean }>(
+    `/meals/${id}/favorite`,
+  );
+  return data;
 }
 
 export async function registerUser(data: RegisterFormData) {

@@ -1,8 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import {
     ArrowRight,
-    ChefHat,
     Clock3,
     Heart,
+    Loader2,
     Plus,
     Settings,
     ShoppingCart,
@@ -11,11 +12,26 @@ import {
     Wand2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getMealHistory } from "../services/api";
 import { useAuthStore } from "../store/authStore";
+import type { MealHistoryItem } from "../types/meal";
 
 export function DashboardPage() {
     const user = useAuthStore((state) => state.user);
     const greetingName = user?.name || "Kucharzu";
+
+    const { data: historyData, isLoading: isHistoryLoading } = useQuery({
+        queryKey: ["mealHistory"],
+        queryFn: () => getMealHistory({ limit: 6 }),
+    });
+
+    const { data: favoritesData, isLoading: isFavoritesLoading } = useQuery({
+        queryKey: ["mealHistory", "favorites"],
+        queryFn: () => getMealHistory({ limit: 10, favoritesOnly: true }),
+    });
+
+    const recentMeals = historyData?.items ?? [];
+    const favoriteMeals = favoritesData?.items ?? [];
 
     return (
         // Layout główny
@@ -80,7 +96,13 @@ export function DashboardPage() {
                             <div className="group flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-6 text-center shadow-sm transition dark:border-rose-400/30 dark:bg-white/5">
                                 <Heart className="mb-3 h-6 w-6 text-slate-400 group-hover:text-red-500" />
                                 <span className="text-sm font-semibold">Ulubione</span>
-                                <span className="text-xs text-slate-500">0 przepisów</span>
+                                <span className="text-xs text-slate-500">
+                                    {isFavoritesLoading ? (
+                                        <Loader2 className="inline h-3 w-3 animate-spin" />
+                                    ) : (
+                                        `${favoriteMeals.length} przepisów`
+                                    )}
+                                </span>
                             </div>
                         </div>
 
@@ -99,26 +121,64 @@ export function DashboardPage() {
                     {/* Kolumna środkowa */}
                     <div className="lg:col-span-8 xl:col-span-6 flex flex-col gap-8">
 
-                        {/* Ostatnie aktywności */}
-                        <div>
+                        {/* Ostatnie przepisy */}
+                        <section>
                             <div className="mb-4 flex items-center justify-between">
                                 <h3 className="text-lg font-bold flex items-center gap-2">
                                     <Clock3 className="h-5 w-5 text-slate-400" />
-                                    Ostatnie aktywności
+                                    Ostatnie przepisy
                                 </h3>
+                                {recentMeals.length > 0 && (
+                                    <span className="text-sm text-slate-500">
+                                        {historyData?.total || 0} łącznie
+                                    </span>
+                                )}
                             </div>
 
-                            {/* Pusty stan historii */}
-                            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-indigo-300/70 bg-indigo-50/40 py-16 text-center dark:border-indigo-400/30 dark:bg-white/5">
-                                <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-white/5">
-                                    <Utensils className="h-8 w-8 text-slate-400" />
+                            {isHistoryLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                                 </div>
-                                <h4 className="text-lg font-semibold">Pusto w kuchni?</h4>
-                                <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                    Nie wygenerowałeś jeszcze żadnego posiłku. Użyj generatora, aby zacząć.
-                                </p>
-                            </div>
-                        </div>
+                            ) : recentMeals.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-indigo-300/70 bg-indigo-50/40 py-16 text-center dark:border-indigo-400/30 dark:bg-white/5">
+                                    <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-white/5">
+                                        <Utensils className="h-8 w-8 text-slate-400" />
+                                    </div>
+                                    <h4 className="text-lg font-semibold">Pusto w kuchni?</h4>
+                                    <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        Nie wygenerowano jeszcze żadnego posiłku. Generator pomoże wystartować.
+                                    </p>
+                                    <Link
+                                        to="/generator"
+                                        className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                                    >
+                                        Wygeneruj pierwszy przepis
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    {recentMeals.map((meal) => (
+                                        <MealHistoryCard key={meal.id} meal={meal} />
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+
+                        {favoriteMeals.length > 0 && (
+                            <section>
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <Heart className="h-5 w-5 text-red-400" />
+                                        Ulubione przepisy
+                                    </h3>
+                                </div>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    {favoriteMeals.slice(0, 4).map((meal) => (
+                                        <MealHistoryCard key={meal.id} meal={meal} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         {/* Szybki Start - NOWA SEKCJA */}
                         <div>
@@ -223,5 +283,68 @@ export function DashboardPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+function MealHistoryCard({ meal }: { meal: MealHistoryItem }) {
+    const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+    const imageUrl = meal.imageUrl?.startsWith("/")
+        ? `${apiBaseUrl}${meal.imageUrl}`
+        : meal.imageUrl;
+
+    return (
+        <Link
+            to={`/recipe/${meal.id}`}
+            className="group relative flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
+        >
+            <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={meal.name}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500">
+                        <Utensils className="h-6 w-6 text-white/70" />
+                    </div>
+                )}
+            </div>
+
+            <div className="flex flex-1 flex-col justify-center min-w-0">
+                <h4 className="font-semibold text-slate-900 truncate dark:text-white">
+                    {meal.name}
+                </h4>
+                {meal.description && (
+                    <p className="text-sm text-slate-500 truncate dark:text-slate-400">
+                        {meal.description}
+                    </p>
+                )}
+                <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
+                    {meal.estimatedTime && (
+                        <span className="flex items-center gap-1">
+                            <Clock3 className="h-3 w-3" />
+                            {meal.estimatedTime} min
+                        </span>
+                    )}
+                    <span>
+                        {new Date(meal.createdAt).toLocaleDateString("pl-PL", {
+                            day: "numeric",
+                            month: "short",
+                        })}
+                    </span>
+                </div>
+            </div>
+
+            {meal.isFavorite && (
+                <div className="absolute right-3 top-3">
+                    <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                </div>
+            )}
+
+            <div className="flex items-center">
+                <ArrowRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-indigo-500" />
+            </div>
+        </Link>
     );
 }
