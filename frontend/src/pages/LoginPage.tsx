@@ -34,6 +34,7 @@ export function LoginPage() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const activeSchema = mode === "login" ? loginSchema : registerSchema;
@@ -41,7 +42,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting: isFormSubmitting },
     reset,
     clearErrors,
   } = useForm<RegisterFormData>({
@@ -50,6 +51,7 @@ export function LoginPage() {
 
   const onSubmit = async (data: RegisterFormData) => {
     setErrorMsg(null);
+    setIsSubmitting(true);
     try {
       let result;
       if (mode === "login") {
@@ -67,24 +69,32 @@ export function LoginPage() {
       } else {
         notify.success("Konto utworzone pomyślnie.", "Gotowe!");
       }
-      if (result.hasCompletedOnboarding) {
-        navigate("/dashboard");
-      } else {
-        navigate("/onboarding");
-      }
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(
-        err.response?.data?.error ||
-          (mode === "login" ? "Błędne dane logowania" : "Błąd rejestracji"),
-      );
-      notify.error(
-        err.response?.data?.error ||
-          (mode === "login" ? "Błędne dane logowania" : "Błąd rejestracji"),
-        "Autoryzacja",
-      );
+      const redirectPath = result.hasCompletedOnboarding
+        ? "/dashboard"
+        : "/onboarding";
+      // Krótkie opóźnienie, żeby store zdążył się zaktualizować przed nawigacją.
+      setTimeout(() => {
+        navigate(redirectPath);
+      }, 100);
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      const fallbackMessage =
+        mode === "login" ? "Błędne dane logowania" : "Błąd rejestracji";
+      const apiMessage =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { error?: string } } }).response?.data
+              ?.error
+          : undefined;
+      const message =
+        apiMessage ?? (err instanceof Error ? err.message : fallbackMessage);
+      setErrorMsg(message);
+      notify.error(message, "Autoryzacja");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const isBusy = isSubmitting || isFormSubmitting;
 
   const toggleMode = () => {
     setMode((prev) => (prev === "login" ? "register" : "login"));
@@ -394,11 +404,11 @@ export function LoginPage() {
               {/* Przycisk Akcji */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isBusy}
                 className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] dark:shadow-indigo-900/50"
               >
                 <div className="absolute inset-0 -z-10 bg-gradient-to-r from-indigo-500 to-violet-500 opacity-0 transition-opacity group-hover:opacity-100" />
-                {isSubmitting ? (
+                {isBusy ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
