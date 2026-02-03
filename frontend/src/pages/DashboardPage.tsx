@@ -25,7 +25,7 @@ import type { MealHistoryItem } from "../types/meal";
 
 export function DashboardPage() {
     const user = useAuthStore((state) => state.user);
-    const openChat = useChatStore((state) => state.openChat);
+  const openGlobalChat = useChatStore((state) => state.openGlobalChat);
     const shoppingItems = useShoppingListStore((state) => state.items);
     const toggleObtained = useShoppingListStore((state) => state.toggleObtained);
     const clearShoppingList = useShoppingListStore((state) => state.clearAll);
@@ -143,7 +143,7 @@ export function DashboardPage() {
                                 </p>
                                 <button
                                     type="button"
-                                    onClick={openChat}
+                                    onClick={openGlobalChat}
                                     className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-500"
                                 >
                                     Otwórz asystenta

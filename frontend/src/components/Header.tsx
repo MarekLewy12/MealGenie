@@ -9,7 +9,7 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   const { token, logout, user } = useAuthStore();
-  const openChat = useChatStore((state) => state.openChat);
+  const openGlobalChat = useChatStore((state) => state.openGlobalChat);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -65,7 +65,7 @@ export function Header() {
 
           {token && (
             <button
-              onClick={openChat}
+              onClick={openGlobalChat}
               className="group flex cursor-pointer items-center gap-2 rounded-xl border border-emerald-200/50 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 hover:shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
               title="Asystent AI"
             >
@@ -92,7 +92,7 @@ export function Header() {
         <div className="flex items-center gap-4 md:hidden">
           {token && (
             <button
-              onClick={openChat}
+              onClick={openGlobalChat}
               className="rounded-lg border border-emerald-200/60 bg-emerald-50 p-2 text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
               aria-label="Asystent AI"
             >
