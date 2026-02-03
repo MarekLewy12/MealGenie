@@ -21,6 +21,7 @@ import {
   Heart,
   Loader2,
   RefreshCw,
+  MessageSquare,
 } from "lucide-react";
 
 import {
@@ -31,6 +32,7 @@ import {
 import { RecipeLoadingWithPreview } from "../components/RecipeLoadingWithPreview";
 import { DashboardBackLink } from "../components/DashboardBackLink";
 import { notify } from "../store/notificationStore";
+import { useChatStore } from "../store/chatStore";
 import { useShoppingListStore } from "../store/shoppingListStore";
 import type {
   MealSuggestion,
@@ -54,6 +56,7 @@ export function RecipePage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [localRecipe, setLocalRecipe] = useState<FullRecipe | null>(null);
   const hasNotifiedRef = useRef(false);
+  const openRecipeChat = useChatStore((state) => state.openRecipeChat);
 
   useEffect(() => {
     setLocalRecipe(null);
@@ -206,6 +209,21 @@ export function RecipePage() {
     ? `${apiBaseUrl}${headerData.imageUrl}`
     : headerData?.imageUrl;
 
+  const handleToggleFavorite = () => {
+    if (!mealId || favoriteMutation.isPending) return;
+    favoriteMutation.mutate();
+  };
+
+  const handleAskAssistant = () => {
+    if (!recipe || !mealId) return;
+
+    openRecipeChat({
+      recipeId: mealId,
+      recipeName: recipe.name,
+      recipeImageUrl: imageUrl ?? undefined,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
       <header className="border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
@@ -213,7 +231,7 @@ export function RecipePage() {
           <DashboardBackLink />
           {mealId && (
             <button
-              onClick={() => favoriteMutation.mutate()}
+              onClick={handleToggleFavorite}
               disabled={favoriteMutation.isPending}
               className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
                 isFavorite
@@ -248,6 +266,35 @@ export function RecipePage() {
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        </div>
+
+        <div className="absolute right-4 top-4 z-10 flex gap-2">
+          {mealId && (
+            <button
+              onClick={handleToggleFavorite}
+              disabled={favoriteMutation.isPending}
+              className={`rounded-full p-2.5 shadow-lg transition hover:scale-105 ${
+                isFavorite
+                  ? "bg-red-500/90 text-white shadow-red-200/50 dark:shadow-red-900/30"
+                  : "bg-white/90 text-slate-700 shadow-slate-200/60 hover:bg-white dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-slate-900/30"
+              }`}
+              title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+            >
+              {favoriteMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Heart className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`} />
+              )}
+            </button>
+          )}
+
+          <button
+            onClick={handleAskAssistant}
+            className="group rounded-full bg-gradient-to-r from-amber-400 to-orange-500 p-2.5 shadow-lg shadow-amber-200/50 transition hover:scale-105 hover:shadow-amber-300/70 dark:shadow-amber-900/30"
+            title="Zapytaj asystenta o ten przepis"
+          >
+            <MessageSquare className="h-5 w-5 text-white" />
+          </button>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -311,76 +358,105 @@ export function RecipePage() {
       )}
 
       <div className="mx-auto max-w-6xl px-4 pb-16">
-        <AnimatePresence mode="wait">
-          {view === "loading" && (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <RecipeLoadingWithPreview teaser={teaser} />
-            </motion.div>
-          )}
+        <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+          <aside className="sticky top-24 self-start">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Potrzebujesz pomocy z tym przepisem?
+                  </p>
+                  <p className="mt-1 text-xs text-amber-800/80 dark:text-amber-200/80">
+                    Zapytaj o kroki, zamienniki składników albo czas.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleAskAssistant}
+                disabled={!recipe || !mealId}
+                className="mt-4 w-full cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-amber-200/50 transition hover:scale-[1.02] hover:shadow-amber-300/70 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-amber-900/30"
+              >
+                Wezwij asystenta przepisu
+              </button>
+            </div>
+          </aside>
 
-          {view === "error" && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-            >
-              <ErrorCard
-                message={errorMessage}
-                onRetry={() => {
-                  if (isHistoryView) {
-                    setView("loading");
-                    refetchHistory();
-                    return;
-                  }
-                  if (teaser) {
-                    setView("loading");
-                    refetchGenerate();
-                  }
-                }}
-              />
-            </motion.div>
-          )}
-
-          {view === "recipe" && recipe && (
-            <motion.div
-              key="recipe"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-8"
-            >
-              <NutritionSection nutrition={recipe.nutrition} />
-
-              <IngredientsSection ingredients={recipe.ingredients} />
-
-              <StepsSection steps={recipe.steps} />
-
-              {recipe.tips.length > 0 && <TipsSection tips={recipe.tips} />}
-
-              {recipe.servingSuggestion && (
-                <SuggestionCard
-                  icon={Sparkles}
-                  title="💫 Jak podać"
-                  content={recipe.servingSuggestion}
-                />
+          <div>
+            <AnimatePresence mode="wait">
+              {view === "loading" && (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <RecipeLoadingWithPreview teaser={teaser} />
+                </motion.div>
               )}
 
-              {recipe.storageInfo && (
-                <SuggestionCard
-                  icon={Refrigerator}
-                  title="📦 Przechowywanie"
-                  content={recipe.storageInfo}
-                />
+              {view === "error" && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ErrorCard
+                    message={errorMessage}
+                    onRetry={() => {
+                      if (isHistoryView) {
+                        setView("loading");
+                        refetchHistory();
+                        return;
+                      }
+                      if (teaser) {
+                        setView("loading");
+                        refetchGenerate();
+                      }
+                    }}
+                  />
+                </motion.div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+              {view === "recipe" && recipe && (
+                <motion.div
+                  key="recipe"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-8"
+                >
+                  <NutritionSection nutrition={recipe.nutrition} />
+
+                  <IngredientsSection ingredients={recipe.ingredients} />
+
+                  <StepsSection steps={recipe.steps} />
+
+                  {recipe.tips.length > 0 && <TipsSection tips={recipe.tips} />}
+
+                  {recipe.servingSuggestion && (
+                    <SuggestionCard
+                      icon={Sparkles}
+                      title="💫 Jak podać"
+                      content={recipe.servingSuggestion}
+                    />
+                  )}
+
+                  {recipe.storageInfo && (
+                    <SuggestionCard
+                      icon={Refrigerator}
+                      title="📦 Przechowywanie"
+                      content={recipe.storageInfo}
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );

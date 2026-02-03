@@ -31,8 +31,8 @@ function App() {
       <div className="relative z-10">
         <Header />
 
-        <div className="overflow-x-hidden">
-          <main className="relative overflow-hidden">
+        <div>
+          <main className="relative">
             <AnimatePresence mode="wait" initial={false}>
               <Routes location={location} key={location.pathname}>
                 <Route

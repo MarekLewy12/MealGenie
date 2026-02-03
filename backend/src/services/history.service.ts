@@ -5,6 +5,8 @@ import type {
   MealHistoryItem,
 } from "../schemas/meal.schema.js";
 
+export type { MealHistoryDetail };
+
 const prisma = new PrismaClient();
 
 export async function getMealHistory(
