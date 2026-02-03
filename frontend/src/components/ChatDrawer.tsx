@@ -7,7 +7,6 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowLeft,
   ChefHat,
   Loader2,
   MessageSquare,
@@ -48,7 +47,6 @@ export function ChatDrawer() {
     addMessage,
     clearCurrentSession,
     setLoading,
-    openGlobalChat,
     getCurrentMessages,
     getCurrentMode,
     getCurrentRecipeId,
@@ -148,7 +146,7 @@ export function ChatDrawer() {
           />
 
           <motion.aside
-            className="fixed left-0 top-0 z-50 flex h-full w-full flex-col border-r border-slate-200/70 bg-white shadow-2xl dark:border-slate-800 dark:bg-[#0b1220] lg:w-[480px]"
+            className="fixed left-0 top-0 z-50 flex h-full w-full flex-col border-r border-slate-200/70 bg-white shadow-2xl dark:border-slate-800 dark:bg-[#0b1220] lg:w-[600px]"
             variants={drawerVariants}
             initial="hidden"
             animate="visible"
@@ -193,16 +191,6 @@ export function ChatDrawer() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {mode === "recipe" && (
-                  <button
-                    type="button"
-                    onClick={openGlobalChat}
-                    className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                    title="Wróć do asystenta globalnego"
-                  >
-                    <ArrowLeft className="h-5 w-5" />
-                  </button>
-                )}
                 <button
                   type="button"
                   onClick={clearCurrentSession}
@@ -227,13 +215,13 @@ export function ChatDrawer() {
                 <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                   Szybkie pytania:
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
                   {RECIPE_CHIPS.map((chip) => (
                     <button
                       key={chip.label}
                       type="button"
                       onClick={() => handleChipClick(chip.prompt)}
-                      className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                      className="cursor-pointer whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
                     >
                       {chip.label}
                     </button>

@@ -377,7 +377,7 @@ export function RecipePage() {
               <button
                 onClick={handleAskAssistant}
                 disabled={!recipe || !mealId}
-                className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-amber-200/50 transition hover:scale-[1.02] hover:shadow-amber-300/70 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-amber-900/30"
+                className="mt-4 w-full cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-amber-200/50 transition hover:scale-[1.02] hover:shadow-amber-300/70 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-amber-900/30"
               >
                 Wezwij asystenta przepisu
               </button>
