@@ -35,7 +35,7 @@ export function MealHistoryCard({ meal }: MealHistoryCardProps) {
   return (
     <Link
       to={`/recipe/${meal.id}`}
-      className="group relative flex gap-3 sm:gap-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
+      className="group relative flex min-w-0 gap-3 sm:gap-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
     >
       <div className="h-14 w-14 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
         {imageUrl ? (

@@ -177,7 +177,7 @@ export function DashboardPage() {
                     </div>
 
                     {/* Kolumna środkowa */}
-                    <div className="lg:col-span-8 xl:col-span-6 flex flex-col gap-8">
+                    <div className="min-w-0 lg:col-span-8 xl:col-span-6 flex flex-col gap-8">
 
                         {/* Ostatnie przepisy */}
                         <section>
@@ -438,7 +438,7 @@ function HeroMealCard({ meal }: { meal: MealHistoryItem }) {
     return (
         <Link
             to={`/recipe/${meal.id}`}
-            className="group relative block overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/50"
+            className="group relative block min-w-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/50"
         >
             <div className="flex flex-col md:flex-row">
                 <div className="relative h-56 w-full md:h-auto md:w-1/2">
@@ -466,13 +466,13 @@ function HeroMealCard({ meal }: { meal: MealHistoryItem }) {
                     )}
                 </div>
 
-                <div className="flex flex-1 flex-col justify-between p-6 md:p-8">
+                <div className="flex min-w-0 flex-1 flex-col justify-between p-6 md:p-8">
                     <div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                        <h3 className="break-words text-2xl font-bold text-slate-900 dark:text-white">
                             {meal.name}
                         </h3>
                         {meal.description && (
-                            <p className="mt-3 line-clamp-2 text-slate-600 dark:text-slate-300">
+                            <p className="mt-3 break-words line-clamp-2 text-slate-600 dark:text-slate-300">
                                 {meal.description}
                             </p>
                         )}
