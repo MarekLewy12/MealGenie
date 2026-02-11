@@ -118,3 +118,11 @@ model ShoppingItem {
 
   @@index([userId, obtained])
 }
+
+model GuestGeneration {
+  id              String   @id @default(uuid())
+  fingerprintHash String
+  createdAt       DateTime @default(now())
+
+  @@index([fingerprintHash, createdAt])
+}
