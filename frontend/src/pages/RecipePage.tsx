@@ -322,7 +322,7 @@ export function RecipePage() {
 
       {headerData && (
         <div className="mx-auto max-w-6xl px-4 py-6">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
             <StatCard
               icon={Clock}
               label="Czas"
@@ -359,7 +359,7 @@ export function RecipePage() {
 
       <div className="mx-auto max-w-6xl px-4 pb-16">
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="sticky top-24 self-start">
+          <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
@@ -385,76 +385,89 @@ export function RecipePage() {
           </aside>
 
           <div>
-            <AnimatePresence mode="wait">
-              {view === "loading" && (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <RecipeLoadingWithPreview teaser={teaser} />
-                </motion.div>
-              )}
+            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-amber-200/50 bg-amber-50/95 p-3 backdrop-blur-lg lg:hidden dark:border-amber-500/20 dark:bg-slate-900/95">
+              <button
+                onClick={handleAskAssistant}
+                disabled={!recipe || !mealId}
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-md transition active:scale-[0.98] disabled:opacity-60"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Zapytaj asystenta
+              </button>
+            </div>
 
-              {view === "error" && (
-                <motion.div
-                  key="error"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <ErrorCard
-                    message={errorMessage}
-                    onRetry={() => {
-                      if (isHistoryView) {
-                        setView("loading");
-                        refetchHistory();
-                        return;
-                      }
-                      if (teaser) {
-                        setView("loading");
-                        refetchGenerate();
-                      }
-                    }}
-                  />
-                </motion.div>
-              )}
+            <div className="pb-20 lg:pb-0">
+              <AnimatePresence mode="wait">
+                {view === "loading" && (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <RecipeLoadingWithPreview teaser={teaser} />
+                  </motion.div>
+                )}
 
-              {view === "recipe" && recipe && (
-                <motion.div
-                  key="recipe"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="space-y-8"
-                >
-                  <NutritionSection nutrition={recipe.nutrition} />
-
-                  <IngredientsSection ingredients={recipe.ingredients} />
-
-                  <StepsSection steps={recipe.steps} />
-
-                  {recipe.tips.length > 0 && <TipsSection tips={recipe.tips} />}
-
-                  {recipe.servingSuggestion && (
-                    <SuggestionCard
-                      icon={Sparkles}
-                      title="💫 Jak podać"
-                      content={recipe.servingSuggestion}
+                {view === "error" && (
+                  <motion.div
+                    key="error"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <ErrorCard
+                      message={errorMessage}
+                      onRetry={() => {
+                        if (isHistoryView) {
+                          setView("loading");
+                          refetchHistory();
+                          return;
+                        }
+                        if (teaser) {
+                          setView("loading");
+                          refetchGenerate();
+                        }
+                      }}
                     />
-                  )}
+                  </motion.div>
+                )}
 
-                  {recipe.storageInfo && (
-                    <SuggestionCard
-                      icon={Refrigerator}
-                      title="📦 Przechowywanie"
-                      content={recipe.storageInfo}
-                    />
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                {view === "recipe" && recipe && (
+                  <motion.div
+                    key="recipe"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-8"
+                  >
+                    <NutritionSection nutrition={recipe.nutrition} />
+
+                    <IngredientsSection ingredients={recipe.ingredients} />
+
+                    <StepsSection steps={recipe.steps} />
+
+                    {recipe.tips.length > 0 && <TipsSection tips={recipe.tips} />}
+
+                    {recipe.servingSuggestion && (
+                      <SuggestionCard
+                        icon={Sparkles}
+                        title="💫 Jak podać"
+                        content={recipe.servingSuggestion}
+                      />
+                    )}
+
+                    {recipe.storageInfo && (
+                      <SuggestionCard
+                        icon={Refrigerator}
+                        title="📦 Przechowywanie"
+                        content={recipe.storageInfo}
+                      />
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -483,13 +496,15 @@ function StatCard({
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/50">
-      <div className={`rounded-xl p-2.5 ${colors[color]}`}>
-        <Icon className="h-5 w-5" />
+    <div className={`flex items-center gap-2 rounded-xl border border-slate-200 p-3 sm:gap-3 sm:p-4 dark:border-slate-800 ${colors[color]}`}>
+      <div className="rounded-lg bg-white/50 p-1.5 sm:p-2 dark:bg-black/20">
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
-      <div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-        <p className="font-semibold text-slate-900 dark:text-white">{value}</p>
+      <div className="min-w-0">
+        <p className="text-[10px] font-medium uppercase tracking-wide opacity-70 sm:text-xs">
+          {label}
+        </p>
+        <p className="truncate text-sm font-bold sm:text-base">{value}</p>
       </div>
     </div>
   );

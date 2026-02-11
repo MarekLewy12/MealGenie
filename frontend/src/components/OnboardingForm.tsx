@@ -173,23 +173,35 @@ export function OnboardingForm({
           </div>
 
           <div>
-            <label className={labelStyles}>
-              Poziom pikantności
-              <span className="ml-2 text-xs font-medium text-slate-600 dark:text-slate-300">
-                {spiceLevelLabels[spiceLevel] ?? "Umiarkowany"}
-              </span>
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="5"
-              step="1"
-              {...register("spiceLevel", { valueAsNumber: true })}
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-rose-500 dark:bg-slate-700"
-            />
-            <div className="mt-1 flex justify-between text-[10px] text-slate-400">
-              <span>Łagodnie</span>
-              <span>Ostro</span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Poziom ostrości
+                </label>
+                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">
+                  {spiceLevelLabels[spiceLevel] ?? "Umiarkowany"}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                step="1"
+                {...register("spiceLevel", { valueAsNumber: true })}
+                className="h-3 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-orange-500 dark:bg-slate-700"
+              />
+              <div className="flex justify-between px-1">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <span
+                    key={level}
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      spiceLevel >= level
+                        ? "bg-orange-500"
+                        : "bg-slate-300 dark:bg-slate-600"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

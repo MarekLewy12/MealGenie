@@ -146,7 +146,7 @@ export function ChatDrawer() {
           />
 
           <motion.aside
-            className="fixed left-0 top-0 z-50 flex h-full w-full flex-col border-r border-slate-200/70 bg-white shadow-2xl dark:border-slate-800 dark:bg-[#0b1220] lg:w-[600px]"
+            className="fixed left-0 top-0 z-50 flex h-full w-full flex-col border-r border-slate-200/70 bg-white shadow-2xl dark:border-slate-800 dark:bg-[#0b1220] sm:w-[85vw] md:w-[70vw] lg:w-[600px] lg:max-w-[50vw]"
             variants={drawerVariants}
             initial="hidden"
             animate="visible"

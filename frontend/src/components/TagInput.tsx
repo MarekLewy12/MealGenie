@@ -1,4 +1,5 @@
 import { useState, KeyboardEvent } from "react";
+import { X } from "lucide-react";
 
 type TagInputProps = {
   value: string[];
@@ -38,22 +39,25 @@ export function TagInput({
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
+      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+        {label}
+      </label>
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 transition focus-within:border-indigo-500 focus-within:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:focus-within:bg-slate-800">
         {/* Tagi */}
         {value.map((tag) => (
           <span
             key={tag}
-            className="flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-100 px-3 py-1 text-sm text-indigo-700 animate-fadeIn dark:border-indigo-500/30 dark:bg-indigo-900/50 dark:text-indigo-200"
+            className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-800 animate-fadeIn sm:px-3 sm:py-1 dark:bg-indigo-500/20 dark:text-indigo-200"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="ml-1 text-indigo-500 hover:text-indigo-700 focus:outline-none dark:text-indigo-400 dark:hover:text-white"
+              className="ml-0.5 rounded-full p-1 hover:bg-indigo-200/50 dark:hover:bg-indigo-400/30"
+              aria-label={`Usuń ${tag}`}
             >
-              &times;
+              <X className="h-3.5 w-3.5" />
             </button>
           </span>
         ))}
