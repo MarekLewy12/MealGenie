@@ -75,9 +75,14 @@ export function Header() {
           )}
 
           {!token ? (
-            <Link to="/login" className={desktopLinkClasses}>
-              Logowanie
-            </Link>
+            <>
+              <Link to="/try" className={desktopLinkClasses}>
+                Wypróbuj
+              </Link>
+              <Link to="/login" className={desktopLinkClasses}>
+                Logowanie
+              </Link>
+            </>
           ) : (
             <button onClick={handleLogout} className={desktopLinkClasses} title={logoutTitle}>
               Wyloguj
@@ -137,9 +142,14 @@ export function Header() {
               )}
 
               {!token ? (
-                <Link to="/login" className={mobileLinkClasses} onClick={closeMenu}>
-                  Logowanie
-                </Link>
+                <>
+                  <Link to="/try" className={mobileLinkClasses} onClick={closeMenu}>
+                    Wypróbuj
+                  </Link>
+                  <Link to="/login" className={mobileLinkClasses} onClick={closeMenu}>
+                    Logowanie
+                  </Link>
+                </>
               ) : (
                 <button
                   onClick={() => {

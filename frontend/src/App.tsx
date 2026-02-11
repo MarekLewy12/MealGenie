@@ -2,6 +2,7 @@ import { AnimatePresence } from "framer-motion";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GeneratorPage } from "./pages/GeneratorPage";
+import { GuestGeneratorPage } from "./pages/GuestGeneratorPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
@@ -16,6 +17,7 @@ import { AuthenticatedLayout } from "./components/AuthenticatedLayout";
 import { NotificationContainer } from "./components/NotificationContainer";
 
 function App() {
+  const token = useAuthStore((state) => state.token);
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
   const location = useLocation();
 
@@ -52,6 +54,22 @@ function App() {
                   element={
                     <PageTransition>
                       <LoginPage />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/try"
+                  element={
+                    <PageTransition>
+                      {token ? (
+                        hasCompletedOnboarding ? (
+                          <Navigate to="/generator" replace />
+                        ) : (
+                          <Navigate to="/onboarding" replace />
+                        )
+                      ) : (
+                        <GuestGeneratorPage />
+                      )}
                     </PageTransition>
                   }
                 />

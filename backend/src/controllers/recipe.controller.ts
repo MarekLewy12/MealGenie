@@ -1,38 +1,10 @@
 import { type Request, type Response, type NextFunction } from "express";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { GenerateRecipeRequestSchema } from "../schemas/recipe.schema.js";
 import { generateFullRecipe } from "../services/recipe.service.js";
+import { removeMealImages } from "../services/image.service.js";
 
 const prisma = new PrismaClient();
-
-async function removeUnusedImages(imageUrls?: string[]) {
-  if (!imageUrls?.length) return;
-
-  const imageDir = path.join(process.cwd(), "public", "meal-images");
-  const candidates = imageUrls
-    .filter((url) => typeof url === "string" && url.startsWith("/meal-images/"))
-    .map((url) => path.basename(url))
-    .filter((fileName) => fileName.endsWith(".jpg"));
-
-  if (candidates.length === 0) return;
-
-  await Promise.all(
-    candidates.map(async (fileName) => {
-      const filePath = path.join(imageDir, fileName);
-      try {
-        await fs.unlink(filePath);
-        console.log("[CLEANUP] Usunieto nieuzywany obrazek:", fileName);
-      } catch (err) {
-        const code = (err as NodeJS.ErrnoException).code;
-        if (code !== "ENOENT") {
-          console.error("[CLEANUP] Blad usuwania obrazka:", fileName, err);
-        }
-      }
-    }),
-  );
-}
 
 export async function generateRecipeController(
   req: Request,
@@ -91,7 +63,7 @@ export async function generateRecipeController(
       },
     });
 
-    await removeUnusedImages(unusedImageUrls);
+    await removeMealImages(unusedImageUrls);
 
     res.json({
       recipe: {

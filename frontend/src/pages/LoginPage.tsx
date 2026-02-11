@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -31,7 +31,10 @@ import { notify } from "../store/notificationStore";
 type AuthMode = "login" | "register";
 
 export function LoginPage() {
-  const [mode, setMode] = useState<AuthMode>("login");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const getModeFromQuery = (): AuthMode =>
+    searchParams.get("mode") === "register" ? "register" : "login";
+  const [mode, setMode] = useState<AuthMode>(getModeFromQuery);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,8 +99,26 @@ export function LoginPage() {
 
   const isBusy = isSubmitting || isFormSubmitting;
 
+  useEffect(() => {
+    const requestedMode = getModeFromQuery();
+    if (requestedMode === mode) {
+      return;
+    }
+
+    setMode(requestedMode);
+    setErrorMsg(null);
+    setShowPassword(false);
+    clearErrors();
+    reset();
+  }, [searchParams, mode, clearErrors, reset]);
+
   const toggleMode = () => {
-    setMode((prev) => (prev === "login" ? "register" : "login"));
+    const nextMode = mode === "login" ? "register" : "login";
+    setMode(nextMode);
+    setSearchParams(
+      nextMode === "register" ? { mode: "register" } : {},
+      { replace: true },
+    );
     setErrorMsg(null);
     setShowPassword(false);
     clearErrors();
@@ -351,7 +372,7 @@ export function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100/60 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-indigo-300 dark:focus:ring-indigo-500/40"
+                      className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100/60 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-indigo-300 dark:focus:ring-indigo-500/40 cursor-pointer"
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" aria-hidden="true" />
@@ -381,7 +402,7 @@ export function LoginPage() {
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      className="text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-500 hover:underline dark:text-indigo-400"
+                      className="text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-500 hover:underline dark:text-indigo-400 cursor-pointer"
                     >
                       Zapomniałeś hasła?
                     </button>
@@ -405,7 +426,7 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={isBusy}
-                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] dark:shadow-indigo-900/50"
+                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] dark:shadow-indigo-900/50 cursor-pointer"
               >
                 <div className="absolute inset-0 -z-10 bg-gradient-to-r from-indigo-500 to-violet-500 opacity-0 transition-opacity group-hover:opacity-100" />
                 {isBusy ? (
@@ -424,14 +445,14 @@ export function LoginPage() {
                   Rejestrując się, akceptujesz nasze{" "}
                   <button
                     type="button"
-                    className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="font-medium text-indigo-600 hover:underline dark:text-indigo-400 cursor-pointer"
                   >
                     Warunki Usługi
                   </button>{" "}
                   i{" "}
                   <button
                     type="button"
-                    className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="font-medium text-indigo-600 hover:underline dark:text-indigo-400 cursor-pointer"
                   >
                     Politykę Prywatności
                   </button>
@@ -452,7 +473,7 @@ export function LoginPage() {
             </div>
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-[1px] hover:border-indigo-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-indigo-500/50"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-[1px] hover:border-indigo-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-indigo-500/50 cursor-pointer"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white shadow-inner shadow-slate-200/70 dark:border-slate-700 dark:bg-slate-800">
                 <svg viewBox="0 0 533.5 544.3" className="h-4 w-4">
@@ -499,7 +520,7 @@ export function LoginPage() {
             </span>
             <button
               onClick={toggleMode}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-6 py-2.5 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-6 py-2.5 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 cursor-pointer"
             >
               {mode === "login" ? "Stwórz nowe konto" : "Zaloguj się"}
               <ArrowRight className="h-3.5 w-3.5" />

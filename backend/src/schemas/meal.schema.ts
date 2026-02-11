@@ -48,6 +48,10 @@ export type SuggestMealsRequest = z.infer<typeof SuggestMealsRequestSchema>;
 export const GuestSuggestMealsRequestSchema = z.object({
   mealType: MealTypeSchema.default("LUNCH"),
   prepTime: z.number().min(5).max(120).default(30),
+  userPrompt: z
+    .string()
+    .max(240, "Opis jest zbyt długi (max 240 znaków)")
+    .optional(),
 });
 
 export type GuestSuggestMealsRequest = z.infer<

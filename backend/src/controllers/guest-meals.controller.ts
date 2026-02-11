@@ -10,6 +10,9 @@ import {
   getGuestRateLimitStatus,
   markGuestGeneration,
 } from "../services/guest-generation.service.js";
+import {
+  scheduleMealImagesCleanup,
+} from "../services/image.service.js";
 
 function getUserAgent(header: string | string[] | undefined): string | null {
   if (Array.isArray(header)) {
@@ -45,7 +48,7 @@ export async function guestSuggestController(
     }
 
     const context = {
-      userPrompt: null,
+      userPrompt: input.userPrompt?.trim() || null,
       availableIngredients: [],
       mealType: input.mealType,
       prepTime: input.prepTime,
@@ -62,6 +65,10 @@ export async function guestSuggestController(
 
     const meals = await generateMealSuggestions(context);
     await markGuestGeneration(fingerprintHash);
+    const generatedImageUrls = meals
+      .map((meal) => meal.imageUrl)
+      .filter((url): url is string => typeof url === "string" && url.length > 0);
+    scheduleMealImagesCleanup(generatedImageUrls);
 
     return res.json({ meals });
   } catch (error) {
