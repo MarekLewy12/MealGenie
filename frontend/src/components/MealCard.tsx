@@ -25,7 +25,7 @@ export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
 
   return (
     <div className="group flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-0 shadow-xl shadow-indigo-100/60 transition hover:-translate-y-1 hover:border-indigo-400/50 hover:shadow-indigo-200/70 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/40 dark:hover:border-indigo-500/50 dark:hover:shadow-indigo-900/30">
-      <div className="relative h-48 w-full overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-slate-100 sm:aspect-video dark:bg-slate-800">
         {imageSrc ? (
           <>
             <img

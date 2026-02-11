@@ -41,7 +41,7 @@ export function Header() {
             <span className="bg-gradient-to-r from-slate-900 to-indigo-500 bg-clip-text text-xl font-bold tracking-tight text-transparent transition group-hover:drop-shadow-[0_6px_25px_rgba(99,102,241,0.25)] dark:from-white dark:to-indigo-200">
               MealGenie
             </span>
-            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+            <span className="hidden text-[10px] font-medium text-slate-400 xs:block dark:text-slate-500">
               by Marek Lewandowski
             </span>
           </div>

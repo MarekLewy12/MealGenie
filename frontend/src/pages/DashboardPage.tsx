@@ -258,10 +258,10 @@ export function DashboardPage() {
                                 <Wand2 className="h-5 w-5 text-indigo-500" />
                                 Szybki Start
                             </h3>
-                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                            <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-5">
                                 <Link
                                     to="/generator?mealType=SNACK&prepTime=15"
-                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex min-w-[140px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md sm:min-w-0 sm:flex-shrink dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
                                     <div className="text-3xl">🚀</div>
                                     <div>
@@ -276,7 +276,7 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=BREAKFAST&prepTime=30"
-                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex min-w-[140px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md sm:min-w-0 sm:flex-shrink dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
                                     <div className="text-3xl">🌅</div>
                                     <div>
@@ -291,7 +291,7 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=LUNCH&prepTime=45"
-                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex min-w-[140px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md sm:min-w-0 sm:flex-shrink dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
                                     <div className="text-3xl">🍽️</div>
                                     <div>
@@ -306,7 +306,7 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=DINNER&prepTime=30"
-                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex min-w-[140px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md sm:min-w-0 sm:flex-shrink dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
                                     <div className="text-3xl">🌙</div>
                                     <div>
@@ -321,7 +321,7 @@ export function DashboardPage() {
 
                                 <Link
                                     to="/generator?mealType=DESSERT&prepTime=30"
-                                    className="group flex flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
+                                    className="group flex min-w-[140px] flex-shrink-0 flex-col items-center gap-2 rounded-2xl border border-indigo-200/60 bg-white/80 p-4 text-center shadow-sm shadow-indigo-100/40 transition-all hover:-translate-y-0.5 hover:border-indigo-300/70 hover:shadow-md sm:min-w-0 sm:flex-shrink dark:border-indigo-400/20 dark:bg-slate-900/60 dark:shadow-none dark:hover:border-fuchsia-400/40"
                                 >
                                     <div className="text-3xl">🍰</div>
                                     <div>
