@@ -13,6 +13,7 @@ import {
   savePreferencesController,
 } from "./controllers/preferences.controller.js";
 import { suggestMealsController } from "./controllers/meals.controller.js";
+import { guestSuggestController } from "./controllers/guest-meals.controller.js";
 import {
   registerController,
   loginController,
@@ -37,6 +38,7 @@ const envSchema = z.object({
 const env = envSchema.parse(process.env);
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(cors());
 app.use(express.json());
@@ -67,6 +69,7 @@ app.post("/api/echo", (req: Request, res: Response, next: NextFunction) => {
 app.post("/api/preferences", authenticateToken, savePreferencesController);
 app.get("/api/preferences", authenticateToken, getPreferencesController);
 app.post("/api/meals/suggest", authenticateToken, suggestMealsController);
+app.post("/api/meals/guest-suggest", guestSuggestController);
 app.post("/api/meals/recipe", authenticateToken, generateRecipeController);
 app.post("/api/chat", authenticateToken, chatController);
 // Kolejnosc ma znaczenie: /history przed /:id, zeby nie przechwycic "history" jako parametru.
