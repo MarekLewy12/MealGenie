@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import fsPromises from "node:fs/promises";
 
 const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY;
 
@@ -42,6 +43,80 @@ type MealImageInput = {
   ingredients: Array<{ name: string }>;
   imagePromptEn?: string | null;
 };
+
+export const DEFAULT_GUEST_IMAGE_TTL_MS = 15 * 60 * 1000;
+
+function getGuestImageTtlMsFromEnv(): number {
+  const raw = process.env.GUEST_IMAGE_TTL_MS;
+
+  if (!raw) {
+    return DEFAULT_GUEST_IMAGE_TTL_MS;
+  }
+
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    console.warn(
+      `[IMAGE] Invalid GUEST_IMAGE_TTL_MS="${raw}", fallback=${DEFAULT_GUEST_IMAGE_TTL_MS}`,
+    );
+    return DEFAULT_GUEST_IMAGE_TTL_MS;
+  }
+
+  return parsed;
+}
+
+export const GUEST_IMAGE_TTL_MS = getGuestImageTtlMsFromEnv();
+
+function getImageFileNames(imageUrls?: string[]): string[] {
+  if (!imageUrls?.length) {
+    return [];
+  }
+
+  return imageUrls
+    .filter((url) => typeof url === "string" && url.startsWith("/meal-images/"))
+    .map((url) => path.basename(url))
+    .filter((fileName) => fileName.endsWith(".jpg") || fileName.endsWith(".png"));
+}
+
+export async function removeMealImages(imageUrls?: string[]): Promise<void> {
+  const candidates = getImageFileNames(imageUrls);
+  if (candidates.length === 0) {
+    return;
+  }
+
+  await Promise.all(
+    candidates.map(async (fileName) => {
+      const filePath = path.join(IMAGE_DIR, fileName);
+      try {
+        await fsPromises.unlink(filePath);
+        console.log("[CLEANUP] Usunieto obrazek:", fileName);
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        if (code !== "ENOENT") {
+          console.error("[CLEANUP] Blad usuwania obrazka:", fileName, err);
+        }
+      }
+    }),
+  );
+}
+
+export function scheduleMealImagesCleanup(
+  imageUrls: string[],
+  delayMs: number = GUEST_IMAGE_TTL_MS,
+): void {
+  const candidates = getImageFileNames(imageUrls);
+  if (candidates.length === 0) {
+    return;
+  }
+
+  const timeout = setTimeout(() => {
+    void removeMealImages(
+      candidates.map((fileName) => `/meal-images/${fileName}`),
+    );
+  }, delayMs);
+
+  // Nie blokuj zamkniecia procesu tylko przez oczekujace timery cleanupu.
+  timeout.unref?.();
+}
 
 export function cleanupOldImages(maxAgeDays: number = 7): void {
   try {

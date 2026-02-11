@@ -65,6 +65,22 @@ export async function generateMealSuggestions(
   return data;
 }
 
+export type GuestGenerateMealSuggestionsPayload = {
+  mealType: MealType;
+  prepTime: number;
+  userPrompt?: string;
+};
+
+export async function guestGenerateMealSuggestions(
+  payload: GuestGenerateMealSuggestionsPayload,
+) {
+  const { data } = await api.post<MealResponse>("/meals/guest-suggest", payload, {
+    timeout: 120_000,
+  });
+
+  return data;
+}
+
 export async function generateFullRecipe(
   mealTeaser: MealSuggestion,
   servings: number = 2,

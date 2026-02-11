@@ -194,10 +194,10 @@ export function HomePage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  to="/generator"
+                  to="/try"
                   className="flex h-12 items-center gap-2 rounded-xl border border-slate-200 bg-white px-8 text-base font-medium text-slate-900 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                 >
-                  Zobacz demo
+                  Wypróbuj bez konta
                 </Link>
               </div>
             </div>
@@ -571,10 +571,10 @@ export function HomePage() {
                 Zacznij teraz
               </Link>
               <Link
-                to="/generator"
+                to="/try"
                 className="rounded-xl border border-amber-300/80 bg-amber-100 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-amber-800 shadow-[0_0_20px_rgba(245,158,11,0.18)] transition hover:-translate-y-0.5 hover:border-amber-200 hover:text-amber-900 hover:shadow-[0_0_30px_rgba(245,158,11,0.24)] dark:border-amber-200/70 dark:bg-amber-500/20 dark:text-amber-100 dark:hover:border-amber-100 dark:hover:text-white"
               >
-                Zobacz generator
+                Wypróbuj bez konta
               </Link>
             </div>
           </div>

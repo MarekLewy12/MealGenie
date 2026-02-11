@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowRight,
   ArrowLeft,
   CheckCircle2,
   ChefHat,
@@ -14,7 +16,10 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { generateMealSuggestions } from "../services/api";
+import {
+  generateMealSuggestions,
+  guestGenerateMealSuggestions,
+} from "../services/api";
 import { LoadingExperience } from "./LoadingExperience";
 import { MealCard } from "./MealCard";
 import { TagInput } from "./TagInput";
@@ -38,6 +43,13 @@ const mealTypeValues = new Set<MealType>(
 );
 
 type GeneratorView = "form" | "loading" | "success" | "error";
+type MealGeneratorMode = "auth" | "guest";
+
+type GuestLimitErrorResponse = {
+  error?: string;
+  message?: string;
+  retryAfterSeconds?: number;
+};
 
 const pageVariants = {
   initial: { opacity: 0, y: 30, scale: 0.98 },
@@ -91,13 +103,36 @@ const successIconVariants = {
   },
 };
 
+function formatRetryAfter(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hours <= 0) {
+    return `${Math.max(1, Math.ceil(seconds / 60))} min`;
+  }
+
+  if (minutes === 0) {
+    return `${hours} godz.`;
+  }
+
+  return `${hours} godz. ${minutes} min`;
+}
+
 type SuccessViewProps = {
   meals: MealSuggestion[];
+  isGuestMode: boolean;
   onReset: () => void;
+  onGuestCta: () => void;
   onSelectMeal: (meal: MealSuggestion) => void;
 };
 
-function SuccessView({ meals, onReset, onSelectMeal }: SuccessViewProps) {
+function SuccessView({
+  meals,
+  isGuestMode,
+  onReset,
+  onGuestCta,
+  onSelectMeal,
+}: SuccessViewProps) {
   return (
     <motion.div
       variants={pageVariants}
@@ -122,10 +157,12 @@ function SuccessView({ meals, onReset, onSelectMeal }: SuccessViewProps) {
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Gotowe! 🎉
+            {isGuestMode ? "Gotowe! Oto darmowy podgląd" : "Gotowe! 🎉"}
           </h2>
           <p className="mt-1 text-slate-600 dark:text-slate-300">
-            Szef kuchni skończył pracę. Oto propozycje dopasowane do Ciebie:
+            {isGuestMode
+              ? "To wersja pokazowa bez personalizacji. Załóż konto, aby zapisać plan i przejść do pełnych przepisów."
+              : "Szef kuchni skończył pracę. Oto propozycje dopasowane do Ciebie:"}
           </p>
         </motion.div>
       </div>
@@ -141,6 +178,7 @@ function SuccessView({ meals, onReset, onSelectMeal }: SuccessViewProps) {
             <MealCard
               meal={meal}
               onSelect={() => onSelectMeal(meal)}
+              showAction={!isGuestMode}
             />
           </motion.div>
         ))}
@@ -150,21 +188,37 @@ function SuccessView({ meals, onReset, onSelectMeal }: SuccessViewProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="flex justify-center pt-4"
+        className="flex flex-wrap justify-center gap-3 pt-4"
       >
+        {isGuestMode && (
+          <button
+            onClick={onGuestCta}
+            className="group flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-indigo-500"
+          >
+            Załóż konto i gotuj dalej
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </button>
+        )}
         <button
           onClick={onReset}
           className="group flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-indigo-500"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Wróć do generatora i spróbuj ponownie
+          {isGuestMode
+            ? "Wróć i zmień parametry podglądu"
+            : "Wróć do generatora i spróbuj ponownie"}
         </button>
       </motion.div>
     </motion.div>
   );
 }
 
-export function MealGenerator() {
+type MealGeneratorProps = {
+  mode?: MealGeneratorMode;
+};
+
+export function MealGenerator({ mode = "auth" }: MealGeneratorProps) {
+  const isGuestMode = mode === "guest";
   const [mealType, setMealType] = useState<MealType>("LUNCH");
   const [prepTime, setPrepTime] = useState(30);
   const [servingSize, setServingSize] = useState(2);
@@ -175,12 +229,25 @@ export function MealGenerator() {
   const [portionMode, setPortionMode] = useState<PortionMode>("servings");
   const [targetWeight, setTargetWeight] = useState(250);
   const [hungerLevel, setHungerLevel] = useState(3);
+  const [guestRetryAfterSeconds, setGuestRetryAfterSeconds] = useState<
+    number | null
+  >(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const { mutate, data, error } = useMutation({
-    mutationFn: () =>
-      generateMealSuggestions({
+    mutationFn: () => {
+      if (isGuestMode) {
+        const normalizedGuestPrompt = userPrompt.trim();
+        return guestGenerateMealSuggestions({
+          mealType,
+          prepTime,
+          userPrompt:
+            normalizedGuestPrompt.length > 0 ? normalizedGuestPrompt : undefined,
+        });
+      }
+
+      return generateMealSuggestions({
         mealType,
         prepTime,
         servingSize: portionMode === "servings" ? servingSize : undefined,
@@ -189,12 +256,41 @@ export function MealGenerator() {
         userPrompt: userPrompt.length > 0 ? userPrompt : undefined,
         availableIngredients: ingredients,
         useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
-      }),
+      });
+    },
     onSuccess: () => {
-      notify.success("Wygenerowano propozycje posiłków.");
+      setGuestRetryAfterSeconds(null);
+      notify.success(
+        isGuestMode
+          ? "Wygenerowano darmowy podgląd (3 propozycje)."
+          : "Wygenerowano propozycje posiłków.",
+      );
       setTimeout(() => setView("success"), 500);
     },
     onError: (err) => {
+      if (axios.isAxiosError(err)) {
+        const responseData = err.response?.data as GuestLimitErrorResponse | undefined;
+        const isGuestLimitReached =
+          err.response?.status === 429 &&
+          responseData?.error === "GUEST_LIMIT_REACHED";
+
+        if (isGuestLimitReached) {
+          const retryAfter =
+            typeof responseData.retryAfterSeconds === "number"
+              ? responseData.retryAfterSeconds
+              : null;
+
+          setGuestRetryAfterSeconds(retryAfter);
+          notify.info(
+            responseData.message ??
+              "Wykorzystano darmową próbę. Załóż konto, aby generować dalej.",
+            "Limit darmowej próby",
+          );
+          setView("error");
+          return;
+        }
+      }
+
       notify.error(
         err instanceof Error
           ? err.message
@@ -205,12 +301,28 @@ export function MealGenerator() {
     },
   });
 
+  const scrollToPageBottom = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    });
+  };
+
   const handleGenerate = () => {
+    setGuestRetryAfterSeconds(null);
     setView("loading");
+    scrollToPageBottom();
     mutate();
   };
 
   const handleBackToForm = () => {
+    setGuestRetryAfterSeconds(null);
     setView("form");
   };
 
@@ -218,6 +330,15 @@ export function MealGenerator() {
     selectedMeal: MealSuggestion,
     allMeals: MealSuggestion[],
   ) => {
+    if (isGuestMode) {
+      notify.info(
+        "Aby wybrać danie i otworzyć pełny przepis, załóż konto.",
+        "Wersja pokazowa",
+      );
+      navigate("/login?mode=register");
+      return;
+    }
+
     const unusedImageUrls = allMeals
       .filter((meal) => meal.imageUrl !== selectedMeal.imageUrl)
       .map((meal) => meal.imageUrl)
@@ -229,6 +350,10 @@ export function MealGenerator() {
         unusedImageUrls,
       },
     });
+  };
+
+  const handleGuestCta = () => {
+    navigate("/login?mode=register");
   };
 
   useEffect(() => {
@@ -290,7 +415,9 @@ export function MealGenerator() {
                 Kreator Posiłków
               </h2>
               <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-                Opisz na co masz ochotę lub podaj składniki, a AI zrobi resztę.
+                {isGuestMode
+                  ? "Wersja pokazowa: wybierz typ posiłku i czas, a zobaczysz 3 propozycje bez personalizacji."
+                  : "Opisz na co masz ochotę lub podaj składniki, a AI zrobi resztę."}
               </p>
             </div>
 
@@ -298,193 +425,228 @@ export function MealGenerator() {
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <PenLine className="h-4 w-4 text-indigo-500" />
-                  Na co masz dzisiaj ochotę? (Opcjonalne)
+                  {isGuestMode
+                    ? "Czego szukasz? (Opcjonalnie)"
+                    : "Na co masz dzisiaj ochotę? (Opcjonalne)"}
                 </label>
                 <textarea
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value)}
-                  placeholder="np. Coś lekkiego po treningu, mam ochotę na kuchnię azjatycką..."
+                  placeholder={
+                    isGuestMode
+                      ? "np. coś lekkiego, bez mięsa, kuchnia włoska..."
+                      : "np. Coś lekkiego po treningu, mam ochotę na kuchnię azjatycką..."
+                  }
                   className="w-full min-h-[80px] rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
-              <div>
-                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  <Refrigerator className="h-4 w-4 text-indigo-500" />
-                  Jakie składniki posiadasz?
-                </div>
-                <TagInput
-                  label=""
-                  placeholder="Wpisz składnik i naciśnij Enter (np. kurczak, ryż)"
-                  value={ingredients}
-                  onChange={setIngredients}
-                />
-              </div>
-            </div>
-
-            <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-900/10">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors ${isThermomixMode ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500 dark:bg-slate-700"}`}
-                  >
-                    <ChefHat className="h-5 w-5 sm:h-6 sm:w-6" />
+              {!isGuestMode && (
+                <div>
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <Refrigerator className="h-4 w-4 text-indigo-500" />
+                    Jakie składniki posiadasz?
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
-                      Tryb Thermomix
-                    </h4>
-                    <p className="text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">
-                      AI przygotuje przepisy wykorzystujące robota.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsThermomixMode(!isThermomixMode)}
-                  className={`relative inline-flex h-10 w-16 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:h-8 sm:w-14 ${isThermomixMode ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
-                >
-                  <span
-                    className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-md transition-transform sm:h-6 sm:w-6 ${isThermomixMode ? "translate-x-7 sm:translate-x-7" : "translate-x-1"}`}
+                  <TagInput
+                    label=""
+                    placeholder="Wpisz składnik i naciśnij Enter (np. kurczak, ryż)"
+                    value={ingredients}
+                    onChange={setIngredients}
                   />
-                </button>
-              </div>
+                </div>
+              )}
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30 sm:grid-cols-2 sm:gap-5 sm:p-5 lg:grid-cols-4">
-              <div className="min-w-0 w-full">
-                <div className="mb-1.5 flex justify-between sm:mb-2">
-                  <label className="text-[11px] font-semibold uppercase text-slate-500 sm:text-xs dark:text-slate-400">
-                    Maks. czas: {prepTime} min
-                  </label>
-                </div>
-                <input
-                  type="range"
-                  min="15"
-                  max="120"
-                  step="15"
-                  value={prepTime}
-                  onChange={(e) => setPrepTime(Number(e.target.value))}
-                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-indigo-600 dark:bg-slate-700"
-                />
-                <div className="mt-1 flex justify-between text-[9px] text-slate-400 sm:text-[10px]">
-                  <span>Szybko (15m)</span>
-                  <span>Uczta (2h)</span>
-                </div>
-              </div>
-
-              <div className="min-w-0 w-full">
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
-                  Tryb porcji
-                </label>
-                <div className="flex w-full gap-2">
+            {!isGuestMode && (
+              <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-900/10">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors ${isThermomixMode ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500 dark:bg-slate-700"}`}
+                    >
+                      <ChefHat className="h-5 w-5 sm:h-6 sm:w-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+                        Tryb Thermomix
+                      </h4>
+                      <p className="text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">
+                        AI przygotuje przepisy wykorzystujące robota.
+                      </p>
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setPortionMode("servings")}
-                    className={`flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-lg px-2 py-2.5 text-[11px] font-semibold transition sm:gap-2 sm:px-3 sm:text-xs ${
-                      portionMode === "servings"
-                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200"
-                        : "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                    }`}
+                    onClick={() => setIsThermomixMode(!isThermomixMode)}
+                    className={`relative inline-flex h-10 w-16 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:h-8 sm:w-14 ${isThermomixMode ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
                   >
-                    <span className="text-base sm:text-lg">👨‍👩‍👧‍👦</span>
-                    <span className="hidden xs:inline">Na osoby</span>
-                    <span className="xs:hidden">Osoby</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPortionMode("weight")}
-                    className={`flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-lg px-2 py-2.5 text-[11px] font-semibold transition sm:gap-2 sm:px-3 sm:text-xs ${
-                      portionMode === "weight"
-                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200"
-                        : "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                    }`}
-                  >
-                    <Scale className="h-4 w-4" />
-                    <span className="hidden xs:inline">Na gramaturę</span>
-                    <span className="xs:hidden">Gramy</span>
+                    <span
+                      className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-md transition-transform sm:h-6 sm:w-6 ${isThermomixMode ? "translate-x-7 sm:translate-x-7" : "translate-x-1"}`}
+                    />
                   </button>
                 </div>
               </div>
+            )}
 
-              <div className="min-w-0 w-full">
-                {portionMode === "servings" ? (
-                  <div>
-                    <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
-                      Liczba osób: {servingSize}
+            {isGuestMode ? (
+              <div className="mb-8 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30 sm:p-5">
+                <div className="min-w-0 w-full">
+                  <div className="mb-1.5 flex justify-between sm:mb-2">
+                    <label className="text-[11px] font-semibold uppercase text-slate-500 sm:text-xs dark:text-slate-400">
+                      Maks. czas: {prepTime} min
                     </label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setServingSize((s) => Math.max(1, s - 1))}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center font-bold text-slate-900 dark:text-white">
-                        {servingSize}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setServingSize((s) => Math.min(10, s + 1))}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
-                      >
-                        +
-                      </button>
-                    </div>
                   </div>
-                ) : (
-                  <div>
-                    <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
-                      Docelowa waga
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min={50}
-                        max={5000}
-                        step={50}
-                        value={targetWeight}
-                        onChange={(e) => setTargetWeight(Number(e.target.value))}
-                        className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center font-bold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                      />
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                        gramów
-                      </span>
-                    </div>
-                    <p className="mt-1.5 text-[10px] text-slate-400">
-                      Idealne dla cukiernictwa i profesjonalnej gastronomii
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="min-w-0 w-full">
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
-                  Poziom głodu
-                </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg" title="Lekki posiłek">
-                    😋
-                  </span>
                   <input
                     type="range"
-                    min="1"
-                    max="5"
-                    value={hungerLevel}
-                    onChange={(e) => setHungerLevel(Number(e.target.value))}
-                    className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-slate-200 accent-orange-500 dark:bg-slate-700"
+                    min="15"
+                    max="120"
+                    step="15"
+                    value={prepTime}
+                    onChange={(e) => setPrepTime(Number(e.target.value))}
+                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-indigo-600 dark:bg-slate-700"
                   />
-                  <span className="text-lg" title="Uczta">
-                    🍖
-                  </span>
-                </div>
-                <div className="mt-1 flex justify-between text-[9px] text-slate-400 sm:text-[10px]">
-                  <span>Lekko</span>
-                  <span>Uczta</span>
+                  <div className="mt-1 flex justify-between text-[9px] text-slate-400 sm:text-[10px]">
+                    <span>Szybko (15m)</span>
+                    <span>Uczta (2h)</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30 sm:grid-cols-2 sm:gap-5 sm:p-5 lg:grid-cols-4">
+                <div className="min-w-0 w-full">
+                  <div className="mb-1.5 flex justify-between sm:mb-2">
+                    <label className="text-[11px] font-semibold uppercase text-slate-500 sm:text-xs dark:text-slate-400">
+                      Maks. czas: {prepTime} min
+                    </label>
+                  </div>
+                  <input
+                    type="range"
+                    min="15"
+                    max="120"
+                    step="15"
+                    value={prepTime}
+                    onChange={(e) => setPrepTime(Number(e.target.value))}
+                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-indigo-600 dark:bg-slate-700"
+                  />
+                  <div className="mt-1 flex justify-between text-[9px] text-slate-400 sm:text-[10px]">
+                    <span>Szybko (15m)</span>
+                    <span>Uczta (2h)</span>
+                  </div>
+                </div>
+
+                <div className="min-w-0 w-full">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
+                    Tryb porcji
+                  </label>
+                  <div className="flex w-full gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPortionMode("servings")}
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-lg px-2 py-2.5 text-[11px] font-semibold transition sm:gap-2 sm:px-3 sm:text-xs ${
+                        portionMode === "servings"
+                          ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200"
+                          : "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      <span className="text-base sm:text-lg">👨‍👩‍👧‍👦</span>
+                      <span className="hidden xs:inline">Na osoby</span>
+                      <span className="xs:hidden">Osoby</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPortionMode("weight")}
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-lg px-2 py-2.5 text-[11px] font-semibold transition sm:gap-2 sm:px-3 sm:text-xs ${
+                        portionMode === "weight"
+                          ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200"
+                          : "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      <Scale className="h-4 w-4" />
+                      <span className="hidden xs:inline">Na gramaturę</span>
+                      <span className="xs:hidden">Gramy</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="min-w-0 w-full">
+                  {portionMode === "servings" ? (
+                    <div>
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
+                        Liczba osób: {servingSize}
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setServingSize((s) => Math.max(1, s - 1))}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center font-bold text-slate-900 dark:text-white">
+                          {servingSize}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setServingSize((s) => Math.min(10, s + 1))}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
+                        Docelowa waga
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={50}
+                          max={5000}
+                          step={50}
+                          value={targetWeight}
+                          onChange={(e) => setTargetWeight(Number(e.target.value))}
+                          className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center font-bold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                        />
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                          gramów
+                        </span>
+                      </div>
+                      <p className="mt-1.5 text-[10px] text-slate-400">
+                        Idealne dla cukiernictwa i profesjonalnej gastronomii
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 w-full">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-500 sm:mb-2 sm:text-xs dark:text-slate-400">
+                    Poziom głodu
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg" title="Lekki posiłek">
+                      😋
+                    </span>
+                    <input
+                      type="range"
+                      min="1"
+                      max="5"
+                      value={hungerLevel}
+                      onChange={(e) => setHungerLevel(Number(e.target.value))}
+                      className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-slate-200 accent-orange-500 dark:bg-slate-700"
+                    />
+                    <span className="text-lg" title="Uczta">
+                      🍖
+                    </span>
+                  </div>
+                  <div className="mt-1 flex justify-between text-[9px] text-slate-400 sm:text-[10px]">
+                    <span>Lekko</span>
+                    <span>Uczta</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="mb-8">
               <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-100">
@@ -522,10 +684,12 @@ export function MealGenerator() {
                 className="group relative flex cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-900/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-900/40 active:scale-95"
               >
                 <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
-                Generuj Posiłki
+                {isGuestMode ? "Wypróbuj za darmo" : "Generuj Posiłki"}
               </button>
               <p className="mt-3 text-xs text-slate-400">
-                Kliknij, a AI połączy Twoje składniki z preferencjami.
+                {isGuestMode
+                  ? "Jedna darmowa próba bez konta. Potem przejdziesz do rejestracji."
+                  : "Kliknij, a AI połączy Twoje składniki z preferencjami."}
               </p>
             </div>
           </motion.div>
@@ -548,7 +712,9 @@ export function MealGenerator() {
           <SuccessView
             key="success"
             meals={data.meals}
+            isGuestMode={isGuestMode}
             onReset={handleBackToForm}
+            onGuestCta={handleGuestCta}
             onSelectMeal={(meal) => handleSelectMeal(meal, data.meals)}
           />
         )}
@@ -573,22 +739,45 @@ export function MealGenerator() {
 
             <div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                Ups! Coś poszło nie tak 😅
+                {isGuestMode && guestRetryAfterSeconds !== null
+                  ? "Darmowa próba jest już wykorzystana"
+                  : "Ups! Coś poszło nie tak 😅"}
               </h2>
               <p className="mt-2 text-slate-600 dark:text-slate-400">
-                {error instanceof Error
-                  ? error.message
-                  : "Nie udało się wygenerować posiłków."}
+                {isGuestMode && guestRetryAfterSeconds !== null
+                  ? `Spróbuj ponownie za około ${formatRetryAfter(guestRetryAfterSeconds)} albo załóż konto, aby generować bez limitu.`
+                  : error instanceof Error
+                    ? error.message
+                    : "Nie udało się wygenerować posiłków."}
               </p>
             </div>
 
-            <button
-              onClick={handleBackToForm}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Spróbuj ponownie
-            </button>
+            {isGuestMode && guestRetryAfterSeconds !== null ? (
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  onClick={handleGuestCta}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                >
+                  Załóż konto
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={handleBackToForm}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Wróć do formularza
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleBackToForm}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Spróbuj ponownie
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
