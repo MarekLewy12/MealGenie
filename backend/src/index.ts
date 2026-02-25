@@ -26,6 +26,7 @@ import {
   deleteMealHistoryController,
 } from "./controllers/history.controller.js";
 import { chatController } from "./controllers/chat.controller.js";
+import { ingredientSuggestionsController } from "./controllers/ingredients.controller.js";
 import { authenticateToken } from "./middlewares/authMiddleware.js";
 import { cleanupOldImages } from "./services/image.service.js";
 
@@ -77,6 +78,9 @@ app.get("/api/meals/history", authenticateToken, getMealHistoryController);
 app.get("/api/meals/history/:id", authenticateToken, getMealByIdController);
 app.delete("/api/meals/history/:id", authenticateToken, deleteMealHistoryController);
 app.patch("/api/meals/:id/favorite", authenticateToken, toggleFavoriteController);
+
+// Ingredients
+app.get("/api/ingredients/suggestions", ingredientSuggestionsController);
 
 // Auth
 app.post("/api/auth/register", registerController);
