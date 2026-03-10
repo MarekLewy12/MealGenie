@@ -74,6 +74,10 @@ export function Header() {
             </button>
           )}
 
+          <Link to="/mobile" className={desktopLinkClasses}>
+            📱 Mobile
+          </Link>
+
           {!token ? (
             <>
               <Link to="/try" className={desktopLinkClasses}>
@@ -140,6 +144,10 @@ export function Header() {
                   </Link>
                 </>
               )}
+
+              <Link to="/mobile" className={mobileLinkClasses} onClick={closeMenu}>
+                📱 Aplikacja mobilna
+              </Link>
 
               {!token ? (
                 <>
