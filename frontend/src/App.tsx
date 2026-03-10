@@ -5,6 +5,7 @@ import { GeneratorPage } from "./pages/GeneratorPage";
 import { GuestGeneratorPage } from "./pages/GuestGeneratorPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
+import { MobilePage } from "./pages/MobilePage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { RecipePage } from "./pages/RecipePage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -70,6 +71,14 @@ function App() {
                       ) : (
                         <GuestGeneratorPage />
                       )}
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/mobile"
+                  element={
+                    <PageTransition>
+                      <MobilePage />
                     </PageTransition>
                   }
                 />
