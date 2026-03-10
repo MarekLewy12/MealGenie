@@ -250,9 +250,9 @@ export function MobilePage() {
                   <ArrowDown className="h-5 w-5" />
                   Pobierz APK
                 </a>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Android 8.0+ · ~25 MB · v1.0.0
-                </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Android 8.0+ · ~80 MB · v1.0.0
+                    </p>
               </div>
             </motion.div>
           </motion.div>
