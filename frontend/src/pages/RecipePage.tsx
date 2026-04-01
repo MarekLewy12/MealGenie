@@ -22,6 +22,7 @@ import {
   Loader2,
   RefreshCw,
   MessageSquare,
+  Download,
 } from "lucide-react";
 
 import {
@@ -34,6 +35,7 @@ import { DashboardBackLink } from "../components/DashboardBackLink";
 import { notify } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { useShoppingListStore } from "../store/shoppingListStore";
+import { downloadRecipePdf } from "../utils/downloadRecipePdf";
 import type {
   MealSuggestion,
   FullRecipe,
@@ -53,6 +55,7 @@ export function RecipePage() {
   const [view, setView] = useState<RecipeView>("loading");
   const [mealId, setMealId] = useState<string | null>(routeId || null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [localRecipe, setLocalRecipe] = useState<FullRecipe | null>(null);
   const hasNotifiedRef = useRef(false);
@@ -224,31 +227,62 @@ export function RecipePage() {
     });
   };
 
+  const handleExportPdf = async () => {
+    if (!recipe || isExporting) return;
+
+    setIsExporting(true);
+    try {
+      await downloadRecipePdf(recipe, imageUrl ?? undefined);
+      notify.success("PDF zapisany!", "Eksport");
+    } catch {
+      notify.error("Nie udało się wygenerować PDF.", "Eksport");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
-      <header className="border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
+      <header className="sticky top-0 z-30 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <DashboardBackLink />
-          {mealId && (
-            <button
-              onClick={handleToggleFavorite}
-              disabled={favoriteMutation.isPending}
-              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                isFavorite
-                  ? "border-red-200/80 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50 dark:hover:bg-red-500/20"
-                  : "border-slate-200/80 bg-white/90 text-slate-800 hover:border-indigo-300 hover:bg-white dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
-              }`}
-            >
-              {favoriteMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Heart
-                  className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
-                />
-              )}
-              {isFavorite ? "Ulubione" : "Dodaj do ulubionych"}
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {recipe && (
+              <button
+                onClick={handleExportPdf}
+                disabled={isExporting}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                {isExporting ? "Generuję..." : "Pobierz PDF"}
+              </button>
+            )}
+
+            {mealId && (
+              <button
+                onClick={handleToggleFavorite}
+                disabled={favoriteMutation.isPending}
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed ${
+                  isFavorite
+                    ? "border-red-200/80 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50 dark:hover:bg-red-500/20"
+                    : "border-slate-200/80 bg-white/90 text-slate-800 hover:border-indigo-300 hover:bg-white dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
+                }`}
+              >
+                {favoriteMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Heart
+                    className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                  />
+                )}
+                {isFavorite ? "Ulubione" : "Dodaj do ulubionych"}
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -273,7 +307,7 @@ export function RecipePage() {
             <button
               onClick={handleToggleFavorite}
               disabled={favoriteMutation.isPending}
-              className={`rounded-full p-2.5 shadow-lg transition hover:scale-105 ${
+              className={`cursor-pointer rounded-full p-2.5 shadow-lg transition hover:scale-105 disabled:cursor-not-allowed ${
                 isFavorite
                   ? "bg-red-500/90 text-white shadow-red-200/50 dark:shadow-red-900/30"
                   : "bg-white/90 text-slate-700 shadow-slate-200/60 hover:bg-white dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-slate-900/30"
@@ -290,7 +324,7 @@ export function RecipePage() {
 
           <button
             onClick={handleAskAssistant}
-            className="group rounded-full bg-gradient-to-r from-amber-400 to-orange-500 p-2.5 shadow-lg shadow-amber-200/50 transition hover:scale-105 hover:shadow-amber-300/70 dark:shadow-amber-900/30"
+            className="group cursor-pointer rounded-full bg-gradient-to-r from-amber-400 to-orange-500 p-2.5 shadow-lg shadow-amber-200/50 transition hover:scale-105 hover:shadow-amber-300/70 dark:shadow-amber-900/30"
             title="Zapytaj asystenta o ten przepis"
           >
             <MessageSquare className="h-5 w-5 text-white" />
