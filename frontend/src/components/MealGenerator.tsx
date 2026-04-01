@@ -122,6 +122,7 @@ type SuccessViewProps = {
   meals: MealSuggestion[];
   isGuestMode: boolean;
   onReset: () => void;
+  onRegenerate: () => void;
   onGuestCta: () => void;
   onSelectMeal: (meal: MealSuggestion) => void;
 };
@@ -130,6 +131,7 @@ function SuccessView({
   meals,
   isGuestMode,
   onReset,
+  onRegenerate,
   onGuestCta,
   onSelectMeal,
 }: SuccessViewProps) {
@@ -200,13 +202,20 @@ function SuccessView({
           </button>
         )}
         <button
+          onClick={onRegenerate}
+          className="group flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-indigo-500"
+        >
+          <RefreshCw className="h-4 w-4 transition-transform group-hover:rotate-180" />
+          Generuj ponownie
+        </button>
+        <button
           onClick={onReset}
           className="group flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-indigo-500"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           {isGuestMode
             ? "Wróć i zmień parametry podglądu"
-            : "Wróć do generatora i spróbuj ponownie"}
+            : "Wróć do generatora i zmień parametry"}
         </button>
       </motion.div>
     </motion.div>
@@ -315,6 +324,13 @@ export function MealGenerator({ mode = "auth" }: MealGeneratorProps) {
   };
 
   const handleGenerate = () => {
+    setGuestRetryAfterSeconds(null);
+    setView("loading");
+    scrollToPageBottom();
+    mutate();
+  };
+
+  const handleRegenerate = () => {
     setGuestRetryAfterSeconds(null);
     setView("loading");
     scrollToPageBottom();
@@ -714,6 +730,7 @@ export function MealGenerator({ mode = "auth" }: MealGeneratorProps) {
             meals={data.meals}
             isGuestMode={isGuestMode}
             onReset={handleBackToForm}
+            onRegenerate={handleRegenerate}
             onGuestCta={handleGuestCta}
             onSelectMeal={(meal) => handleSelectMeal(meal, data.meals)}
           />
