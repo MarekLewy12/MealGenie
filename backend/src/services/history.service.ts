@@ -80,6 +80,7 @@ export async function getMealById(
     fullRecipeJson: meal.fullRecipeJson,
     ingredients: meal.ingredients,
     rating: meal.rating,
+    shareId: meal.shareId,
   };
 }
 

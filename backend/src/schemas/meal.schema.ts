@@ -136,6 +136,7 @@ export const MealHistoryDetailSchema = MealHistoryItemSchema.extend({
   fullRecipeJson: z.any().nullable(),
   ingredients: z.array(z.string()),
   rating: z.number().nullable(),
+  shareId: z.string().uuid().nullable().optional(),
 });
 
 export type MealIdParam = z.infer<typeof MealIdParamSchema>;

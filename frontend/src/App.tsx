@@ -8,6 +8,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { MobilePage } from "./pages/MobilePage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { RecipePage } from "./pages/RecipePage";
+import { SharedRecipePage } from "./pages/SharedRecipePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { RecipesPage } from "./pages/RecipesPage";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
@@ -21,6 +22,7 @@ function App() {
   const token = useAuthStore((state) => state.token);
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
   const location = useLocation();
+  const isSharedPage = location.pathname.startsWith("/shared");
 
   return (
     <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#05030f] dark:text-slate-50">
@@ -32,7 +34,7 @@ function App() {
       </div>
 
       <div className="relative z-10">
-        <Header />
+        {!isSharedPage && <Header />}
 
         <div>
           <main className="relative">
@@ -79,6 +81,14 @@ function App() {
                   element={
                     <PageTransition>
                       <MobilePage />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/shared/:shareId"
+                  element={
+                    <PageTransition>
+                      <SharedRecipePage />
                     </PageTransition>
                   }
                 />
