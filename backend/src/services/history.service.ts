@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import type {
   GetHistoryQuery,
@@ -114,4 +115,54 @@ export async function deleteMealHistory(
   });
 
   return result.count > 0;
+}
+
+export async function toggleShareLink(
+  userId: string,
+  mealId: string,
+): Promise<{ shareId: string | null } | null> {
+  const meal = await prisma.mealHistory.findFirst({
+    where: { id: mealId, userId },
+    select: { shareId: true },
+  });
+
+  if (!meal) {
+    return null;
+  }
+
+  const newShareId = meal.shareId ? null : randomUUID();
+
+  const updated = await prisma.mealHistory.update({
+    where: { id: mealId },
+    data: { shareId: newShareId },
+    select: { shareId: true },
+  });
+
+  return { shareId: updated.shareId };
+}
+
+export async function getSharedMeal(
+  shareId: string,
+): Promise<MealHistoryDetail | null> {
+  const meal = await prisma.mealHistory.findUnique({
+    where: { shareId },
+  });
+
+  if (!meal) {
+    return null;
+  }
+
+  return {
+    id: meal.id,
+    name: meal.name,
+    description: meal.description,
+    imageUrl: meal.imageUrl,
+    estimatedTime: meal.estimatedTime,
+    category: meal.category,
+    isFavorite: false,
+    createdAt: meal.createdAt.toISOString(),
+    fullRecipeJson: meal.fullRecipeJson,
+    ingredients: meal.ingredients,
+    rating: null,
+  };
 }

@@ -98,6 +98,7 @@ model MealHistory {
   wasSelected   Boolean   @default(false)
   selectedAt    DateTime?
   rating        Int?
+  shareId       String?   @unique
   createdAt     DateTime  @default(now())
 
   @@index([userId, createdAt])

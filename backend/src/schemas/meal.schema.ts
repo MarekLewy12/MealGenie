@@ -111,6 +111,10 @@ export const MealIdParamSchema = z.object({
   id: z.string().uuid("Nieprawidłowy format ID przepisu"),
 });
 
+export const ShareIdParamSchema = z.object({
+  shareId: z.string().uuid("Nieprawidłowy format linku udostępniania"),
+});
+
 export const GetHistoryQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),
   offset: z.coerce.number().int().min(0).default(0),
@@ -135,6 +139,7 @@ export const MealHistoryDetailSchema = MealHistoryItemSchema.extend({
 });
 
 export type MealIdParam = z.infer<typeof MealIdParamSchema>;
+export type ShareIdParam = z.infer<typeof ShareIdParamSchema>;
 export type GetHistoryQuery = z.infer<typeof GetHistoryQuerySchema>;
 export type MealHistoryItem = z.infer<typeof MealHistoryItemSchema>;
 export type MealHistoryDetail = z.infer<typeof MealHistoryDetailSchema>;

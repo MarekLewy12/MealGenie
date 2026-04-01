@@ -25,6 +25,10 @@ import {
   toggleFavoriteController,
   deleteMealHistoryController,
 } from "./controllers/history.controller.js";
+import {
+  getSharedMealController,
+  toggleShareController,
+} from "./controllers/share.controller.js";
 import { chatController } from "./controllers/chat.controller.js";
 import { ingredientSuggestionsController } from "./controllers/ingredients.controller.js";
 import { authenticateToken } from "./middlewares/authMiddleware.js";
@@ -73,11 +77,13 @@ app.post("/api/meals/suggest", authenticateToken, suggestMealsController);
 app.post("/api/meals/guest-suggest", guestSuggestController);
 app.post("/api/meals/recipe", authenticateToken, generateRecipeController);
 app.post("/api/chat", authenticateToken, chatController);
+app.get("/api/meals/shared/:shareId", getSharedMealController);
 // Kolejnosc ma znaczenie: /history przed /:id, zeby nie przechwycic "history" jako parametru.
 app.get("/api/meals/history", authenticateToken, getMealHistoryController);
 app.get("/api/meals/history/:id", authenticateToken, getMealByIdController);
 app.delete("/api/meals/history/:id", authenticateToken, deleteMealHistoryController);
 app.patch("/api/meals/:id/favorite", authenticateToken, toggleFavoriteController);
+app.patch("/api/meals/:id/share", authenticateToken, toggleShareController);
 
 // Ingredients
 app.get("/api/ingredients/suggestions", ingredientSuggestionsController);
