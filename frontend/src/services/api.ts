@@ -136,6 +136,22 @@ export async function toggleMealFavorite(
   return data;
 }
 
+export async function toggleMealShare(
+  id: string,
+): Promise<{ shareId: string | null }> {
+  const { data } = await api.patch<{ shareId: string | null }>(
+    `/meals/${id}/share`,
+  );
+  return data;
+}
+
+export async function getSharedMeal(
+  shareId: string,
+): Promise<MealHistoryDetail> {
+  const { data } = await api.get<MealHistoryDetail>(`/meals/shared/${shareId}`);
+  return data;
+}
+
 export async function deleteMealHistory(id: string): Promise<void> {
   await api.delete(`/meals/history/${id}`);
 }

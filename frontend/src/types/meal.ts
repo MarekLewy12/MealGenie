@@ -79,6 +79,7 @@ export interface MealHistoryDetail extends MealHistoryItem {
   fullRecipeJson: FullRecipe | null;
   ingredients: string[];
   rating: number | null;
+  shareId?: string | null;
 }
 
 export interface MealHistoryResponse {
