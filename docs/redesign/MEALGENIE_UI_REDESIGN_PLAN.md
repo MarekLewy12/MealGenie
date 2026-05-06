@@ -4,6 +4,32 @@ Status dokumentu: gotowy do review
 Zakres: plan wdrożenia redesignu UI, bez zmian kodu aplikacji  
 Kierunek: Direction A - Cozy Polish home kitchen
 
+## Status Wdrożenia
+
+| Etap | Status | Data | Notatka |
+|---|---|---|---|
+| Etap 1 - Foundation | Gotowe do review | 2026-05-06 | Wprowadzono tokeny Direction A, fonty, `html lang="pl"`, globalny focus ring, reduced motion i ciepłe tło light/dark w `frontend/src/index.css`, `frontend/tailwind.config.js`, `frontend/index.html` oraz `frontend/src/App.tsx`. Do ręcznego sprawdzenia: light/dark po reloadzie, mobile overflow, widoczność focusu i ewentualny FOUC przed osobnym no-FOUC fixem. |
+
+## Strategia branchowania redesignu
+
+`master` pozostaje stabilnym stanem produkcyjnym sprzed redesignu i nie przyjmuje bezpośrednich PR-ów UI redesignu.
+
+Punkty bezpieczeństwa dla stanu sprzed UI redesignu:
+
+- tag: `pre-ui-redesign-2026-05-06`
+- branch archiwalny: `archive/pre-ui-redesign-2026-05-06`
+
+Gałąź integracyjna redesignu:
+
+- `redesign/direction-a`
+
+Zasady pracy:
+
+- PR z `feature/ui-redesign-foundation` ma być kierowany do `redesign/direction-a`, nie do `master`. Jeśli branch foundation występuje jako `feat/ui-redesign-foundation`, obowiązuje ta sama zasada.
+- Kolejne branche robocze redesignu mają startować z `redesign/direction-a`.
+- `master` pozostaje nietknięty aż do finalnego, osobno zaakceptowanego PR-a `redesign/direction-a` -> `master`.
+- Tej strategii nie zmieniamy bez osobnej decyzji Marka.
+
 ## 1. Decyzja projektowa
 
 Wybieramy Direction A, ponieważ najlepiej pasuje do obietnicy MealGenie: pomoc w codziennym gotowaniu, bez technologicznego dystansu i bez wrażenia kolejnego zimnego narzędzia AI. Obecny frontend jest mocno oparty o język SaaS/AI: slate, indigo, fiolety, gradienty, glow i `Space Grotesk`. Direction A przenosi produkt w stronę ciepłego polskiego domu: pergamin, kremowy papier, notes z przepisami, terracotta, bazylia, spokojna typografia i klimat "jak u babci, ale w telefonie".
