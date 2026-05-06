@@ -5,13 +5,12 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { createFocusTrap, type FocusTrap } from "focus-trap";
 import {
   ChefHat,
-  Loader2,
   MessageSquare,
   Send,
-  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -23,6 +22,8 @@ import { chatWithAssistant } from "../services/api";
 import { useChatStore } from "../store/chatStore";
 import { notify } from "../store/notificationStore";
 import type { ChatRequest } from "../types/chat";
+import { cn } from "../utils/cn";
+import { Badge, Eyebrow, IconButton, MealEmoji } from "./ui";
 
 const RECIPE_CHIPS = [
   { label: "📍 Na którym kroku jestem", prompt: "Jestem na kroku " },
@@ -31,12 +32,21 @@ const RECIPE_CHIPS = [
 ];
 
 const drawerVariants = {
-  hidden: { x: "-100%" },
+  hidden: { x: "100%" },
   visible: { x: 0 },
-  exit: { x: "-100%" },
+  exit: { x: "100%" },
 };
 
 const HISTORY_WINDOW = 15;
+const DRAWER_TITLE_ID = "mealgenie-chat-drawer-title";
+const DRAWER_DESCRIPTION_ID = "mealgenie-chat-drawer-description";
+
+function formatMessageTime(timestamp: number) {
+  return new Intl.DateTimeFormat("pl-PL", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(timestamp);
+}
 
 export function ChatDrawer() {
   const {
@@ -54,19 +64,48 @@ export function ChatDrawer() {
   const messages = getCurrentMessages();
   const mode = getCurrentMode();
   const recipeId = getCurrentRecipeId();
+  const shouldReduceMotion = useReducedMotion();
   const [input, setInput] = useState("");
+  const drawerRef = useRef<HTMLElement | null>(null);
+  const focusTrapRef = useRef<FocusTrap | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
-    const timer = setTimeout(() => inputRef.current?.focus(), 100);
-    return () => clearTimeout(timer);
-  }, [isOpen]);
+    if (!isOpen || !drawerRef.current) {
+      return;
+    }
+
+    const drawerElement = drawerRef.current;
+    const focusTrap = createFocusTrap(drawerElement, {
+      initialFocus: () => closeButtonRef.current ?? drawerElement,
+      fallbackFocus: () => drawerElement,
+      returnFocusOnDeactivate: true,
+      escapeDeactivates: true,
+      allowOutsideClick: true,
+      clickOutsideDeactivates: false,
+      onDeactivate: () => {
+        if (useChatStore.getState().isOpen) {
+          closeChat();
+        }
+      },
+    });
+
+    focusTrapRef.current = focusTrap;
+    focusTrap.activate();
+
+    return () => {
+      focusTrap.deactivate({ returnFocus: true });
+      focusTrapRef.current = null;
+    };
+  }, [closeChat, isOpen]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isOpen]);
+    messagesEndRef.current?.scrollIntoView({
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+    });
+  }, [messages, isOpen, shouldReduceMotion]);
 
   const handleSend = async () => {
     const trimmed = input.trim();
@@ -132,96 +171,134 @@ export function ChatDrawer() {
     inputRef.current?.focus();
   };
 
+  const title = mode === "recipe" ? "Asystent przepisu" : "Genie w kuchni";
+  const subtitle =
+    mode === "recipe" && recipeContext
+      ? recipeContext.recipeName
+      : "Twój spokojny pomocnik od gotowania";
+  const modeBadge = mode === "recipe" ? "Tryb przepisu" : "Tryb globalny";
+  const description =
+    mode === "recipe"
+      ? "Pytaj o kroki, składniki i techniki dla aktualnego przepisu."
+      : "Pytaj o przepisy, składniki, techniki kulinarne i planowanie posiłków.";
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
           <motion.div
             onClick={closeChat}
-            className="fixed inset-0 z-40 cursor-pointer bg-slate-900/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 cursor-pointer bg-ink/30 backdrop-blur-[2px] dark:bg-black/55"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{
+              duration: shouldReduceMotion ? 0.01 : 0.24,
+              ease: "easeOut",
+            }}
             aria-hidden
           />
 
           <motion.aside
-            className="fixed left-0 top-0 z-50 flex h-full w-full flex-col border-r border-slate-200/70 bg-white shadow-2xl dark:border-slate-800 dark:bg-[#0b1220] sm:w-[85vw] md:w-[70vw] lg:w-[600px] lg:max-w-[50vw]"
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={DRAWER_TITLE_ID}
+            aria-describedby={DRAWER_DESCRIPTION_ID}
+            tabIndex={-1}
+            className="fixed right-0 top-0 z-50 flex h-dvh w-full max-w-full flex-col overflow-hidden border-l border-border bg-bg-elevated text-ink shadow-lg sm:w-[88vw] md:w-[70vw] lg:w-[560px] lg:max-w-[48vw]"
             variants={drawerVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={{
+              duration: shouldReduceMotion ? 0.01 : 0.3,
+              ease: [0.22, 1, 0.36, 1],
+            }}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    mode === "recipe"
-                      ? "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300"
-                      : "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
-                  }`}
-                >
-                  {mode === "recipe" ? (
-                    <ChefHat className="h-5 w-5" />
-                  ) : (
-                    <MessageSquare className="h-5 w-5" />
-                  )}
+            <div
+              className={cn(
+                "relative overflow-hidden border-b border-border px-4 py-4 sm:px-6",
+                mode === "recipe"
+                  ? "bg-accent-soft/70 dark:bg-accent-soft/55"
+                  : "bg-bg-elevated",
+              )}
+            >
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(194,87,40,0.13),transparent_44%)] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(232,138,74,0.09),transparent_46%)]" />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div
+                    className={cn(
+                      "mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border shadow-xs",
+                      mode === "recipe"
+                        ? "border-accent/25 bg-bg-elevated text-accent"
+                        : "border-basil/25 bg-basil-soft text-basil",
+                    )}
+                  >
+                    {mode === "recipe" ? (
+                      <ChefHat className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <MessageSquare className="h-5 w-5" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Eyebrow tone={mode === "recipe" ? "accent" : "basil"}>
+                        {modeBadge}
+                      </Eyebrow>
+                      <Badge variant={mode === "recipe" ? "accent" : "basil"}>
+                        Gotowy
+                      </Badge>
+                    </div>
+                    <h2
+                      id={DRAWER_TITLE_ID}
+                      className="font-brand text-xl font-semibold leading-tight text-ink"
+                    >
+                      {title}
+                    </h2>
+                    <p
+                      id={DRAWER_DESCRIPTION_ID}
+                      className="mt-1 max-w-[17rem] truncate text-sm text-ink-soft sm:max-w-[24rem]"
+                    >
+                      {subtitle}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  {mode === "recipe" && recipeContext ? (
-                    <>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Asystent Przepisu
-                      </p>
-                      <p className="max-w-[200px] truncate text-xs text-amber-600 dark:text-amber-400">
-                        📍 {recipeContext.recipeName}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Asystent AI
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Twój kulinarny ekspert
-                      </p>
-                    </>
-                  )}
+                <div className="flex shrink-0 items-center gap-2">
+                  <IconButton
+                    aria-label="Wyczyść bieżącą rozmowę"
+                    title="Wyczyść bieżącą rozmowę"
+                    onClick={clearCurrentSession}
+                    variant="ghost"
+                    className="min-h-10 min-w-10 border-border/70 bg-bg-elevated/80 p-2 text-ink-soft hover:text-bordeaux"
+                    icon={<Trash2 className="h-4 w-4" />}
+                  />
+                  <button
+                    ref={closeButtonRef}
+                    type="button"
+                    aria-label="Zamknij chat"
+                    title="Zamknij chat"
+                    onClick={closeChat}
+                    className="inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-md border border-border/70 bg-bg-elevated/80 p-2 text-ink-soft transition duration-fast ease-out hover:bg-accent-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={clearCurrentSession}
-                  className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-red-500 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-red-400"
-                  title="Wyczyść tę rozmowę"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={closeChat}
-                  className="cursor-pointer rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                  title="Zamknij"
-                >
-                  <X className="h-5 w-5" />
-                </button>
               </div>
             </div>
 
             {mode === "recipe" && (
-              <div className="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-                <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+              <div className="border-b border-border bg-bg px-4 py-3 sm:px-6">
+                <p className="mb-2 text-xs font-semibold text-ink-soft">
                   Szybkie pytania:
                 </p>
-                <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+                <div className="flex max-w-full flex-nowrap gap-2 overflow-x-auto pb-1">
                   {RECIPE_CHIPS.map((chip) => (
                     <button
                       key={chip.label}
                       type="button"
                       onClick={() => handleChipClick(chip.prompt)}
-                      className="cursor-pointer whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                      className="min-h-9 cursor-pointer whitespace-nowrap rounded-pill border border-border-strong bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-accent transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent-deep"
                     >
                       {chip.label}
                     </button>
@@ -230,31 +307,31 @@ export function ChatDrawer() {
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions text"
+              className="flex-1 overflow-y-auto bg-bg px-4 py-5 sm:px-6"
+            >
               {messages.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center">
-                  <div
-                    className={`mb-4 rounded-full p-4 ${
+                  <MealEmoji
+                    emoji={mode === "recipe" ? "🍲" : "🥄"}
+                    size="lg"
+                    className={cn(
+                      "mb-4",
                       mode === "recipe"
-                        ? "bg-amber-100 dark:bg-amber-500/15"
-                        : "bg-emerald-100 dark:bg-emerald-500/15"
-                    }`}
-                  >
-                    {mode === "recipe" ? (
-                      <ChefHat className="h-8 w-8 text-amber-600 dark:text-amber-300" />
-                    ) : (
-                      <Sparkles className="h-8 w-8 text-emerald-600 dark:text-emerald-300" />
+                        ? "bg-accent-soft text-accent"
+                        : "bg-basil-soft text-basil",
                     )}
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  />
+                  <h3 className="font-brand text-xl font-semibold text-ink">
                     {mode === "recipe"
                       ? "Potrzebujesz pomocy z przepisem?"
-                      : "Cześć! Jak mogę pomóc?"}
+                      : "Cześć, co dziś gotujemy?"}
                   </h3>
-                  <p className="mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-                    {mode === "recipe"
-                      ? "Zapytaj o dowolny krok, składnik lub technikę z tego przepisu."
-                      : "Pytaj o przepisy, składniki, techniki kulinarne i planowanie posiłków."}
+                  <p className="mt-2 max-w-xs text-sm leading-6 text-ink-soft">
+                    {description}
                   </p>
                 </div>
               ) : (
@@ -267,14 +344,15 @@ export function ChatDrawer() {
                       }`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                        className={cn(
+                          "max-w-[85%] px-4 py-3 text-sm leading-6 shadow-xs",
                           message.role === "user"
-                            ? "bg-indigo-600 text-white"
-                            : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100"
-                        }`}
+                            ? "rounded-[18px] rounded-br-sm bg-accent text-ink-inverse"
+                            : "rounded-[18px] rounded-bl-sm border border-border bg-bg-elevated text-ink",
+                        )}
                       >
                         {message.role === "assistant" ? (
-                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <div className="prose prose-sm max-w-none prose-headings:font-brand prose-headings:text-ink prose-p:my-0 prose-p:text-ink prose-a:text-accent prose-strong:text-ink prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-code:text-accent-deep dark:prose-invert dark:prose-p:text-ink dark:prose-strong:text-ink">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm, remarkBreaks]}
                             >
@@ -282,11 +360,35 @@ export function ChatDrawer() {
                             </ReactMarkdown>
                           </div>
                         ) : (
-                          <p className="text-sm">{message.content}</p>
+                          <p className="whitespace-pre-wrap">{message.content}</p>
                         )}
+                        <p
+                          className={cn(
+                            "mt-2 text-[11px] leading-none opacity-70",
+                            message.role === "user"
+                              ? "text-right text-ink-inverse"
+                              : "text-ink-muted",
+                          )}
+                        >
+                          {message.role === "user" ? "Ty · " : "Genie · "}
+                          {formatMessageTime(message.createdAt)}
+                        </p>
                       </div>
                     </div>
                   ))}
+                  {isLoading ? (
+                    <div className="flex justify-start">
+                      <div className="flex items-center gap-2 rounded-[18px] rounded-bl-sm border border-border bg-bg-elevated px-4 py-3 text-sm text-ink-soft shadow-xs">
+                        <span className="sr-only">Genie pisze odpowiedź</span>
+                        <span className="flex gap-1" aria-hidden="true">
+                          <span className="h-2 w-2 animate-pulse rounded-pill bg-accent [animation-delay:0ms]" />
+                          <span className="h-2 w-2 animate-pulse rounded-pill bg-accent [animation-delay:120ms]" />
+                          <span className="h-2 w-2 animate-pulse rounded-pill bg-accent [animation-delay:240ms]" />
+                        </span>
+                        <span aria-hidden="true">pisze...</span>
+                      </div>
+                    </div>
+                  ) : null}
                   <div ref={messagesEndRef} />
                 </div>
               )}
@@ -295,10 +397,14 @@ export function ChatDrawer() {
 
             <form
               onSubmit={handleSubmit}
-              className="border-t border-slate-100 p-4 dark:border-slate-800"
+              className="border-t border-border bg-bg-elevated p-3 sm:p-4"
             >
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-2 rounded-lg border border-border bg-bg-sunken p-2 shadow-xs">
+                <label htmlFor="mealgenie-chat-input" className="sr-only">
+                  Wiadomość do Genie
+                </label>
                 <textarea
+                  id="mealgenie-chat-input"
                   ref={inputRef}
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
@@ -306,21 +412,26 @@ export function ChatDrawer() {
                   placeholder={
                     mode === "recipe"
                       ? "Np. 'W kroku 3 sos wyszedł wodnisty...'"
-                      : "Napisz wiadomość..."
+                      : "Zapytaj o przepis, składnik albo plan..."
                   }
-                  className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                  className="max-h-32 min-h-11 flex-1 resize-none rounded-md border border-transparent bg-bg-elevated px-3 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:outline-none"
                   rows={1}
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
+                  aria-label="Wyślij wiadomość"
                   disabled={isLoading || !input.trim()}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md border border-accent bg-accent text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover disabled:cursor-not-allowed disabled:border-border disabled:bg-bg-sunken disabled:text-ink-disabled disabled:shadow-none"
                 >
                   {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="flex gap-1" aria-hidden="true">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-pill bg-current [animation-delay:0ms]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-pill bg-current [animation-delay:120ms]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-pill bg-current [animation-delay:240ms]" />
+                    </span>
                   ) : (
-                    <Send className="h-5 w-5" />
+                    <Send className="h-5 w-5" aria-hidden="true" />
                   )}
                 </button>
               </div>

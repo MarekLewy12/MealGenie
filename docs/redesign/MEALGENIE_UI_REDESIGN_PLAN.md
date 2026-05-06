@@ -14,6 +14,7 @@ Kierunek: Direction A - Cozy Polish home kitchen
 | Etap 5 - Recipe | Gotowe do review | 2026-05-06 | Przebudowano `RecipePage` i `SharedRecipePage` na Direction A: ciepłe tło, papierowy hero ze zdjęciem, meta cards, akcje favorite/share/PDF/chat, publiczny shared view bez auth oraz semantyczne sekcje składników i kroków. Zmienione pliki: `frontend/src/pages/RecipePage.tsx`, `frontend/src/pages/SharedRecipePage.tsx`, `frontend/src/components/recipe/RecipeSections.tsx`, `frontend/src/components/RecipeLoadingWithPreview.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 6 - Generator i suggestions | Gotowe do review | 2026-05-06 | Przebudowano wizualnie auth i guest generator w Direction A: ciepłe wrappery stron, trzy spokojne sekcje formularza, paper-card suggestions, loading/error polish oraz dostępniejszy `TagInput`. Zachowano mutacje, payloady, query paramy, guest 429, `formatRetryAfter`, `unusedImageUrls`, `handleGuestCta` i przejście do `/recipe`. Zmienione pliki: `frontend/src/pages/GeneratorPage.tsx`, `frontend/src/pages/GuestGeneratorPage.tsx`, `frontend/src/components/MealGenerator.tsx`, `frontend/src/components/TagInput.tsx`, `frontend/src/components/LoadingExperience.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` na Direction A: ciepły greeting, generator/asystent, papierowa lista zakupów, nowe loading/error/empty states oraz biblioteka przepisów oparta o `MealHistoryCard`. Zachowano query keys, `getMealHistory`, store'y zakupów/chat, eksport listy i routing. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
+| Etap 8 - Chat drawer | Gotowe do review | 2026-05-06 | Przebudowano `ChatDrawer` w Direction A: prawostronny drawer desktop/full-screen mobile, ciepłe surfaces, odróżnienie recipe/global mode, spokojne bubbles, input paper-card, loading dots oraz a11y baseline z `role="dialog"`, `aria-modal`, `aria-labelledby`, ESC, focus trap przez `focus-trap`, focus on open, return focus i `role="log" aria-live="polite"`. Zmienione pliki: `frontend/src/components/ChatDrawer.tsx`, `frontend/package.json`, `frontend/package-lock.json`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 
 ## Strategia branchowania redesignu
 
@@ -371,6 +372,26 @@ Checklist testowy:
 - Focus wraca do przycisku, który otworzył chat.
 - Backdrop nie zamyka przypadkowo podczas pisania.
 - Screen reader dostaje nowe wiadomości bez przerwania użytkownika.
+
+Status po implementacji 2026-05-06: `Gotowe do review`.
+
+Zmienione pliki:
+
+- `frontend/src/components/ChatDrawer.tsx`
+- `frontend/package.json`
+- `frontend/package-lock.json`
+- `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`
+
+Notatki accessibility:
+
+- Dodano `role="dialog"`, `aria-modal="true"`, `aria-labelledby` i `aria-describedby`.
+- Dodano focus trap przez `focus-trap`; biblioteka obsługuje Tab/Shift+Tab, ESC i return focus, bez ręcznej implementacji w komponencie.
+- Backdrop nadal zamyka drawer przez istniejące `closeChat`; `focus-trap` ma `allowOutsideClick: true`, żeby nie blokować kliknięcia tła.
+- Wiadomości renderują się w kontenerze `role="log"` z `aria-live="polite"`.
+
+Nowe zależności:
+
+- `focus-trap`
 
 ### Etap 9 - Landing i MobilePage
 
@@ -758,7 +779,7 @@ Ta sekcja powinna być aktualizowana po każdym etapie.
 | Etap 5 - Recipe | Nie rozpoczęto | - | Pierwszy pełny ekran produktowy. |
 | Etap 6 - Generator | Gotowe do review | 2026-05-06 | Przebudowano `GeneratorPage`, `GuestGeneratorPage`, `MealGenerator`, `TagInput` i lekko `LoadingExperience`; zachowano payloady i mutacje. |
 | Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` w Direction A. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
-| Etap 8 - Chat drawer | Nie rozpoczęto | - | Osobny nacisk na a11y. |
+| Etap 8 - Chat drawer | Gotowe do review | 2026-05-06 | Przebudowano `frontend/src/components/ChatDrawer.tsx` wizualnie i accessibility-wise w Direction A. Zachowano `useChatStore`, `chatWithAssistant`, tryby global/recipe, historię, `HISTORY_WINDOW`, chipsy recipe, Enter/Shift+Enter i payloady. Dodano `focus-trap` dla Tab/Shift+Tab, ESC i return focus. |
 | Etap 9 - Landing i MobilePage | Nie rozpoczęto | - | Na końcu, po stabilizacji komponentów. |
 
 ## 11. Pierwszy mały krok po zaakceptowaniu planu
