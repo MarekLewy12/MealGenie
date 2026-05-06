@@ -9,6 +9,7 @@ Kierunek: Direction A - Cozy Polish home kitchen
 | Etap | Status | Data | Notatka |
 |---|---|---|---|
 | Etap 1 - Foundation | Gotowe do review | 2026-05-06 | Wprowadzono tokeny Direction A, fonty, `html lang="pl"`, globalny focus ring, reduced motion i ciepłe tło light/dark w `frontend/src/index.css`, `frontend/tailwind.config.js`, `frontend/index.html` oraz `frontend/src/App.tsx`. Do ręcznego sprawdzenia: light/dark po reloadzie, mobile overflow, widoczność focusu i ewentualny FOUC przed osobnym no-FOUC fixem. |
+| Etap 3 - Logo, header i shell | Gotowe do review | 2026-05-06 | Wprowadzono komponent `Logo`, header Direction A, przestylowany `ThemeToggle`, skip-link do treści oraz zachowano brak globalnego headera na `/shared/:shareId`. Zmienione pliki: `frontend/src/components/Logo.tsx`, `frontend/src/components/Header.tsx`, `frontend/src/components/ThemeToggle.tsx`, `frontend/src/App.tsx`, `frontend/index.html`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 
 ## Strategia branchowania redesignu
 

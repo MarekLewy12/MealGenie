@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, MessageSquare, X } from "lucide-react";
+import { Menu, MessageSquare, Smartphone, X } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { notify } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { ThemeToggle } from "./ThemeToggle";
+import { Logo } from "./Logo";
+import { cn } from "../utils/cn";
 
 export function Header() {
   const { token, logout, user } = useAuthStore();
   const openGlobalChat = useChatStore((state) => state.openGlobalChat);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
   const handleLogout = () => {
@@ -21,43 +24,76 @@ export function Header() {
   const homeLink = token ? "/dashboard" : "/";
   const homeLabel = token ? "Dashboard" : "Strona główna";
   const logoutTitle = user?.name ? `Wyloguj ${user.name}` : "Wyloguj";
+  const mobileMenuId = "mobile-navigation";
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const linkBaseClasses =
-    "cursor-pointer text-sm font-semibold uppercase tracking-wide transition-colors duration-200";
-  const desktopLinkClasses = `${linkBaseClasses} hover:text-indigo-600 dark:hover:text-indigo-400 text-slate-700 dark:text-slate-200`;
+    "cursor-pointer rounded-pill px-3 py-2 text-sm font-semibold text-ink-soft transition duration-fast ease-out hover:bg-accent-soft hover:text-accent";
   const mobileLinkClasses =
-    "block w-full cursor-pointer border-b border-slate-100 p-4 text-lg font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-800 dark:text-white dark:hover:bg-slate-800/50";
+    "flex min-h-12 w-full cursor-pointer items-center justify-between rounded-md border border-transparent px-4 py-3 text-left text-base font-semibold text-ink transition duration-fast ease-out hover:border-border-strong hover:bg-accent-soft hover:text-accent";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#0c0f1d]/80">
-      <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-6">
-        <Link to={homeLink} className="group flex items-center gap-3" onClick={closeMenu}>
-          <img
-            src="/logo-genie.png"
-            alt="MealGenie"
-            className="h-9 w-9 rounded-xl bg-white p-1 shadow-md shadow-indigo-200/40 transition group-hover:scale-105 dark:bg-white/5 dark:shadow-indigo-900/40"
+    <header
+      className={cn(
+        "sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-base ease-out",
+        isScrolled
+          ? "border-border-strong bg-bg-elevated/95 shadow-md"
+          : "border-border bg-bg-elevated shadow-xs",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-4 transition-[min-height,padding] duration-base ease-out sm:px-6",
+          isScrolled ? "min-h-16 py-2" : "min-h-[4.5rem] py-3",
+        )}
+      >
+        <Link
+          to={homeLink}
+          className="group rounded-md transition duration-fast ease-out hover:opacity-95"
+          onClick={closeMenu}
+          aria-label={`MealGenie - ${homeLabel}`}
+        >
+          <Logo
+            className={cn(
+              "transition duration-base ease-out group-hover:scale-[1.02]",
+              isScrolled ? "scale-[0.94]" : "scale-100",
+            )}
           />
-          <div className="flex flex-col leading-none">
-            <span className="bg-gradient-to-r from-slate-900 to-indigo-500 bg-clip-text text-xl font-bold tracking-tight text-transparent transition group-hover:drop-shadow-[0_6px_25px_rgba(99,102,241,0.25)] dark:from-white dark:to-indigo-200">
-              MealGenie
-            </span>
-            <span className="hidden text-[10px] font-medium text-slate-400 xs:block dark:text-slate-500">
-              by Marek Lewandowski
-            </span>
-          </div>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link to={homeLink} className={desktopLinkClasses}>
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Główna nawigacja">
+          <Link to={homeLink} className={linkBaseClasses}>
             {homeLabel}
           </Link>
 
           {token && (
             <>
-              <Link to="/settings" className={desktopLinkClasses}>
+              <Link to="/settings" className={linkBaseClasses}>
                 Ustawienia
               </Link>
-              <Link to="/generator" className={desktopLinkClasses}>
+              <Link to="/generator" className={linkBaseClasses}>
                 Generator
               </Link>
             </>
@@ -66,44 +102,55 @@ export function Header() {
           {token && (
             <button
               onClick={openGlobalChat}
-              className="group flex cursor-pointer items-center gap-2 rounded-xl border border-emerald-200/50 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 hover:shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+              className="group inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-pill border border-basil bg-basil-soft px-4 py-2 text-sm font-semibold text-basil transition duration-fast ease-out hover:bg-bg-elevated"
               title="Asystent AI"
+              type="button"
             >
               <MessageSquare className="h-4 w-4 transition-transform group-hover:scale-110" />
               <span className="hidden lg:inline">Asystent</span>
             </button>
           )}
 
-          <Link to="/mobile" className={desktopLinkClasses}>
-            📱 Mobile
+          <Link to="/mobile" className={cn(linkBaseClasses, "inline-flex items-center gap-2")}>
+            <Smartphone className="h-4 w-4" aria-hidden="true" />
+            Mobile
           </Link>
 
           {!token ? (
             <>
-              <Link to="/try" className={desktopLinkClasses}>
+              <Link to="/try" className={cn(linkBaseClasses, "text-accent")}>
                 Wypróbuj
               </Link>
-              <Link to="/login" className={desktopLinkClasses}>
+              <Link
+                to="/login"
+                className="inline-flex min-h-11 items-center justify-center rounded-pill border border-accent bg-accent px-5 py-2 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover"
+              >
                 Logowanie
               </Link>
             </>
           ) : (
-            <button onClick={handleLogout} className={desktopLinkClasses} title={logoutTitle}>
+            <button
+              onClick={handleLogout}
+              className={cn(linkBaseClasses, "text-accent hover:text-accent-deep")}
+              title={logoutTitle}
+              type="button"
+            >
               Wyloguj
             </button>
           )}
 
-          <div className="ml-2 border-l border-slate-200/60 pl-4 dark:border-white/10">
+          <div className="ml-2 border-l border-border pl-4">
             <ThemeToggle />
           </div>
         </nav>
 
-        <div className="flex items-center gap-4 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           {token && (
             <button
               onClick={openGlobalChat}
-              className="rounded-lg border border-emerald-200/60 bg-emerald-50 p-2 text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-basil bg-basil-soft p-2.5 text-basil transition duration-fast ease-out hover:bg-bg-elevated"
               aria-label="Asystent AI"
+              type="button"
             >
               <MessageSquare className="h-5 w-5" />
             </button>
@@ -111,9 +158,11 @@ export function Header() {
           <ThemeToggle />
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border bg-bg-elevated p-2.5 text-ink-soft shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent"
             aria-label="Menu"
             aria-expanded={isMenuOpen}
+            aria-controls={mobileMenuId}
+            type="button"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -127,9 +176,9 @@ export function Header() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden border-t border-slate-200 bg-white/95 backdrop-blur-xl md:hidden dark:border-slate-800 dark:bg-[#0c0f1d]/95"
+            className="overflow-hidden border-t border-border bg-bg-elevated shadow-md backdrop-blur-xl lg:hidden"
           >
-            <nav className="flex flex-col p-4">
+            <nav id={mobileMenuId} className="flex flex-col gap-2 p-4" aria-label="Menu mobilne">
               <Link to={homeLink} className={mobileLinkClasses} onClick={closeMenu}>
                 {homeLabel}
               </Link>
@@ -145,8 +194,13 @@ export function Header() {
                 </>
               )}
 
-              <Link to="/mobile" className={mobileLinkClasses} onClick={closeMenu}>
-                📱 Aplikacja mobilna
+              <Link
+                to="/mobile"
+                className={cn(mobileLinkClasses, "justify-start gap-3")}
+                onClick={closeMenu}
+              >
+                <Smartphone className="h-5 w-5" aria-hidden="true" />
+                Aplikacja mobilna
               </Link>
 
               {!token ? (
@@ -154,7 +208,14 @@ export function Header() {
                   <Link to="/try" className={mobileLinkClasses} onClick={closeMenu}>
                     Wypróbuj
                   </Link>
-                  <Link to="/login" className={mobileLinkClasses} onClick={closeMenu}>
+                  <Link
+                    to="/login"
+                    className={cn(
+                      mobileLinkClasses,
+                      "border-accent bg-accent text-ink-inverse hover:bg-accent-hover hover:text-ink-inverse",
+                    )}
+                    onClick={closeMenu}
+                  >
                     Logowanie
                   </Link>
                 </>
@@ -164,7 +225,11 @@ export function Header() {
                     handleLogout();
                     closeMenu();
                   }}
-                  className={`${mobileLinkClasses} text-left text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20`}
+                  className={cn(
+                    mobileLinkClasses,
+                    "text-bordeaux hover:border-bordeaux hover:bg-bg-sunken hover:text-bordeaux",
+                  )}
+                  type="button"
                 >
                   Wyloguj się
                 </button>

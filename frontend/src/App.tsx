@@ -25,7 +25,13 @@ function App() {
   const isSharedPage = location.pathname.startsWith("/shared");
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden bg-bg text-ink transition-colors duration-base ease-in-out">
+    <div className="relative min-h-screen w-full overflow-x-clip bg-bg text-ink transition-colors duration-base ease-in-out">
+      <a
+        href="#main-content"
+        className="fixed left-4 top-4 z-[60] -translate-y-24 rounded-md bg-accent px-4 py-3 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast ease-out focus:translate-y-0"
+      >
+        Przejdź do treści
+      </a>
       <NotificationContainer />
       <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_18%_12%,rgba(194,87,40,0.08),transparent_38%),radial-gradient(ellipse_at_88%_8%,rgba(212,160,23,0.08),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.08),transparent_48%),radial-gradient(ellipse_at_80%_0%,rgba(122,176,104,0.06),transparent_34%)]">
         <div className="absolute inset-0 opacity-[0.22] [background-image:radial-gradient(var(--border)_0.75px,transparent_0.75px)] [background-size:18px_18px] dark:opacity-0" />
@@ -35,7 +41,7 @@ function App() {
         {!isSharedPage && <Header />}
 
         <div>
-          <main className="relative">
+          <main id="main-content" className="relative" tabIndex={-1}>
             <AnimatePresence mode="wait" initial={false}>
               <Routes location={location} key={location.pathname}>
                 <Route
