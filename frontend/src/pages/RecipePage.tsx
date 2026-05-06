@@ -15,7 +15,6 @@ import {
   Share2,
   Sparkles,
   Users,
-  UtensilsCrossed,
   XCircle,
 } from "lucide-react";
 
@@ -39,6 +38,15 @@ import { notify } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { downloadRecipePdf } from "../utils/downloadRecipePdf";
 import type { MealSuggestion, FullRecipe } from "../types/meal";
+import {
+  Badge,
+  Button,
+  Card,
+  Eyebrow,
+  FolkDivider,
+  IconButton,
+  MealEmoji,
+} from "../components/ui";
 
 type RecipeView = "loading" | "recipe" | "error";
 
@@ -232,6 +240,13 @@ export function RecipePage() {
   const imageUrl = headerData?.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${headerData.imageUrl}`
     : headerData?.imageUrl;
+  const totalTime = recipe?.totalTimeMinutes || headerData?.cookingTimeMinutes || 0;
+  const difficultyLabel =
+    (recipe?.difficulty || headerData?.difficulty) === "Easy"
+      ? "Łatwe"
+      : (recipe?.difficulty || headerData?.difficulty) === "Medium"
+        ? "Średnie"
+        : "Trudne";
 
   const handleToggleFavorite = () => {
     if (!mealId || favoriteMutation.isPending) return;
@@ -334,242 +349,206 @@ export function RecipePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-[#020617] dark:to-slate-900">
-      <header className="sticky top-0 z-30 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/80">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+    <div className="min-h-screen bg-bg text-ink">
+      <header className="sticky top-0 z-30 border-b border-border bg-bg-elevated/90 shadow-xs backdrop-blur-xl">
+        <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between px-4 py-2">
           <DashboardBackLink />
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {recipe && (
-              <div className="flex items-center">
-                <button
-                  onClick={handleShare}
-                  disabled={shareMutation.isPending}
-                  title={shareId ? "Kopiuj link udostępniania" : "Udostępnij przepis"}
-                  className={`inline-flex cursor-pointer items-center gap-1.5 border px-2.5 py-2 text-xs font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:gap-2 sm:px-3 sm:text-sm ${
-                    shareId
-                      ? "rounded-l-full border-r-0 border-emerald-200/80 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:border-emerald-400/50 dark:hover:bg-emerald-500/20"
-                      : "rounded-full border-slate-200/80 bg-white/90 text-slate-800 hover:border-indigo-300 hover:shadow-md dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
-                  }`}
-                >
-                  {shareMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isCopied ? (
-                    <Check className="h-4 w-4 text-emerald-500" />
-                  ) : (
-                    <Share2 className="h-4 w-4" />
-                  )}
-                  <span className="hidden sm:inline">
-                    {shareMutation.isPending
-                      ? "Przetwarzam..."
-                      : isCopied
-                        ? "Skopiowano!"
-                        : shareId
-                          ? "Kopiuj link"
-                          : "Udostępnij"}
-                  </span>
-                </button>
-
-                {shareId && (
-                  <button
-                    onClick={handleDisableShare}
-                    disabled={shareMutation.isPending}
-                    className="cursor-pointer rounded-r-full border border-l-0 border-emerald-200/80 bg-emerald-50 px-1.5 py-2 text-emerald-400 shadow-sm transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:hover:bg-red-500/10"
-                    title="Wyłącz udostępnianie"
-                  >
-                    <XCircle className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {recipe && (
-              <button
-                onClick={handleExportPdf}
-                disabled={isExporting}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/90 px-2.5 py-2 text-xs font-semibold text-slate-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:gap-2 sm:px-3 sm:text-sm dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
-              >
-                {isExporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-                <span className="hidden sm:inline">
-                  {isExporting ? "Generuję..." : "Pobierz PDF"}
-                </span>
-              </button>
-            )}
-
-            {mealId && (
-              <button
-                onClick={handleToggleFavorite}
-                disabled={favoriteMutation.isPending}
-                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-2 text-xs font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed sm:gap-2 sm:px-3 sm:text-sm ${
-                  isFavorite
-                    ? "border-red-200/80 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50 dark:hover:bg-red-500/20"
-                    : "border-slate-200/80 bg-white/90 text-slate-800 hover:border-indigo-300 hover:bg-white dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-indigo-400/60 dark:hover:bg-slate-900"
-                }`}
-              >
-                {favoriteMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Heart
-                    className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
-                  />
-                )}
-                <span className="hidden sm:inline">
-                  {isFavorite ? "Ulubione" : "Dodaj do ulubionych"}
-                </span>
-              </button>
-            )}
-          </div>
         </div>
       </header>
 
-      <div className="relative">
-        <div className="h-[200px] overflow-hidden sm:h-[280px] md:h-[360px]">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={headerData?.name || "Przepis"}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500">
-              <UtensilsCrossed className="h-24 w-24 text-white/50" />
-            </div>
-          )}
-          <div className="absolute inset-0 hidden bg-gradient-to-t from-black/70 via-black/20 to-transparent sm:block" />
-        </div>
-
-        <div className="absolute right-4 top-4 z-10 flex gap-2">
-          {mealId && (
-            <button
-              onClick={handleToggleFavorite}
-              disabled={favoriteMutation.isPending}
-              className={`cursor-pointer rounded-full p-2.5 shadow-lg transition hover:scale-105 disabled:cursor-not-allowed ${
-                isFavorite
-                  ? "bg-red-500/90 text-white shadow-red-200/50 dark:shadow-red-900/30"
-                  : "bg-white/90 text-slate-700 shadow-slate-200/60 hover:bg-white dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-slate-900/30"
-              }`}
-              title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
-            >
-              {favoriteMutation.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+      <main>
+        <section className="mx-auto max-w-6xl px-4 py-5 sm:py-8">
+          <div className="grid overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-lg lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+            <div className="relative min-h-[230px] overflow-hidden sm:min-h-[320px] lg:min-h-[560px]">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={headerData?.name || recipe?.name || "Przepis"}
+                  className="h-full w-full object-cover"
+                />
               ) : (
-                <Heart className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`} />
+                <div className="flex h-full min-h-[230px] w-full items-center justify-center bg-accent-soft sm:min-h-[320px] lg:min-h-[560px]">
+                  <MealEmoji
+                    name={headerData?.name || recipe?.name || "Przepis"}
+                    size="lg"
+                    className="text-7xl"
+                  />
+                </div>
               )}
-            </button>
-          )}
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/45 via-accent-deep/10 to-transparent" />
+              <Badge
+                variant="accent"
+                className="absolute left-4 top-4 shadow-sm"
+              >
+                {isHistoryView ? "Zapisany przepis" : "Świeżo wygenerowany"}
+              </Badge>
+            </div>
 
-          <button
-            onClick={handleAskAssistant}
-            className="group cursor-pointer rounded-full bg-gradient-to-r from-amber-400 to-orange-500 p-2.5 shadow-lg shadow-amber-200/50 transition hover:scale-105 hover:shadow-amber-300/70 dark:shadow-amber-900/30"
-            title="Zapytaj asystenta o ten przepis"
-          >
-            <MessageSquare className="h-5 w-5 text-white" />
-          </button>
-        </div>
-
-        <div className="bg-gradient-to-b from-indigo-100 via-white/95 to-slate-50 px-4 py-5 dark:from-indigo-950 dark:via-indigo-950/90 dark:to-slate-900 sm:absolute sm:bottom-0 sm:left-0 sm:right-0 sm:bg-none sm:bg-transparent sm:p-6">
-          <div className="mx-auto max-w-6xl">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl sm:text-white md:text-3xl lg:text-4xl"
-            >
-              {headerData?.name || "Ładowanie..."}
-            </motion.h1>
-            {headerData?.description && (
-              <motion.p
+            <div className="flex flex-col justify-center p-5 sm:p-8 lg:p-10">
+              <Eyebrow>Przepis MealGenie</Eyebrow>
+              <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="mt-1.5 text-sm text-slate-600 dark:text-indigo-100 sm:mt-2 sm:text-base sm:text-white/90 md:text-lg"
+                className="mt-3 font-brand text-3xl font-semibold leading-[1.05] text-ink sm:text-5xl"
               >
-                {headerData.description}
-              </motion.p>
-            )}
-          </div>
-        </div>
-      </div>
+                {headerData?.name || recipe?.name || "Ładowanie przepisu"}
+              </motion.h1>
+              {headerData?.description && (
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="mt-4 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg"
+                >
+                  {headerData.description}
+                </motion.p>
+              )}
 
-      {headerData && (
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:py-6">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-            <StatCard
-              icon={Clock}
-              label="Czas"
-              value={`${headerData.cookingTimeMinutes} min`}
-              color="blue"
-            />
-            <StatCard
-              icon={ChefHat}
-              label="Trudność"
-              value={
-                headerData.difficulty === "Easy"
-                  ? "Łatwe"
-                  : headerData.difficulty === "Medium"
-                    ? "Średnie"
-                    : "Trudne"
-              }
-              color="purple"
-            />
-            <StatCard
-              icon={Flame}
-              label="Kalorie"
-              value={headerData.calories ? `${headerData.calories} kcal` : "—"}
-              color="orange"
-            />
-            <StatCard
-              icon={Users}
-              label="Porcje"
-              value={recipe?.servings ? `${recipe.servings}` : "—"}
-              color="green"
-            />
-          </div>
-        </div>
-      )}
+              <FolkDivider className="my-5 max-w-48" />
 
-      <div className="mx-auto max-w-6xl px-4 pb-16">
-        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
-                  <MessageSquare className="h-5 w-5" />
+              {headerData && (
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+                  <StatCard
+                    icon={Clock}
+                    label="Czas"
+                    value={`${totalTime} min`}
+                    color="blue"
+                  />
+                  <StatCard
+                    icon={ChefHat}
+                    label="Trudność"
+                    value={difficultyLabel}
+                    color="purple"
+                  />
+                  <StatCard
+                    icon={Flame}
+                    label="Kalorie"
+                    value={recipe?.nutrition?.calories || headerData.calories ? `${recipe?.nutrition?.calories || headerData.calories} kcal` : "—"}
+                    color="orange"
+                  />
+                  <StatCard
+                    icon={Users}
+                    label="Porcje"
+                    value={recipe?.servings ? `${recipe.servings}` : "—"}
+                    color="green"
+                  />
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Potrzebujesz pomocy z tym przepisem?
-                  </p>
-                  <p className="mt-1 text-xs text-amber-800/80 dark:text-amber-200/80">
-                    Zapytaj o kroki, zamienniki składników albo czas.
-                  </p>
+              )}
+
+              {recipe && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {mealId && (
+                    <Button
+                      variant={isFavorite ? "primary" : "secondary"}
+                      onClick={handleToggleFavorite}
+                      disabled={favoriteMutation.isPending}
+                      leftIcon={
+                        favoriteMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
+                        )
+                      }
+                    >
+                      {isFavorite ? "Ulubione" : "Dodaj do ulubionych"}
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="secondary"
+                    onClick={handleShare}
+                    disabled={shareMutation.isPending || !mealId}
+                    leftIcon={
+                      shareMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isCopied ? (
+                        <Check className="h-4 w-4 text-basil" />
+                      ) : (
+                        <Share2 className="h-4 w-4" />
+                      )
+                    }
+                  >
+                    {shareMutation.isPending
+                      ? "Przetwarzam..."
+                      : isCopied
+                        ? "Skopiowano"
+                        : shareId
+                          ? "Kopiuj link"
+                          : "Udostępnij"}
+                  </Button>
+
+                  {shareId && (
+                    <IconButton
+                      aria-label="Wyłącz udostępnianie przepisu"
+                      variant="ghost"
+                      onClick={handleDisableShare}
+                      disabled={shareMutation.isPending}
+                      icon={<XCircle className="h-4 w-4" />}
+                      className="rounded-pill text-bordeaux"
+                      title="Wyłącz udostępnianie"
+                    />
+                  )}
+
+                  <Button
+                    variant="secondary"
+                    onClick={handleExportPdf}
+                    disabled={isExporting}
+                    leftIcon={
+                      isExporting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )
+                    }
+                  >
+                    {isExporting ? "Generuję..." : "Pobierz PDF"}
+                  </Button>
+
+                  <Button
+                    variant="primary"
+                    onClick={handleAskAssistant}
+                    disabled={!recipe || !mealId}
+                    leftIcon={<MessageSquare className="h-4 w-4" />}
+                  >
+                    Zapytaj asystenta
+                  </Button>
                 </div>
-              </div>
-              <button
-                onClick={handleAskAssistant}
-                disabled={!recipe || !mealId}
-                className="mt-4 w-full cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-amber-200/50 transition hover:scale-[1.02] hover:shadow-amber-300/70 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-amber-900/30"
-              >
-                Wezwij asystenta przepisu
-              </button>
+              )}
             </div>
-          </aside>
+          </div>
+        </section>
 
-          <div>
-            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-amber-200/50 bg-amber-50/95 px-3 pb-[env(safe-area-inset-bottom,8px)] pt-3 backdrop-blur-lg lg:hidden dark:border-amber-500/20 dark:bg-slate-900/95">
-              <button
-                onClick={handleAskAssistant}
-                disabled={!recipe || !mealId}
-                className="mx-auto flex w-full max-w-lg cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition active:scale-[0.98] disabled:opacity-60"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Zapytaj asystenta
-              </button>
-            </div>
+        <div className="mx-auto max-w-6xl px-4 pb-16">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[280px_1fr]">
+            <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
+              <Card className="p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-soft text-accent-deep">
+                    <MessageSquare className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <Eyebrow tone="basil">Asystent w kuchni</Eyebrow>
+                    <p className="mt-2 text-sm font-semibold leading-snug text-ink">
+                      Potrzebujesz pomocy z tym przepisem?
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                      Zapytaj o kroki, zamienniki składników albo czas.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={handleAskAssistant}
+                  disabled={!recipe || !mealId}
+                  leftIcon={<MessageSquare className="h-4 w-4" />}
+                  className="mt-4 w-full"
+                >
+                  Otwórz chat przepisu
+                </Button>
+              </Card>
+            </aside>
 
-            <div className="pb-20 lg:pb-0">
+            <div>
               <AnimatePresence mode="wait">
                 {view === "loading" && (
                   <motion.div
@@ -628,7 +607,7 @@ export function RecipePage() {
                     {recipe.servingSuggestion && (
                       <SuggestionCard
                         icon={Sparkles}
-                        title="💫 Jak podać"
+                        title="Jak podać"
                         content={recipe.servingSuggestion}
                       />
                     )}
@@ -636,7 +615,7 @@ export function RecipePage() {
                     {recipe.storageInfo && (
                       <SuggestionCard
                         icon={Refrigerator}
-                        title="📦 Przechowywanie"
+                        title="Przechowywanie"
                         content={recipe.storageInfo}
                       />
                     )}
@@ -646,7 +625,7 @@ export function RecipePage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
@@ -659,14 +638,16 @@ function ErrorCard({
   onRetry: () => void;
 }) {
   return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-500/30 dark:bg-red-500/10">
-      <p className="mb-4 text-red-700 dark:text-red-300">{message}</p>
-      <button
+    <Card className="p-6 text-center">
+      <Eyebrow tone="accent">Nie udało się przygotować przepisu</Eyebrow>
+      <p className="mx-auto mt-3 max-w-xl text-ink-soft">{message}</p>
+      <Button
         onClick={onRetry}
-        className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+        variant="primary"
+        className="mt-5"
       >
         Spróbuj ponownie
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 }

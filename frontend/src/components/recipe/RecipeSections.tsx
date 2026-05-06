@@ -16,6 +16,7 @@ import {
 import { notify } from "../../store/notificationStore";
 import { useShoppingListStore } from "../../store/shoppingListStore";
 import type { FullRecipe, FullRecipeIngredient } from "../../types/meal";
+import { Badge, Card, DottedRow, Eyebrow, IconButton } from "../ui";
 
 export function StatCard({
   icon: Icon,
@@ -29,27 +30,26 @@ export function StatCard({
   color: "blue" | "purple" | "orange" | "green";
 }) {
   const colors = {
-    blue: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
-    purple:
-      "bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400",
-    orange:
-      "bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400",
-    green:
-      "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400",
+    blue: "bg-bg-elevated text-ink",
+    purple: "bg-accent-soft text-accent-deep",
+    orange: "bg-saffron-soft text-ink",
+    green: "bg-basil-soft text-ink",
   };
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 sm:gap-3 sm:p-4 dark:border-slate-800 ${colors[color]}`}
+      className={`flex min-h-[76px] items-center gap-2 rounded-lg border border-border p-2.5 shadow-xs sm:gap-3 sm:p-4 ${colors[color]}`}
     >
-      <div className="rounded-lg bg-white/50 p-1.5 dark:bg-black/20">
+      <div className="rounded-md bg-bg-elevated/70 p-1.5 text-accent shadow-xs">
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wide opacity-70">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
           {label}
         </p>
-        <p className="truncate text-sm font-bold">{value}</p>
+        <p className="truncate font-serif text-base font-medium leading-tight text-ink">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -65,16 +65,16 @@ export function NutritionSection({
       label: "Kalorie",
       value: nutrition.calories,
       unit: "kcal",
-      color: "bg-orange-500",
+      accent: "bg-accent",
     },
-    { label: "Białko", value: nutrition.protein, unit: "g", color: "bg-red-500" },
+    { label: "Białko", value: nutrition.protein, unit: "g", accent: "bg-basil" },
     {
       label: "Węglowodany",
       value: nutrition.carbs,
       unit: "g",
-      color: "bg-amber-500",
+      accent: "bg-saffron",
     },
-    { label: "Tłuszcze", value: nutrition.fat, unit: "g", color: "bg-yellow-500" },
+    { label: "Tłuszcze", value: nutrition.fat, unit: "g", accent: "bg-accent-deep" },
   ];
 
   return (
@@ -83,26 +83,28 @@ export function NutritionSection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
     >
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-        📊 Wartości odżywcze
-        <span className="text-sm font-normal text-slate-500">(na porcję)</span>
-      </h2>
+      <div className="mb-4">
+        <Eyebrow>Na porcję</Eyebrow>
+        <h2 className="mt-2 font-serif text-2xl font-medium leading-tight text-ink">
+          Wartości odżywcze
+        </h2>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {items.map((item) => (
-          <div
+          <Card
             key={item.label}
-            className="rounded-2xl border border-slate-200 bg-white p-4 text-center dark:border-slate-800 dark:bg-slate-900/50"
+            className="p-4 text-center"
           >
-            <div className={`mx-auto mb-2 h-1.5 w-12 rounded-full ${item.color}`} />
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+            <div className={`mx-auto mb-3 h-1.5 w-12 rounded-pill ${item.accent}`} />
+            <p className="font-serif text-2xl font-medium leading-none text-ink">
               {item.value}
-              <span className="text-sm font-normal text-slate-500">
+              <span className="font-sans text-sm font-normal text-ink-muted">
                 {" "}
                 {item.unit}
               </span>
             </p>
-            <p className="text-xs text-slate-500">{item.label}</p>
-          </div>
+            <p className="mt-1 text-xs text-ink-muted">{item.label}</p>
+          </Card>
         ))}
       </div>
     </motion.section>
@@ -145,22 +147,25 @@ export function IngredientsSection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-        🥗 Składniki
-      </h2>
+      <div className="mb-4">
+        <Eyebrow>Lista do przygotowania</Eyebrow>
+        <h2 className="mt-2 font-serif text-2xl font-medium leading-tight text-ink">
+          Składniki
+        </h2>
+      </div>
       <div className="space-y-4">
         {Object.entries(grouped).map(([category, items]) => {
           const IconComponent = categoryIcons[category] || UtensilsCrossed;
           return (
-            <div
+            <Card
               key={category}
-              className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/50"
+              className="p-4 sm:p-5"
             >
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                <IconComponent className="h-4 w-4" />
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink">
+                <IconComponent className="h-4 w-4 text-accent" aria-hidden="true" />
                 {category}
               </h3>
-              <ul className="space-y-2">
+              <ul role="list" className="space-y-2.5">
                 {items.map((ing, idx) => {
                   const itemKey = buildKey(ing);
                   const isInList = shoppingItems.some(
@@ -168,13 +173,41 @@ export function IngredientsSection({
                   );
 
                   return (
-                    <li key={idx} className="group flex items-start gap-2 sm:gap-3">
-                      <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
-                      <div className="flex flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-2">
-                        <div className="flex flex-1 items-center gap-1.5">
+                    <li key={idx} className="group">
+                      <div className="flex items-start gap-2 sm:items-center">
+                        <span className="mt-3 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent sm:mt-0" aria-hidden="true" />
+                        <div className="min-w-0 flex-1">
+                          <DottedRow
+                            label={
+                              <span>
+                                <span className="font-medium text-ink">{ing.name}</span>
+                                {ing.notes && (
+                                  <span className="ml-1 text-xs text-ink-muted sm:text-sm">
+                                    ({ing.notes})
+                                  </span>
+                                )}
+                              </span>
+                            }
+                            value={`${ing.amount} ${ing.unit}`}
+                            className="font-serif text-base"
+                          />
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1">
                           {allowShoppingList && (
-                            <button
-                              type="button"
+                            <IconButton
+                              aria-label={
+                                isInList
+                                  ? `Usuń z listy zakupów: ${ing.name}`
+                                  : `Dodaj do listy zakupów: ${ing.name}`
+                              }
+                              variant={isInList ? "ghost" : "secondary"}
+                              icon={
+                                isInList ? (
+                                  <Minus className="h-3.5 w-3.5" />
+                                ) : (
+                                  <Plus className="h-3.5 w-3.5" />
+                                )
+                              }
                               onClick={() => {
                                 if (isInList) {
                                   const wasRemoved = removeItem({
@@ -200,66 +233,39 @@ export function IngredientsSection({
                                     : "Ten składnik jest już na liście.",
                                 );
                               }}
-                              className={`flex-shrink-0 cursor-pointer rounded-lg border p-1 transition ${
+                              className={`min-h-9 min-w-9 rounded-pill p-2 ${
                                 isInList
-                                  ? "border-red-200/80 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/20"
-                                  : "border-emerald-200/80 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                                  ? "text-bordeaux hover:bg-accent-soft hover:text-bordeaux"
+                                  : "text-basil hover:text-basil"
                               }`}
                               title={
                                 isInList
                                   ? "Usuń z listy zakupów"
                                   : "Dodaj do listy zakupów"
                               }
-                            >
-                              {isInList ? (
-                                <Minus className="h-3.5 w-3.5" />
-                              ) : (
-                                <Plus className="h-3.5 w-3.5" />
-                              )}
-                            </button>
-                          )}
-                          <span className="font-medium text-slate-900 dark:text-white">
-                            {ing.name}
-                          </span>
-                          {ing.notes && (
-                            <span className="hidden text-slate-500 sm:inline">
-                              ({ing.notes})
-                            </span>
+                            />
                           )}
                           {allowShoppingList && (
                             <button
                               type="button"
                               title="Zamienniki - wkrótce dostępne!"
-                              className="ml-1 hidden cursor-not-allowed rounded-lg p-1 opacity-0 transition-opacity hover:bg-slate-100 group-hover:opacity-100 sm:block dark:hover:bg-slate-800"
+                              aria-label={`Zamienniki dla składnika: ${ing.name}`}
+                              className="hidden min-h-9 min-w-9 cursor-not-allowed items-center justify-center rounded-pill text-ink-muted opacity-0 transition hover:bg-bg-sunken group-hover:opacity-100 sm:inline-flex"
                               onClick={(event) => {
                                 event.preventDefault();
                                 alert("🔜 Funkcja zamienników będzie dostępna wkrótce!");
                               }}
                             >
-                              <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
+                              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                           )}
-                        </div>
-                        <div
-                          className={`flex flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:gap-2 ${
-                            allowShoppingList ? "pl-7 sm:pl-0" : "pl-0"
-                          }`}
-                        >
-                          {ing.notes && (
-                            <span className="text-xs text-slate-400 sm:hidden">
-                              {ing.notes}
-                            </span>
-                          )}
-                          <span className="text-sm font-medium text-slate-500 sm:text-base">
-                            {ing.amount} {ing.unit}
-                          </span>
                         </div>
                       </div>
                     </li>
                   );
                 })}
               </ul>
-            </div>
+            </Card>
           );
         })}
       </div>
@@ -274,48 +280,54 @@ export function StepsSection({ steps }: { steps: FullRecipe["steps"] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-        👨‍🍳 Przygotowanie
-      </h2>
-      <div className="space-y-4">
+      <div className="mb-4">
+        <Eyebrow>Jak ugotować</Eyebrow>
+        <h2 className="mt-2 font-serif text-2xl font-medium leading-tight text-ink">
+          Przygotowanie
+        </h2>
+      </div>
+      <ol className="space-y-4">
         {steps.map((step, idx) => (
-          <motion.div
+          <motion.li
             key={step.stepNumber}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 + idx * 0.05 }}
-            className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900/50"
+            className="rounded-lg border border-border bg-bg-elevated p-4 shadow-sm sm:p-5"
           >
             <div className="mb-2 flex items-start justify-between gap-2 sm:mb-3">
               <div className="flex items-center gap-2 sm:gap-3">
-                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white sm:h-8 sm:w-8 sm:text-sm">
+                <span
+                  aria-hidden="true"
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-pill bg-accent-soft font-mono text-sm font-semibold text-accent-deep ring-1 ring-border"
+                >
                   {step.stepNumber}
                 </span>
-                <h3 className="text-sm font-semibold text-slate-900 sm:text-base dark:text-white">
+                <h3 className="font-serif text-lg font-medium leading-tight text-ink">
                   {step.title}
                 </h3>
               </div>
               {step.duration && (
-                <span className="flex flex-shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600 sm:text-xs dark:bg-slate-800 dark:text-slate-400">
-                  <Timer className="h-3 w-3" />
+                <Badge variant="neutral" className="flex flex-shrink-0 items-center gap-1">
+                  <Timer className="h-3 w-3" aria-hidden="true" />
                   {step.duration}
-                </span>
+                </Badge>
               )}
             </div>
-            <p className="text-sm text-slate-700 sm:text-base dark:text-slate-300">
+            <p className="border-t border-dotted border-border-dotted pt-3 text-base leading-relaxed text-ink-soft">
               {step.instruction}
             </p>
             {step.tip && (
-              <div className="mt-2 flex items-start gap-2 rounded-xl bg-amber-50 p-2.5 sm:mt-3 sm:p-3 dark:bg-amber-500/10">
-                <Lightbulb className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-600 sm:h-4 sm:w-4 dark:text-amber-400" />
-                <p className="text-xs text-amber-800 sm:text-sm dark:text-amber-200">
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-saffron/30 bg-saffron-soft p-3">
+                <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-saffron" aria-hidden="true" />
+                <p className="text-sm leading-relaxed text-ink">
                   {step.tip}
                 </p>
               </div>
             )}
-          </motion.div>
+          </motion.li>
         ))}
-      </div>
+      </ol>
     </motion.section>
   );
 }
@@ -326,18 +338,22 @@ export function TipsSection({ tips }: { tips: string[] }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5 dark:border-amber-500/30 dark:from-amber-500/10 dark:to-orange-500/10"
+      className="rounded-lg border border-border bg-bg-elevated p-5 shadow-sm"
     >
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-amber-900 dark:text-amber-100">
-        💡 Wskazówki szefa kuchni
+      <Eyebrow tone="saffron">Dobre rady</Eyebrow>
+      <h2 className="mt-2 font-serif text-2xl font-medium leading-tight text-ink">
+        Wskazówki szefa kuchni
       </h2>
-      <ul className="space-y-3">
+      <ul role="list" className="mt-4 space-y-3">
         {tips.map((tip, idx) => (
           <li key={idx} className="flex items-start gap-3">
-            <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-xs font-bold text-amber-800 dark:bg-amber-500/30 dark:text-amber-200">
+            <span
+              aria-hidden="true"
+              className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-pill bg-saffron-soft font-mono text-xs font-semibold text-saffron"
+            >
               {idx + 1}
             </span>
-            <span className="text-amber-800 dark:text-amber-100">{tip}</span>
+            <span className="leading-relaxed text-ink-soft">{tip}</span>
           </li>
         ))}
       </ul>
@@ -359,12 +375,19 @@ export function SuggestionCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
-      className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/50"
+      className="rounded-lg border border-border bg-bg-elevated p-5 shadow-sm"
     >
-      <h3 className="mb-2 font-semibold text-slate-900 dark:text-white">
-        {title}
-      </h3>
-      <p className="text-slate-600 dark:text-slate-400">{content}</p>
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-accent-soft text-accent-deep">
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <h3 className="font-serif text-xl font-medium leading-tight text-ink">
+            {title}
+          </h3>
+          <p className="mt-2 leading-relaxed text-ink-soft">{content}</p>
+        </div>
+      </div>
     </motion.div>
   );
 }
