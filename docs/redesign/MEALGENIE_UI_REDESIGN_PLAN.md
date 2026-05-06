@@ -10,6 +10,7 @@ Kierunek: Direction A - Cozy Polish home kitchen
 |---|---|---|---|
 | Etap 1 - Foundation | Gotowe do review | 2026-05-06 | Wprowadzono tokeny Direction A, fonty, `html lang="pl"`, globalny focus ring, reduced motion i ciepłe tło light/dark w `frontend/src/index.css`, `frontend/tailwind.config.js`, `frontend/index.html` oraz `frontend/src/App.tsx`. Do ręcznego sprawdzenia: light/dark po reloadzie, mobile overflow, widoczność focusu i ewentualny FOUC przed osobnym no-FOUC fixem. |
 | Etap 3 - Logo, header i shell | Gotowe do review | 2026-05-06 | Wprowadzono komponent `Logo`, header Direction A, przestylowany `ThemeToggle`, skip-link do treści oraz zachowano brak globalnego headera na `/shared/:shareId`. Zmienione pliki: `frontend/src/components/Logo.tsx`, `frontend/src/components/Header.tsx`, `frontend/src/components/ThemeToggle.tsx`, `frontend/src/App.tsx`, `frontend/index.html`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
+| Etap 4 - Karty posiłków i historii | Gotowe do review | 2026-05-06 | Przebudowano wizualnie karty na papierowy styl Direction A, z ciepłym obrazem/fallbackiem, fontem brandowym dla nazw przepisów, badge/meta, dotted rows i dostępnym usuwaniem historii. Zmienione pliki: `frontend/src/components/MealCard.tsx`, `frontend/src/components/MealHistoryCard.tsx`, `frontend/src/components/Logo.tsx`, `frontend/src/index.css`, `frontend/tailwind.config.js`, `frontend/index.html`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 
 ## Strategia branchowania redesignu
 
@@ -41,8 +42,11 @@ Najważniejsza korekta względem prototypu: produkcyjnie nie używamy Fraunces/I
 
 - `Source Serif 4` dla nagłówków i display.
 - `Source Sans 3` dla UI i tekstu bazowego.
+- `Outfit` jako font brandowy dla logo, nazw kart i krótkich tytułów produktowych.
 - `Caveat` tylko jako oszczędny, dekoracyjny kicker.
 - `JetBrains Mono` dla liczb, ilości i elementów wymagających tabularnego rytmu.
+
+Decyzja typograficzna po review Etapu 4: `Outfit` zostaje jako font brandowy dla logo, nazw kart i krótkich tytułów produktowych. `Source Serif 4` pozostaje dla display/hero/recipe editorial headings, a `Source Sans 3` dla tekstu UI i body.
 
 ## 2. Pliki referencyjne
 

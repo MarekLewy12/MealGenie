@@ -1,4 +1,5 @@
 import type { MealSuggestion } from "../types/meal";
+import { Badge, Button, DottedRow, MealEmoji } from "./ui";
 
 type MealCardProps = {
   meal: MealSuggestion;
@@ -6,13 +7,19 @@ type MealCardProps = {
   showAction?: boolean;
 };
 
-const difficultyColors: Record<MealSuggestion["difficulty"], string> = {
-  Easy:
-    "border border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-200",
-  Medium:
-    "border border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-500/30 dark:bg-yellow-500/15 dark:text-yellow-100",
-  Hard:
-    "border border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-200",
+const difficultyBadgeVariant: Record<
+  MealSuggestion["difficulty"],
+  "basil" | "saffron" | "danger"
+> = {
+  Easy: "basil",
+  Medium: "saffron",
+  Hard: "danger",
+};
+
+const difficultyLabel: Record<MealSuggestion["difficulty"], string> = {
+  Easy: "łatwe",
+  Medium: "średnie",
+  Hard: "trudne",
 };
 
 export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
@@ -24,79 +31,63 @@ export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
     : meal.imageUrl;
 
   return (
-    <div className="group flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-0 shadow-xl shadow-indigo-100/60 transition hover:-translate-y-1 hover:border-indigo-400/50 hover:shadow-indigo-200/70 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-slate-950/40 dark:hover:border-indigo-500/50 dark:hover:shadow-indigo-900/30">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-slate-100 sm:aspect-video dark:bg-slate-800">
+    <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-border-strong bg-bg-elevated text-ink shadow-[0_18px_38px_-30px_rgba(58,40,24,0.58),0_1px_0_rgba(255,255,255,0.42)_inset] outline outline-1 outline-offset-2 outline-border-strong/80 transition duration-base ease-out hover:-translate-y-0.5 hover:border-accent/55 hover:outline-accent/35 hover:shadow-[0_24px_44px_-30px_rgba(58,40,24,0.68),0_1px_0_rgba(255,255,255,0.45)_inset]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg-sunken sm:aspect-video">
         {imageSrc ? (
           <>
             <img
               src={imageSrc}
-              alt={meal.name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 brightness-[0.92] contrast-[1.08] saturate-[1.05]"
+              alt={`Zdjęcie dania: ${meal.name}`}
+              className="h-full w-full object-cover brightness-[0.94] contrast-[1.03] saturate-[1.03]"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/10 via-accent/5 to-transparent" />
           </>
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-600">
-            <svg
-              className="h-16 w-16 text-white opacity-60"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M3 7h18M3 12h18M3 17h18"
-              />
-            </svg>
+          <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,var(--accent-soft),transparent_45%),var(--bg-sunken)]">
+            <MealEmoji size="lg" fallback="MG" className="h-20 w-20 text-2xl text-accent" />
           </div>
         )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-bg-elevated/45 to-transparent" />
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-              {meal.name}
-            </h3>
-            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-              {meal.description}
-            </p>
+      <div className="flex flex-1 flex-col gap-5 p-5 sm:p-6">
+        <div className="min-w-0">
+          <div className="mb-2 text-[0.68rem] font-bold uppercase leading-none tracking-[0.14em] text-accent">
+            pomysł na dziś
           </div>
+          <h3 className="font-brand text-xl font-semibold leading-tight tracking-[-0.01em] text-ink">
+            {meal.name}
+          </h3>
+          <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink-soft">
+            {meal.description}
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${difficultyColors[meal.difficulty]}`}
-          >
-            {meal.difficulty}
-          </span>
-          <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-100">
-            Czas: {meal.cookingTimeMinutes} min
-          </span>
-          <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 shadow-[0_0_20px_rgba(245,158,11,0.15)] dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-100">
-            Kalorie: {meal.calories ? `${meal.calories} kcal` : 'n/d'}
-          </span>
+          <Badge variant={difficultyBadgeVariant[meal.difficulty]}>
+            {difficultyLabel[meal.difficulty]}
+          </Badge>
+          <Badge variant="neutral">{meal.cookingTimeMinutes} min</Badge>
+          <Badge variant="accent">
+            {meal.calories ? `${meal.calories} kcal` : "kcal n/d"}
+          </Badge>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white/80 p-4 dark:border-slate-800 dark:bg-slate-800/60">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-200">
+        <div className="rounded-md border border-border bg-bg/55 p-4">
+          <div className="mb-3 text-[0.68rem] font-bold uppercase leading-none tracking-[0.14em] text-accent">
             Składniki
           </div>
-          <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-200">
+          <ul className="space-y-2" role="list">
             {displayedIngredients.map((ingredient, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(245,158,11,0.08)]" />
-                <span className="flex-1">{ingredient.name}</span>
-                <span className="text-slate-500 dark:text-slate-400">
-                  {ingredient.amount}
-                  {ingredient.unit ? ` ${ingredient.unit}` : ''}
-                </span>
+              <li key={`${ingredient.name}-${index}`}>
+                <DottedRow
+                  label={ingredient.name}
+                  value={`${ingredient.amount}${ingredient.unit ? ` ${ingredient.unit}` : ""}`}
+                />
               </li>
             ))}
             {remainingCount > 0 && (
-              <li className="text-sm text-slate-500 dark:text-slate-400">
+              <li className="pt-1 text-sm text-ink-muted">
                 + {remainingCount} więcej
               </li>
             )}
@@ -104,16 +95,13 @@ export function MealCard({ meal, onSelect, showAction = true }: MealCardProps) {
         </div>
 
         {showAction && (
-          <div className="mt-auto pt-2">
-            <button
-              onClick={onSelect}
-              className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-900 shadow-lg shadow-amber-200/70 transition hover:-translate-y-0.5 hover:shadow-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-300 dark:shadow-amber-900/30 dark:hover:shadow-amber-900/50"
-            >
+          <div className="mt-auto pt-1">
+            <Button onClick={onSelect} className="w-full rounded-lg shadow-accent">
               Wybieram to danie
-            </button>
+            </Button>
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }

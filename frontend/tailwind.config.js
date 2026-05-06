@@ -44,6 +44,7 @@ export default {
         bordeaux: "var(--bordeaux)",
       },
       fontFamily: {
+        brand: ["var(--font-brand)"],
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         script: ["var(--font-script)"],
