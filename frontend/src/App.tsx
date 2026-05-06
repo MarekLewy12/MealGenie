@@ -33,7 +33,7 @@ function App() {
         Przejdź do treści
       </a>
       <NotificationContainer />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_18%_12%,rgba(194,87,40,0.08),transparent_38%),radial-gradient(ellipse_at_88%_8%,rgba(212,160,23,0.08),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.08),transparent_48%),radial-gradient(ellipse_at_80%_0%,rgba(122,176,104,0.06),transparent_34%)]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_18%_12%,rgba(194,87,40,0.08),transparent_38%),radial-gradient(ellipse_at_88%_8%,rgba(212,160,23,0.08),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.025),transparent_48%),radial-gradient(ellipse_at_80%_0%,rgba(139,194,122,0.018),transparent_34%)]">
         <div className="absolute inset-0 opacity-[0.22] [background-image:radial-gradient(var(--border)_0.75px,transparent_0.75px)] [background-size:18px_18px] dark:opacity-0" />
       </div>
 

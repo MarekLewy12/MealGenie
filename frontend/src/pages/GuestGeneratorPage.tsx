@@ -1,40 +1,78 @@
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { MealGenerator } from "../components/MealGenerator";
+import { Card, Eyebrow, FolkDivider } from "../components/ui";
+
+const guestIntroContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const guestIntroItem = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.38, ease: "easeOut" },
+  },
+};
 
 export function GuestGeneratorPage() {
   return (
-    <section className="mx-auto max-w-screen-2xl px-6 py-10">
-      <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-indigo-700 dark:text-indigo-200">
-            Podgląd AI
-          </p>
-          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">
-            Wypróbuj MealGenie bez konta
+    <section className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <motion.div
+        variants={guestIntroContainer}
+        initial="hidden"
+        animate="visible"
+        className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
+      >
+        <motion.div variants={guestIntroItem} className="max-w-3xl space-y-3">
+          <Eyebrow>Podgląd generatora</Eyebrow>
+          <h1 className="font-brand text-3xl font-semibold leading-tight text-ink sm:text-5xl">
+            Wypróbuj{" "}
+            <span className="bg-gradient-to-r from-accent via-accent-deep to-saffron bg-clip-text text-transparent dark:from-accent dark:via-saffron dark:to-ink">
+              MealGenie
+            </span>{" "}
+            bez konta
           </h1>
-          <p className="max-w-2xl text-sm text-slate-700 dark:text-slate-300">
+          <p className="max-w-2xl text-base leading-7 text-ink-soft">
             Jedna darmowa generacja (3 dania), aby szybko zobaczyć jak działa
-            system. Potem możesz założyć konto i przejść do pełnego generatora.
+            system.
+            <br />
+            Potem możesz założyć konto i przejść do pełnego generatora.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
+          <FolkDivider className="max-w-52 text-border-strong" />
+        </motion.div>
+        <motion.div variants={guestIntroItem} className="flex flex-wrap gap-3">
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-indigo-700 shadow-sm shadow-indigo-100 transition hover:-translate-y-0.5 hover:border-fuchsia-300 hover:text-indigo-900 dark:border-indigo-400/60 dark:bg-white/5 dark:text-indigo-100 dark:hover:border-fuchsia-400 dark:hover:text-white"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-pill border border-accent bg-accent px-5 py-2.5 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
             Zaloguj się
           </Link>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:text-white"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-pill border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold leading-none text-ink shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
             Wróć na start
           </Link>
-        </div>
-      </div>
-      <div className="mb-8 grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
-          <p className="text-xs font-semibold uppercase tracking-wide">
+        </motion.div>
+      </motion.div>
+      <motion.div
+        variants={guestIntroContainer}
+        initial="hidden"
+        animate="visible"
+        className="mb-8 grid gap-3 md:grid-cols-2"
+      >
+        <motion.div variants={guestIntroItem}>
+          <Card className="h-full text-sm leading-6 text-ink-soft">
+          <p className="text-[11px] font-bold uppercase leading-none tracking-[0.14em] text-accent">
             Co masz teraz
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-4">
@@ -43,9 +81,11 @@ export function GuestGeneratorPage() {
             <li>krótki opis czego szukasz (opcjonalnie),</li>
             <li>brak historii, zapisu i pełnego flow przepisu.</li>
           </ul>
-        </div>
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-100">
-          <p className="text-xs font-semibold uppercase tracking-wide">
+          </Card>
+        </motion.div>
+        <motion.div variants={guestIntroItem}>
+          <Card className="h-full text-sm leading-6 text-ink-soft">
+          <p className="text-[11px] font-bold uppercase leading-none tracking-[0.14em] text-basil">
             Co odblokujesz po logowaniu
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-4">
@@ -56,8 +96,9 @@ export function GuestGeneratorPage() {
             <li>wybór dania i przejście do pełnego przepisu,</li>
             <li>zapis, historia i kolejne generacje bez limitu próby.</li>
           </ul>
-        </div>
-      </div>
+          </Card>
+        </motion.div>
+      </motion.div>
       <MealGenerator mode="guest" />
     </section>
   );

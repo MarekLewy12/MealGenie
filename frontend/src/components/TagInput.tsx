@@ -1,5 +1,5 @@
-import { useState, KeyboardEvent } from "react";
-import { X } from "lucide-react";
+import { useId, useState, KeyboardEvent } from "react";
+import { Plus, X } from "lucide-react";
 
 type TagInputProps = {
   value: string[];
@@ -14,6 +14,10 @@ export function TagInput({
   label,
   placeholder,
 }: TagInputProps) {
+  const generatedId = useId();
+  const inputId = `${generatedId}-tag-input`;
+  const hintId = `${generatedId}-tag-hint`;
+  const accessibleLabel = label.trim() || placeholder || "Wpisz tag";
   const [inputValue, setInputValue] = useState("");
 
   const addTag = () => {
@@ -39,33 +43,40 @@ export function TagInput({
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
-        {label}
+      <label
+        htmlFor={inputId}
+        className={
+          label
+            ? "text-sm font-semibold text-ink"
+            : "sr-only"
+        }
+      >
+        {accessibleLabel}
       </label>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 transition focus-within:border-indigo-500 focus-within:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:focus-within:bg-slate-800">
-        {/* Tagi */}
+      <div className="flex min-h-14 flex-wrap items-center gap-2 rounded-lg border border-dashed border-border-strong bg-bg px-3 py-2 shadow-xs transition duration-fast ease-out focus-within:border-accent focus-within:bg-bg-elevated focus-within:ring-2 focus-within:ring-accent-soft">
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-800 animate-fadeIn sm:px-3 sm:py-1 dark:bg-indigo-500/20 dark:text-indigo-200"
+            className="inline-flex min-h-10 items-center gap-1 rounded-pill border border-border bg-bg-elevated px-3 py-1.5 text-sm font-semibold text-ink shadow-xs animate-fadeIn"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="ml-0.5 rounded-full p-1 hover:bg-indigo-200/50 dark:hover:bg-indigo-400/30"
-              aria-label={`Usuń ${tag}`}
+              className="ml-0.5 inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-center rounded-pill text-ink-muted transition hover:bg-accent-soft hover:text-bordeaux focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              aria-label={`Usuń składnik: ${tag}`}
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </span>
         ))}
 
-        {/* Kontener Input + Przycisk */}
-        <div className="flex flex-1 min-w-[150px] items-center">
+        <div className="flex min-w-[140px] flex-1 items-center">
           <input
-            className="w-full flex-1 bg-transparent px-2 py-1 text-slate-900 outline-none placeholder:text-slate-500 dark:text-white"
+            id={inputId}
+            aria-describedby={hintId}
+            className="min-h-10 w-full flex-1 bg-transparent px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-soft"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -75,14 +86,15 @@ export function TagInput({
             <button
               type="button"
               onClick={addTag}
-              className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white transition hover:bg-indigo-500 active:scale-95"
+              className="ml-2 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border border-accent bg-accent text-ink-inverse shadow-accent transition hover:border-accent-hover hover:bg-accent-hover active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              aria-label={`Dodaj składnik: ${inputValue.trim()}`}
             >
-              +
+              <Plus className="h-4 w-4" />
             </button>
           )}
         </div>
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p id={hintId} className="text-xs text-ink-soft">
         Wpisz i naciśnij <strong>Enter</strong> lub <strong>+</strong>
       </p>
     </div>

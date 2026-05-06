@@ -72,20 +72,20 @@ export function LoadingExperience({
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 p-8 shadow-2xl shadow-indigo-200/50 dark:shadow-indigo-900/50"
+        className="rounded-pill border border-border-strong bg-accent p-8 text-ink-inverse shadow-accent"
       >
-        <ChefHat className="h-16 w-16 text-white" />
+        <ChefHat className="h-16 w-16" />
       </motion.div>
 
       {(title || subtitle) && (
         <div className="text-center">
           {title && (
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
+            <h2 className="font-brand text-2xl font-semibold text-ink">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            <p className="mt-2 text-sm text-ink-soft">
               {subtitle}
             </p>
           )}
@@ -102,7 +102,7 @@ export function LoadingExperience({
             transition={{ duration: 0.5 }}
             className="absolute inset-0 flex items-center justify-center text-center"
           >
-            <p className="text-xl font-semibold text-slate-700 dark:text-slate-200">
+            <p className="font-serif text-xl font-medium text-ink">
               {factsToShow[currentFactIndex]}
             </p>
           </motion.div>
@@ -110,15 +110,15 @@ export function LoadingExperience({
       </div>
 
       <div className="w-full max-w-md">
-        <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+        <div className="h-2 overflow-hidden rounded-pill bg-bg-sunken">
           <motion.div
-            className="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"
+            className="h-full bg-accent"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
             transition={{ duration: progressDurationSec, ease: "linear" }}
           />
         </div>
-        <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-2 text-center text-sm text-ink-soft">
           {progressLabel}
         </p>
       </div>

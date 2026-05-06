@@ -72,28 +72,28 @@
 
 :root.dark,
 :root[data-theme="dark"] {
-  --bg: #1c1410;
-  --bg-elevated: #271c15;
-  --bg-sunken: #15100c;
+  --bg: #151312;
+  --bg-elevated: #1e1b1a;
+  --bg-sunken: #0d0b0a;
   --bg-inverse: #fdf8ec;
 
-  --ink: #f4ede1;
-  --ink-soft: #c5b4a0;
-  --ink-muted: #8a7864;
+  --ink: #f0eae4;
+  --ink-soft: #c4bdb6;
+  --ink-muted: #a49d96;
   --ink-disabled: #5a4a3c;
   --ink-inverse: #1c1410;
 
-  --border: #3a2c20;
-  --border-strong: #4a3826;
-  --border-dotted: #5a4634;
+  --border: #332d29;
+  --border-strong: #453e39;
+  --border-dotted: #5a514b;
 
   --accent: #e88a4a;
   --accent-hover: #f29a5e;
   --accent-pressed: #d27a3a;
   --accent-soft: #3a2218;
   --accent-deep: #c25728;
-  --basil: #7ab068;
-  --basil-soft: #2a3a26;
+  --basil: #8bc27a;
+  --basil-soft: #223321;
   --saffron: #f0c050;
   --saffron-soft: #3a2e14;
   --bordeaux: #c26060;
@@ -138,8 +138,8 @@ body {
 
 :root.dark body {
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(232, 138, 74, 0.06), transparent 50%),
-    radial-gradient(ellipse at 80% 0%, rgba(122, 176, 104, 0.05), transparent 34%),
+    radial-gradient(ellipse at 30% 20%, rgba(232, 138, 74, 0.03), transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(139, 194, 122, 0.025), transparent 34%),
     var(--bg);
   color: var(--ink);
 }
