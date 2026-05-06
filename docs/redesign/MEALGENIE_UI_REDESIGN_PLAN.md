@@ -13,6 +13,7 @@ Kierunek: Direction A - Cozy Polish home kitchen
 | Etap 4 - Karty posiłków i historii | Gotowe do review | 2026-05-06 | Przebudowano wizualnie karty na papierowy styl Direction A, z ciepłym obrazem/fallbackiem, fontem brandowym dla nazw przepisów, badge/meta, dotted rows i dostępnym usuwaniem historii. Zmienione pliki: `frontend/src/components/MealCard.tsx`, `frontend/src/components/MealHistoryCard.tsx`, `frontend/src/components/Logo.tsx`, `frontend/src/index.css`, `frontend/tailwind.config.js`, `frontend/index.html`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 5 - Recipe | Gotowe do review | 2026-05-06 | Przebudowano `RecipePage` i `SharedRecipePage` na Direction A: ciepłe tło, papierowy hero ze zdjęciem, meta cards, akcje favorite/share/PDF/chat, publiczny shared view bez auth oraz semantyczne sekcje składników i kroków. Zmienione pliki: `frontend/src/pages/RecipePage.tsx`, `frontend/src/pages/SharedRecipePage.tsx`, `frontend/src/components/recipe/RecipeSections.tsx`, `frontend/src/components/RecipeLoadingWithPreview.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 6 - Generator i suggestions | Gotowe do review | 2026-05-06 | Przebudowano wizualnie auth i guest generator w Direction A: ciepłe wrappery stron, trzy spokojne sekcje formularza, paper-card suggestions, loading/error polish oraz dostępniejszy `TagInput`. Zachowano mutacje, payloady, query paramy, guest 429, `formatRetryAfter`, `unusedImageUrls`, `handleGuestCta` i przejście do `/recipe`. Zmienione pliki: `frontend/src/pages/GeneratorPage.tsx`, `frontend/src/pages/GuestGeneratorPage.tsx`, `frontend/src/components/MealGenerator.tsx`, `frontend/src/components/TagInput.tsx`, `frontend/src/components/LoadingExperience.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
+| Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` na Direction A: ciepły greeting, generator/asystent, papierowa lista zakupów, nowe loading/error/empty states oraz biblioteka przepisów oparta o `MealHistoryCard`. Zachowano query keys, `getMealHistory`, store'y zakupów/chat, eksport listy i routing. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 
 ## Strategia branchowania redesignu
 
@@ -756,7 +757,7 @@ Ta sekcja powinna być aktualizowana po każdym etapie.
 | Etap 4 - Karty | Nie rozpoczęto | - | `MealCard` i `MealHistoryCard`. |
 | Etap 5 - Recipe | Nie rozpoczęto | - | Pierwszy pełny ekran produktowy. |
 | Etap 6 - Generator | Gotowe do review | 2026-05-06 | Przebudowano `GeneratorPage`, `GuestGeneratorPage`, `MealGenerator`, `TagInput` i lekko `LoadingExperience`; zachowano payloady i mutacje. |
-| Etap 7 - Dashboard i Recipes | Nie rozpoczęto | - | Zachować query/store. |
+| Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` w Direction A. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 8 - Chat drawer | Nie rozpoczęto | - | Osobny nacisk na a11y. |
 | Etap 9 - Landing i MobilePage | Nie rozpoczęto | - | Na końcu, po stabilizacji komponentów. |
 
