@@ -726,8 +726,8 @@ Ta sekcja powinna być aktualizowana po każdym etapie.
 | Etap | Status | Data | Notatki |
 |---|---|---|---|
 | Plan redesignu | Gotowe do review | 2026-05-06 | Utworzono plan wdrożenia Direction A. |
-| Etap 1 - Foundation | Nie rozpoczęto | - | Pierwszy krok po akceptacji planu. |
-| Etap 2 - Atomy UI | Nie rozpoczęto | - | Zależy od foundation. |
+| Etap 1 - Foundation | Gotowe do review | 2026-05-06 | Wprowadzono tokeny Direction A, fonty, globalny focus ring, reduced motion i ciepłe tło light/dark. |
+| Etap 2 - Atomy UI | Gotowe do review | 2026-05-06 | Dodano bazowe atomy Direction A w `frontend/src/components/ui/`: Button, IconButton, Card, Input, Textarea, Switch, PillGroup, Eyebrow, HandwrittenKicker, FolkDivider, DottedRow, Badge i MealEmoji, plus lokalny helper `cn` oraz eksport barrel. |
 | Etap 3 - Logo, header, shell | Nie rozpoczęto | - | Zależy od atomów. |
 | Etap 4 - Karty | Nie rozpoczęto | - | `MealCard` i `MealHistoryCard`. |
 | Etap 5 - Recipe | Nie rozpoczęto | - | Pierwszy pełny ekran produktowy. |
