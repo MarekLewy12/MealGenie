@@ -25,12 +25,10 @@ function App() {
   const isSharedPage = location.pathname.startsWith("/shared");
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#05030f] dark:text-slate-50">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-bg text-ink transition-colors duration-base ease-in-out">
       <NotificationContainer />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-8%] top-[-10%] h-72 w-72 rounded-full bg-indigo-200/40 blur-[120px] dark:bg-indigo-500/15" />
-        <div className="absolute right-[-6%] top-10 h-80 w-80 rounded-full bg-fuchsia-200/30 blur-[140px] dark:bg-fuchsia-500/12" />
-        <div className="absolute bottom-[-12%] left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-blue-200/30 blur-[140px] dark:bg-blue-500/10" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_18%_12%,rgba(194,87,40,0.08),transparent_38%),radial-gradient(ellipse_at_88%_8%,rgba(212,160,23,0.08),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.08),transparent_48%),radial-gradient(ellipse_at_80%_0%,rgba(122,176,104,0.06),transparent_34%)]">
+        <div className="absolute inset-0 opacity-[0.22] [background-image:radial-gradient(var(--border)_0.75px,transparent_0.75px)] [background-size:18px_18px] dark:opacity-0" />
       </div>
 
       <div className="relative z-10">
