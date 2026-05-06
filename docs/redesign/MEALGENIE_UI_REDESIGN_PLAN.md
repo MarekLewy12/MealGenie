@@ -12,6 +12,7 @@ Kierunek: Direction A - Cozy Polish home kitchen
 | Etap 3 - Logo, header i shell | Gotowe do review | 2026-05-06 | Wprowadzono komponent `Logo`, header Direction A, przestylowany `ThemeToggle`, skip-link do treści oraz zachowano brak globalnego headera na `/shared/:shareId`. Zmienione pliki: `frontend/src/components/Logo.tsx`, `frontend/src/components/Header.tsx`, `frontend/src/components/ThemeToggle.tsx`, `frontend/src/App.tsx`, `frontend/index.html`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 4 - Karty posiłków i historii | Gotowe do review | 2026-05-06 | Przebudowano wizualnie karty na papierowy styl Direction A, z ciepłym obrazem/fallbackiem, fontem brandowym dla nazw przepisów, badge/meta, dotted rows i dostępnym usuwaniem historii. Zmienione pliki: `frontend/src/components/MealCard.tsx`, `frontend/src/components/MealHistoryCard.tsx`, `frontend/src/components/Logo.tsx`, `frontend/src/index.css`, `frontend/tailwind.config.js`, `frontend/index.html`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 5 - Recipe | Gotowe do review | 2026-05-06 | Przebudowano `RecipePage` i `SharedRecipePage` na Direction A: ciepłe tło, papierowy hero ze zdjęciem, meta cards, akcje favorite/share/PDF/chat, publiczny shared view bez auth oraz semantyczne sekcje składników i kroków. Zmienione pliki: `frontend/src/pages/RecipePage.tsx`, `frontend/src/pages/SharedRecipePage.tsx`, `frontend/src/components/recipe/RecipeSections.tsx`, `frontend/src/components/RecipeLoadingWithPreview.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
+| Etap 6 - Generator i suggestions | Gotowe do review | 2026-05-06 | Przebudowano wizualnie auth i guest generator w Direction A: ciepłe wrappery stron, trzy spokojne sekcje formularza, paper-card suggestions, loading/error polish oraz dostępniejszy `TagInput`. Zachowano mutacje, payloady, query paramy, guest 429, `formatRetryAfter`, `unusedImageUrls`, `handleGuestCta` i przejście do `/recipe`. Zmienione pliki: `frontend/src/pages/GeneratorPage.tsx`, `frontend/src/pages/GuestGeneratorPage.tsx`, `frontend/src/components/MealGenerator.tsx`, `frontend/src/components/TagInput.tsx`, `frontend/src/components/LoadingExperience.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 
 ## Strategia branchowania redesignu
 
@@ -48,6 +49,23 @@ Najważniejsza korekta względem prototypu: produkcyjnie nie używamy Fraunces/I
 - `JetBrains Mono` dla liczb, ilości i elementów wymagających tabularnego rytmu.
 
 Decyzja typograficzna po review Etapu 4: `Outfit` zostaje jako font brandowy dla logo, nazw kart i krótkich tytułów produktowych. `Source Serif 4` pozostaje dla display/hero/recipe editorial headings, a `Source Sans 3` dla tekstu UI i body.
+
+Decyzja kolorystyczna po review Etapu 6: dark mode Direction A nie używa już pierwotnej, mocno brązowej palety `hearth dark` z handoffu jako wartości docelowych. Po audycie Marka tła dark-mode zostały świadomie przesunięte w stronę neutralnego, ciepłego grafitu, aby poprawić czytelność i nadać UI bardziej profesjonalny charakter. Ciepło Direction A ma pochodzić głównie z terracotta/basil/saffron oraz drobnych poświat, nie z zalania całej aplikacji brązem.
+
+Aktualne źródło prawdy dla produkcyjnych tokenów to `frontend/src/index.css`. Przy dalszych etapach i w kolejnych sesjach należy używać poniższego kierunku dark-mode zamiast przywracać stare wartości `#1c1410 -> #271c15` z pierwotnego README:
+
+- `--bg: #151312`
+- `--bg-elevated: #1e1b1a`
+- `--bg-sunken: #0d0b0a`
+- `--ink: #f0eae4`
+- `--ink-soft: #c4bdb6`
+- `--ink-muted: #a49d96`
+- `--border: #332d29`
+- `--border-strong: #453e39`
+- `--border-dotted: #5a514b`
+- `--accent: #e88a4a`
+- `--basil: #8bc27a`
+- Dark-mode radial overlays mają być bardzo subtelne; nie wzmacniać ich ponad obecne wartości bez osobnego review.
 
 ## 2. Pliki referencyjne
 
@@ -737,7 +755,7 @@ Ta sekcja powinna być aktualizowana po każdym etapie.
 | Etap 3 - Logo, header, shell | Nie rozpoczęto | - | Zależy od atomów. |
 | Etap 4 - Karty | Nie rozpoczęto | - | `MealCard` i `MealHistoryCard`. |
 | Etap 5 - Recipe | Nie rozpoczęto | - | Pierwszy pełny ekran produktowy. |
-| Etap 6 - Generator | Nie rozpoczęto | - | Zachować payloady i mutacje. |
+| Etap 6 - Generator | Gotowe do review | 2026-05-06 | Przebudowano `GeneratorPage`, `GuestGeneratorPage`, `MealGenerator`, `TagInput` i lekko `LoadingExperience`; zachowano payloady i mutacje. |
 | Etap 7 - Dashboard i Recipes | Nie rozpoczęto | - | Zachować query/store. |
 | Etap 8 - Chat drawer | Nie rozpoczęto | - | Osobny nacisk na a11y. |
 | Etap 9 - Landing i MobilePage | Nie rozpoczęto | - | Na końcu, po stabilizacji komponentów. |

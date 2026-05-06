@@ -37,6 +37,7 @@ export function Button({
       disabled={disabled}
       className={cn(
         "inline-flex min-h-11 items-center justify-center gap-2 rounded-md border px-5 py-2.5 text-sm font-semibold leading-none transition duration-fast ease-out",
+        "cursor-pointer",
         "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
         "disabled:cursor-not-allowed disabled:border-border disabled:bg-bg-sunken disabled:text-ink-disabled disabled:shadow-none",
         variantClasses[variant],

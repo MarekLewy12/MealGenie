@@ -33,6 +33,7 @@ export function Switch({
       }}
       className={cn(
         "inline-flex min-h-11 min-w-11 items-center rounded-pill p-1 transition duration-fast ease-out",
+        "cursor-pointer",
         "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
         checked ? "bg-accent" : "bg-bg-sunken",
         disabled && "cursor-not-allowed opacity-60",

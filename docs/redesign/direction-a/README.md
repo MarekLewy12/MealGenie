@@ -58,6 +58,52 @@ Display tier always uses `Source Serif 4` with italic for the accent word ("ugot
 
 ---
 
+## Implementation Update: Dark Mode Palette Override
+
+As of the Etap 6 generator review on 2026-05-06, MealGenie no longer uses the original warm-brown `hearth dark` values below as the production dark-mode target.
+
+Marek approved a deliberate dark-mode adjustment after visual review: backgrounds should move toward a neutral warm graphite, while the cozy Direction A character should come from terracotta, basil, saffron, typography, paper surfaces in light mode, and very subtle glows. This improves long-session readability and prevents the interface from becoming too sepia/brown.
+
+Use `frontend/src/index.css` as the source of truth. For future implementation sessions, do not restore the older `#1c1410 -> #271c15` brown dark palette unless Marek explicitly asks for that rollback.
+
+Current production dark-mode direction:
+
+```css
+:root.dark,
+:root[data-theme="dark"] {
+  --bg: #151312;
+  --bg-elevated: #1e1b1a;
+  --bg-sunken: #0d0b0a;
+  --bg-inverse: #fdf8ec;
+
+  --ink: #f0eae4;
+  --ink-soft: #c4bdb6;
+  --ink-muted: #a49d96;
+  --ink-disabled: #5a4a3c;
+  --ink-inverse: #1c1410;
+
+  --border: #332d29;
+  --border-strong: #453e39;
+  --border-dotted: #5a514b;
+
+  --accent: #e88a4a;
+  --accent-hover: #f29a5e;
+  --accent-pressed: #d27a3a;
+  --accent-soft: #3a2218;
+  --accent-deep: #c25728;
+
+  --basil: #8bc27a;
+  --basil-soft: #223321;
+  --saffron: #f0c050;
+  --saffron-soft: #3a2e14;
+  --bordeaux: #c26060;
+}
+```
+
+Dark background glows should remain minimal. The current app-level dark overlay is intentionally very low opacity to avoid visible blob artifacts.
+
+---
+
 ## Design Tokens (CSS Variables)
 
 Drop this in `src/styles/tokens.css` and import it from your root entry. All colors are tested AA-compliant against their pairing surface. The `--ink-*` and `--bg-*` tokens flip in dark mode; the brand `--accent-*`, `--basil-*`, `--saffron-*` keep their hue but step lighter.
