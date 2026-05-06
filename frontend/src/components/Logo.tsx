@@ -53,7 +53,7 @@ export function Logo({ variant = "wordmark", className }: LogoProps) {
 
       {!isCompact && (
         <span className="flex min-w-0 flex-col leading-none">
-          <span className="font-['Outfit',var(--font-sans)] text-[1.58rem] font-bold leading-none tracking-[-0.018em] text-ink">
+          <span className="font-brand text-[1.58rem] font-bold leading-none tracking-[-0.018em] text-ink">
             Meal
             <em className="ml-0.5 font-medium not-italic text-accent">
               Genie

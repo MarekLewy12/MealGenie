@@ -49,6 +49,7 @@
   --shadow-accent: 0 12px 24px -8px rgba(194, 87, 40, 0.4);
 
   /* Type */
+  --font-brand: "Outfit", var(--font-sans);
   --font-serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
   --font-sans: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-script: "Caveat", "Snell Roundhand", cursive;
