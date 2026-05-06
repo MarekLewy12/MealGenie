@@ -3,3 +3,7 @@ node_modules/
 dist/
 .DS_Store
 .idea/
+
+# Generated meal images for local/dev usage.
+backend/public/meal-images/*
+!backend/public/meal-images/.gitkeep
