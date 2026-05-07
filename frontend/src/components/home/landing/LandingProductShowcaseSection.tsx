@@ -1,4 +1,4 @@
-import { motion, type MotionProps, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import {
   Bot,
@@ -13,6 +13,16 @@ import type { LucideIcon } from "lucide-react";
 import { Badge, HandwrittenKicker } from "../../ui";
 import { cn } from "../../../utils/cn";
 import { experienceHighlights, type Tone } from "./landingContent";
+import {
+  cardEntrance,
+  contentStagger,
+  headingLineEntrance,
+  landingCardPop,
+  landingFadeUp,
+  landingStagger,
+  revealViewport,
+  sectionEntrance,
+} from "./landingMotion";
 
 type ExperienceHighlight = {
   label: string;
@@ -95,9 +105,22 @@ const productModeToneClassName: Record<Tone, string> = {
   neutral: "bg-bg-sunken text-ink-soft",
 };
 
-function FeatureMiniCard({ mode }: { mode: ExperienceHighlight }) {
+function FeatureMiniCard({
+  mode,
+  motionDisabled,
+}: {
+  mode: ExperienceHighlight;
+  motionDisabled: boolean;
+}) {
   return (
-    <div className="group inline-flex min-h-12 items-center gap-3 rounded-pill border border-border/80 bg-bg-elevated/80 px-3 py-2 shadow-xs backdrop-blur transition duration-base ease-out hover:-translate-y-0.5 hover:border-accent/35 hover:bg-accent-soft/35 hover:shadow-sm motion-reduce:hover:translate-y-0">
+    <motion.div
+      variants={landingCardPop}
+      whileHover={
+        motionDisabled ? undefined : { y: -6, rotate: -0.4, scale: 1.025 }
+      }
+      transition={{ duration: 0.22, ease: "easeOut" }}
+      className="group inline-flex min-h-12 items-center gap-3 rounded-pill border border-border/80 bg-bg-elevated/80 px-3 py-2 shadow-xs backdrop-blur transition duration-base ease-out hover:border-accent/35 hover:bg-accent-soft/35 hover:shadow-sm motion-reduce:hover:translate-y-0"
+    >
       <span
         className={cn(
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-pill transition duration-base ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100",
@@ -115,7 +138,7 @@ function FeatureMiniCard({ mode }: { mode: ExperienceHighlight }) {
           {mode.helper}
         </span>
       </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -416,15 +439,6 @@ export function LandingProductShowcaseSection() {
   const shouldReduceMotion = useReducedMotion();
   const motionDisabled = Boolean(shouldReduceMotion);
 
-  const sectionMotion: MotionProps = motionDisabled
-    ? {}
-    : {
-        initial: { opacity: 0, y: 24 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.28 },
-        transition: { duration: 0.6, ease: "easeOut" },
-      };
-
   return (
     <section
       aria-labelledby="landing-product-showcase-title"
@@ -435,24 +449,46 @@ export function LandingProductShowcaseSection() {
         aria-hidden="true"
       />
 
-      <motion.div className="relative mx-auto max-w-6xl px-4 sm:px-6" {...sectionMotion}>
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(18rem,0.55fr)] lg:items-end">
-          <div>
-            <HandwrittenKicker>po wyborze dania</HandwrittenKicker>
-            <h2
+      <motion.div
+        initial={motionDisabled ? false : "hidden"}
+        whileInView={motionDisabled ? undefined : "visible"}
+        viewport={revealViewport}
+        variants={contentStagger}
+        className="relative mx-auto max-w-6xl px-4 sm:px-6"
+      >
+        <motion.div
+          variants={sectionEntrance}
+          className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(18rem,0.55fr)] lg:items-end"
+        >
+          <motion.div variants={contentStagger}>
+            <motion.div variants={headingLineEntrance}>
+              <HandwrittenKicker>po wyborze dania</HandwrittenKicker>
+            </motion.div>
+            <motion.h2
               id="landing-product-showcase-title"
+              variants={contentStagger}
               className="mx-auto mt-3 max-w-3xl font-brand text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl"
             >
-              <span className="block">Kiedy wybierzesz danie,</span>
-              <span className="block text-accent">plan zostaje przy blacie.</span>
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-ink-soft sm:text-lg">
+              <motion.span variants={headingLineEntrance} className="block">
+                Kiedy wybierzesz danie,
+              </motion.span>
+              <motion.span variants={headingLineEntrance} className="block text-accent">
+                plan zostaje przy blacie.
+              </motion.span>
+            </motion.h2>
+            <motion.p
+              variants={landingFadeUp}
+              className="mt-5 max-w-2xl text-base leading-7 text-ink-soft sm:text-lg"
+            >
               Kroki, makro, zakupy i asystent są w jednym miejscu, więc nie
               wracasz do chaotycznych notatek w połowie gotowania.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          <div className="grid grid-cols-3 gap-2 rounded-[1.4rem] border border-border bg-bg-elevated/70 p-2 shadow-sm backdrop-blur">
+          <motion.div
+            variants={cardEntrance}
+            className="grid grid-cols-3 gap-2 rounded-[1.4rem] border border-border bg-bg-elevated/70 p-2 shadow-sm backdrop-blur"
+          >
             {outcomeHighlights.map((item) => (
               <div key={item.label} className="rounded-[1rem] bg-bg-sunken/75 px-3 py-3 text-center">
                 <p className="font-brand text-2xl font-semibold leading-none text-accent">
@@ -463,25 +499,29 @@ export function LandingProductShowcaseSection() {
                 </p>
               </div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         <motion.div
-          initial={motionDisabled ? false : { opacity: 0, y: 40, scale: 0.965 }}
-          whileInView={motionDisabled ? undefined : { opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          variants={cardEntrance}
         >
           <ProductWindow>
             <ShowcaseMockup shouldReduceMotion={motionDisabled} />
           </ProductWindow>
         </motion.div>
 
-        <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div
+          className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          variants={landingStagger}
+        >
           {experienceHighlights.map((mode) => (
-            <FeatureMiniCard key={mode.label} mode={mode} />
+            <FeatureMiniCard
+              key={mode.label}
+              mode={mode}
+              motionDisabled={motionDisabled}
+            />
           ))}
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   );

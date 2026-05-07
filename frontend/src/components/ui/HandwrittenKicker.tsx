@@ -7,7 +7,11 @@ export function HandwrittenKicker({ className, ...props }: HTMLAttributes<HTMLSp
     <span
       {...props}
       aria-hidden="true"
-      className={cn("font-script text-xl italic leading-none text-accent", className)}
+      className={cn(
+        "font-script italic leading-none text-accent",
+        className,
+        "text-[1.7rem]",
+      )}
     />
   );
 }

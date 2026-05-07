@@ -2,7 +2,14 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import { HandwrittenKicker } from "../../ui";
 import { landingBenefits } from "./landingContent";
-import { landingFadeUp, landingStagger } from "./landingMotion";
+import {
+  contentStagger,
+  headingLineEntrance,
+  landingFadeUp,
+  landingStagger,
+  revealViewport,
+  sectionEntrance,
+} from "./landingMotion";
 
 export function LandingBenefitsSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -12,35 +19,50 @@ export function LandingBenefitsSection() {
       aria-labelledby="landing-benefits-heading"
       className="relative scroll-mt-24 overflow-hidden bg-bg-elevated/40 px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-border" />
-
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
-          <div>
-            <HandwrittenKicker>co zyskujesz</HandwrittenKicker>
-            <h2
+      <motion.div
+        initial={shouldReduceMotion ? false : "hidden"}
+        whileInView={shouldReduceMotion ? undefined : "visible"}
+        viewport={revealViewport}
+        variants={sectionEntrance}
+        className="mx-auto max-w-6xl"
+      >
+        <motion.div
+          variants={contentStagger}
+          className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end"
+        >
+          <motion.div variants={contentStagger}>
+            <motion.div variants={headingLineEntrance}>
+              <HandwrittenKicker>co zyskujesz</HandwrittenKicker>
+            </motion.div>
+            <motion.h2
               id="landing-benefits-heading"
+              variants={contentStagger}
               className="mt-3 font-brand text-3xl font-semibold leading-[1.12] text-ink sm:text-4xl lg:text-[2.75rem]"
             >
-              <span className="block">Mniej decyzji.</span>
-              <span className="block">Mniej resztek.</span>
-              <span className="block text-paper-gradient">Więcej spokoju.</span>
-            </h2>
-          </div>
+              <motion.span variants={headingLineEntrance} className="block">
+                Mniej decyzji.
+              </motion.span>
+              <motion.span variants={headingLineEntrance} className="block">
+                Mniej resztek.
+              </motion.span>
+              <motion.span variants={headingLineEntrance} className="block text-paper-gradient">
+                Więcej spokoju.
+              </motion.span>
+            </motion.h2>
+          </motion.div>
 
-          <p className="max-w-2xl text-base leading-7 text-ink-soft sm:text-lg sm:leading-8 lg:justify-self-end">
+          <motion.p
+            variants={landingFadeUp}
+            className="max-w-2xl text-base leading-7 text-ink-soft sm:text-lg sm:leading-8 lg:justify-self-end"
+          >
             Nie musisz planować życia w tabelce. Wystarczy szybciej wybrać
             posiłek, zużyć to, co już masz, i wejść do kuchni z jasnym
             kierunkiem.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         <motion.div
           className="mt-10 grid gap-4 sm:grid-cols-2"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.22 }}
           variants={landingStagger}
         >
           {landingBenefits.map((benefit) => (
@@ -70,7 +92,7 @@ export function LandingBenefitsSection() {
             </motion.article>
           ))}
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -4,9 +4,9 @@
 
 :root {
   /* Surfaces */
-  --bg: #f6efe2;
-  --bg-elevated: #fdf8ec;
-  --bg-sunken: #ece2d0;
+  --bg: #fcfaf8;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #f3f0eb;
   --bg-inverse: #1f1612;
 
   /* Ink */
@@ -17,9 +17,9 @@
   --ink-inverse: #fdf8ec;
 
   /* Borders */
-  --border: #e3d6bf;
-  --border-strong: #d0bd9e;
-  --border-dotted: #c4b094;
+  --border: #e8e3df;
+  --border-strong: #d6cfc8;
+  --border-dotted: #d6cfc8;
 
   /* Brand */
   --accent: #c25728;
@@ -42,11 +42,11 @@
   --radius-pill: 999px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(58, 40, 24, 0.06);
-  --shadow-sm: 0 4px 10px -2px rgba(58, 40, 24, 0.08);
-  --shadow-md: 0 12px 24px -8px rgba(58, 40, 24, 0.14);
-  --shadow-lg: 0 30px 60px -20px rgba(58, 40, 24, 0.25);
-  --shadow-accent: 0 12px 24px -8px rgba(194, 87, 40, 0.4);
+  --shadow-xs: 0 1px 2px rgba(58, 40, 24, 0.045);
+  --shadow-sm: 0 4px 10px -2px rgba(58, 40, 24, 0.065);
+  --shadow-md: 0 14px 28px -12px rgba(58, 40, 24, 0.13);
+  --shadow-lg: 0 32px 68px -24px rgba(58, 40, 24, 0.22);
+  --shadow-accent: 0 14px 28px -12px rgba(194, 87, 40, 0.34);
 
   /* Type */
   --font-brand: "Outfit", var(--font-sans);

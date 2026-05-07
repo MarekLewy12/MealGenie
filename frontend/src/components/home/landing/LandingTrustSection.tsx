@@ -1,60 +1,62 @@
 import { motion, useReducedMotion } from "framer-motion";
 
-import { useScrollAnimation } from "../../../hooks/useScrollAnimation";
 import { Badge, HandwrittenKicker } from "../../ui";
 import { landingTrustCards } from "./landingContent";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-};
+import {
+  cardEntrance,
+  contentStagger,
+  headingLineEntrance,
+  landingFadeUp,
+  revealViewport,
+  sectionEntrance,
+} from "./landingMotion";
 
 const trustRules = ["bez sponsorowanych dań", "bez ukrytych priorytetów"];
 
 export function LandingTrustSection() {
-  const { ref, isInView } = useScrollAnimation(0.22);
   const shouldReduceMotion = useReducedMotion();
-
-  const motionProps = shouldReduceMotion
-    ? {}
-    : {
-        initial: "hidden",
-        animate: isInView ? "visible" : "hidden",
-      };
 
   return (
     <section
-      ref={ref}
       aria-labelledby="landing-trust-heading"
       className="relative scroll-mt-24 overflow-hidden bg-bg px-4 py-14 text-ink sm:px-6 lg:py-20"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border" />
-
-      <div className="mx-auto max-w-6xl">
+      <motion.div
+        initial={shouldReduceMotion ? false : "hidden"}
+        whileInView={shouldReduceMotion ? undefined : "visible"}
+        viewport={revealViewport}
+        variants={sectionEntrance}
+        className="mx-auto max-w-6xl"
+      >
         <motion.div
-          {...motionProps}
-          variants={fadeUp}
-          transition={{ duration: 0.45, ease: "easeOut" }}
+          variants={contentStagger}
           className="mx-auto max-w-3xl text-center"
         >
-          <HandwrittenKicker className="text-2xl">spokojnie i jasno</HandwrittenKicker>
-          <h2
+          <motion.div variants={headingLineEntrance}>
+            <HandwrittenKicker className="text-2xl">spokojnie i jasno</HandwrittenKicker>
+          </motion.div>
+          <motion.h2
             id="landing-trust-heading"
+            variants={contentStagger}
             className="mt-3 font-brand text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl"
           >
-            <span className="block">Normalne składniki.</span>
-            <span className="block text-accent">Przepisy bez marketingowego szumu.</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-ink-soft">
+            <motion.span variants={headingLineEntrance} className="block">
+              Normalne składniki.
+            </motion.span>
+            <motion.span variants={headingLineEntrance} className="block text-accent">
+              Przepisy bez marketingowego szumu.
+            </motion.span>
+          </motion.h2>
+          <motion.p
+            variants={landingFadeUp}
+            className="mx-auto mt-4 max-w-2xl text-base leading-7 text-ink-soft"
+          >
             MealGenie stawia na produkty z polskich sklepów, jasne preferencje
             i propozycje, które wynikają z dopasowania, nie z reklamy.
-          </p>
+          </motion.p>
         </motion.div>
 
-        <div className="mx-auto mt-8 h-px max-w-lg bg-border" />
-
         <motion.div
-          {...motionProps}
           variants={{
             hidden: { opacity: 0 },
             visible: {
@@ -65,8 +67,7 @@ export function LandingTrustSection() {
           className="mt-10 grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-stretch"
         >
           <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.42, ease: "easeOut" }}
+            variants={cardEntrance}
             className="rounded-sm border border-border-strong bg-bg-elevated p-6 shadow-sm sm:p-7"
           >
             <Badge variant="accent">bez marketingowego szumu</Badge>
@@ -86,12 +87,14 @@ export function LandingTrustSection() {
             </div>
           </motion.div>
 
-          <div className="divide-y divide-border rounded-[1.4rem] border border-border-strong bg-bg-elevated/70 backdrop-blur">
+          <motion.div
+            variants={contentStagger}
+            className="divide-y divide-border rounded-[1.4rem] border border-border-strong bg-bg-elevated/70 backdrop-blur"
+          >
             {landingTrustCards.map((item) => (
               <motion.article
                 key={item.title}
-                variants={fadeUp}
-                transition={{ duration: 0.42, ease: "easeOut" }}
+                variants={landingFadeUp}
                 className="grid gap-4 px-5 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-6"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-bg-sunken text-accent">
@@ -110,9 +113,9 @@ export function LandingTrustSection() {
                 <Badge variant={item.badgeVariant}>{item.badge}</Badge>
               </motion.article>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -1,61 +1,113 @@
 import { ArrowRight, CheckCircle2, UserPlus } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 import { FolkDivider, HandwrittenKicker } from "../../ui";
 import { finalCtaPoints } from "./landingContent";
+import {
+  cardEntrance,
+  contentStagger,
+  headingLineEntrance,
+  landingFadeUp,
+  revealViewport,
+  sectionEntrance,
+} from "./landingMotion";
+import { usePointerParallax } from "./usePointerParallax";
+
+const MotionLink = motion(Link);
 
 export function LandingFinalCtaSection() {
+  const shouldReduceMotion = useReducedMotion();
+  const ctaCardParallax = usePointerParallax({
+    maxRotate: 3.4,
+    maxTranslate: 8,
+    scale: 1.012,
+    spring: { damping: 28, stiffness: 150 },
+  });
+
   return (
     <section
       aria-labelledby="landing-final-cta-heading"
       className="relative scroll-mt-24 overflow-hidden bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute left-0 top-8 h-px w-full bg-border" />
-      </div>
+      <motion.div
+        initial={shouldReduceMotion ? false : "hidden"}
+        whileInView={shouldReduceMotion ? undefined : "visible"}
+        viewport={revealViewport}
+        variants={sectionEntrance}
+        className="relative mx-auto grid max-w-6xl gap-10 px-0 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:text-left"
+      >
+        <motion.div variants={contentStagger} className="text-center lg:text-left">
+          <motion.div variants={headingLineEntrance}>
+            <FolkDivider className="mx-auto mb-7 max-w-sm text-accent/70 lg:mx-0" />
+          </motion.div>
 
-      <div className="relative mx-auto grid max-w-6xl gap-10 px-0 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:text-left">
-        <div className="text-center lg:text-left">
-          <FolkDivider className="mx-auto mb-7 max-w-sm text-accent/70 lg:mx-0" />
-
-          <div className="mx-auto text-center lg:mx-0 lg:max-w-sm">
+          <motion.div
+            variants={headingLineEntrance}
+            className="mx-auto text-center lg:mx-0 lg:max-w-sm"
+          >
             <HandwrittenKicker>gotujemy?</HandwrittenKicker>
-          </div>
-          <h2
+          </motion.div>
+          <motion.h2
             id="landing-final-cta-heading"
+            variants={contentStagger}
             className="mx-auto mt-4 max-w-3xl font-brand text-3xl font-semibold leading-tight text-ink min-[375px]:text-4xl lg:mx-0 lg:text-5xl"
           >
-            <span className="block">Zacznij od jednego posiłku.</span>
-            <span className="block text-paper-gradient">Gotuj spokojniej już dziś.</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-ink-soft lg:mx-0">
+            <motion.span variants={headingLineEntrance} className="block">
+              Zacznij od jednego posiłku.
+            </motion.span>
+            <motion.span variants={headingLineEntrance} className="block text-paper-gradient">
+              Gotuj spokojniej już dziś.
+            </motion.span>
+          </motion.h2>
+          <motion.p
+            variants={landingFadeUp}
+            className="mx-auto mt-4 max-w-2xl text-base leading-7 text-ink-soft lg:mx-0"
+          >
             Pierwszy pomysł sprawdzisz bez konta. Profil przyda się, gdy chcesz
             zapisać preferencje, historię i ulubione przepisy.
-          </p>
+          </motion.p>
 
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-            <Link
+          <motion.div
+            variants={landingFadeUp}
+            className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start"
+          >
+            <MotionLink
               to="/try"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-6 py-3 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-6 py-3 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(194,87,40,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               Zobacz pomysł na dziś
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <Link
+              <ArrowRight
+                className="h-4 w-4 transition duration-300 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                aria-hidden="true"
+              />
+            </MotionLink>
+            <MotionLink
               to="/login?mode=register"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated px-6 py-3 text-sm font-semibold leading-none text-accent shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated px-6 py-3 text-sm font-semibold leading-none text-accent shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent hover:bg-accent-soft hover:text-accent-deep hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <UserPlus className="h-4 w-4" aria-hidden="true" />
               Załóż profil
-            </Link>
-          </div>
+            </MotionLink>
+          </motion.div>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-ink-muted lg:mx-0">
+          <motion.p
+            variants={landingFadeUp}
+            className="mx-auto mt-4 max-w-xl text-sm leading-6 text-ink-muted lg:mx-0"
+          >
             Pierwsza generacja bez konta. Profil zapisze preferencje i historię.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="relative">
+        <motion.div
+          variants={cardEntrance}
+          className="relative will-change-transform"
+          onPointerMove={ctaCardParallax.onPointerMove}
+          onPointerLeave={ctaCardParallax.onPointerLeave}
+          style={shouldReduceMotion ? undefined : ctaCardParallax.style}
+        >
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -inset-8 rounded-full bg-[radial-gradient(circle,rgba(194,87,40,0.18),rgba(90,138,74,0.10)_42%,transparent_68%)] blur-3xl"
@@ -92,8 +144,8 @@ export function LandingFinalCtaSection() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

@@ -5,12 +5,20 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import { useRef } from "react";
+import { useRef, type CSSProperties, type PointerEvent } from "react";
 import { Link } from "react-router-dom";
 
 import { Badge, DottedRow, HandwrittenKicker } from "../../ui";
 import { heroDecisionFacts, landingHeroCopy } from "./landingContent";
-import { landingFadeUp, landingStagger } from "./landingMotion";
+import {
+  cardEntrance,
+  contentStagger,
+  headingLineEntrance,
+  landingFadeUp,
+  landingStagger,
+  sectionEntrance,
+} from "./landingMotion";
+import { usePointerParallax } from "./usePointerParallax";
 
 const heroImages = [
   {
@@ -49,10 +57,21 @@ const alternativeRecipes = [
 const MotionSection = motion.section;
 const MotionDiv = motion.div;
 const MotionH1 = motion.h1;
+const MotionP = motion.p;
+const MotionLink = motion(Link);
+
+const primaryCtaClassName =
+  "group inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-accent bg-accent px-8 py-4 text-base font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(194,87,40,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
+
+const secondaryCtaClassName =
+  "inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-border-strong bg-bg-elevated/85 px-7 py-4 text-base font-semibold leading-none text-ink shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent/40 hover:bg-bg-elevated hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
 
 function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
-    <div className="relative mt-[4.5rem] max-w-2xl sm:mt-20 lg:mt-24">
+    <MotionDiv
+      variants={cardEntrance}
+      className="relative mt-[4.5rem] max-w-2xl sm:mt-20 lg:mt-24"
+    >
       <div
         className="pointer-events-none absolute -inset-3 rounded-md bg-[radial-gradient(circle_at_18%_0%,rgba(194,87,40,0.12),transparent_55%),radial-gradient(circle_at_92%_28%,rgba(90,138,74,0.13),transparent_50%)] blur-xl"
         aria-hidden="true"
@@ -115,7 +134,7 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
           ))}
         </div>
       </MotionDiv>
-    </div>
+    </MotionDiv>
   );
 }
 
@@ -128,29 +147,119 @@ export function LandingHeroSection() {
   });
   const recipeCardY = useTransform(scrollYProgress, [0, 1], [0, 72]);
   const recipeCardRotate = useTransform(scrollYProgress, [0, 1], [0, -1.2]);
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, -36]);
+  const mainCardParallax = usePointerParallax({
+    maxRotate: 7,
+    maxTranslate: 10,
+    scale: 1.018,
+  });
+  const basilLayerParallax = usePointerParallax({
+    maxRotate: 1.8,
+    maxTranslate: 6,
+    scale: 1.004,
+    spring: { damping: 30, stiffness: 130 },
+  });
+  const accentLayerParallax = usePointerParallax({
+    maxRotate: 1.4,
+    maxTranslate: 4,
+    scale: 1.006,
+    spring: { damping: 32, stiffness: 150 },
+  });
+
+  const handleHeroCardPointerMove = (event: PointerEvent<HTMLElement>) => {
+    mainCardParallax.onPointerMove(event);
+    basilLayerParallax.onPointerMove(event);
+    accentLayerParallax.onPointerMove(event);
+  };
+
+  const handleHeroCardPointerLeave = (event: PointerEvent<HTMLElement>) => {
+    mainCardParallax.onPointerLeave(event);
+    basilLayerParallax.onPointerLeave(event);
+    accentLayerParallax.onPointerLeave(event);
+  };
 
   return (
     <MotionSection
       ref={heroRef}
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
-      animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={shouldReduceMotion ? undefined : { duration: 0.55, ease: "easeOut" }}
+      initial={shouldReduceMotion ? false : "hidden"}
+      animate={shouldReduceMotion ? undefined : "visible"}
+      variants={sectionEntrance}
       className="relative isolate overflow-hidden bg-bg px-4 pt-12 pb-12 text-ink sm:px-6 sm:pt-16 lg:px-8 lg:pt-20 lg:pb-16"
       aria-labelledby="landing-hero-title"
     >
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-x-0 top-0 h-44 bg-[radial-gradient(ellipse_at_top,rgba(194,87,40,0.16),transparent_64%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(232,138,74,0.11),transparent_66%)]" />
-        <div className="absolute right-[8%] top-24 hidden h-80 w-80 rounded-full bg-accent/12 blur-3xl lg:block dark:bg-accent/10" />
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-bg">
         <MotionDiv
-          style={shouldReduceMotion ? undefined : { y: backgroundY }}
-          className="absolute inset-0 bg-[linear-gradient(rgba(208,189,158,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(208,189,158,0.18)_1px,transparent_1px)] bg-[size:28px_28px] opacity-45 dark:opacity-20"
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : {
+                  scale: [1, 1.15, 1],
+                  x: ["0%", "4%", "0%"],
+                  y: ["0%", "8%", "0%"],
+                }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: 15, repeat: Infinity, ease: "easeInOut" }
+          }
+          className="absolute -left-[10%] -top-[10%] h-[50rem] w-[50rem] rounded-full bg-saffron/40 blur-[120px] dark:bg-saffron/25"
         />
+
+        <MotionDiv
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : {
+                  scale: [1, 1.1, 1],
+                  x: ["0%", "-6%", "0%"],
+                  y: ["0%", "12%", "0%"],
+                }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }
+          }
+          className="absolute -right-[15%] top-[10%] h-[55rem] w-[55rem] rounded-full bg-accent/35 blur-[120px] dark:bg-accent/30"
+        />
+
+        <MotionDiv
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : {
+                  scale: [1, 1.2, 1],
+                  x: ["0%", "8%", "0%"],
+                  y: ["0%", "-8%", "0%"],
+                }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: 20, repeat: Infinity, ease: "easeInOut", delay: 4 }
+          }
+          className="absolute bottom-[-10%] left-[20%] h-[45rem] w-[45rem] rounded-full bg-basil/30 blur-[120px] dark:bg-basil/20"
+        />
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.42),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.32),transparent_30%)]" />
+        <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.58)_0_1px,transparent_1.6px),radial-gradient(circle_at_70%_65%,rgba(58,40,24,0.18)_0_1px,transparent_1.4px)] [background-position:0_0,9px_13px] [background-size:19px_23px,29px_31px] dark:opacity-[0.06]" />
+        <div className="absolute inset-x-0 bottom-[-1px] h-56 bg-gradient-to-b from-transparent via-bg/35 to-bg/95" />
       </div>
 
-      <div className="mx-auto grid max-w-7xl items-start gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,0.92fr)] lg:gap-16 xl:gap-20">
-        <div className="max-w-3xl lg:pt-4">
-          <div className="mb-5 flex flex-wrap items-center gap-3 sm:mb-6">
+      <MotionDiv
+        initial={shouldReduceMotion ? false : "hidden"}
+        animate={shouldReduceMotion ? undefined : "visible"}
+        variants={contentStagger}
+        className="mx-auto grid max-w-7xl items-start gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,0.92fr)] lg:gap-16 xl:gap-20"
+      >
+        <MotionDiv
+          variants={contentStagger}
+          className="max-w-3xl lg:pt-4"
+        >
+          <MotionDiv
+            variants={headingLineEntrance}
+            className="mb-5 flex flex-wrap items-center gap-3 sm:mb-6"
+          >
             <Badge variant="basil" className="gap-1.5">
               <Leaf className="h-3.5 w-3.5" aria-hidden="true" />
               {landingHeroCopy.eyebrow}
@@ -158,19 +267,17 @@ export function LandingHeroSection() {
             <HandwrittenKicker className="text-2xl">
               {landingHeroCopy.kicker}
             </HandwrittenKicker>
-          </div>
+          </MotionDiv>
 
           <MotionH1
             id="landing-hero-title"
             variants={landingStagger}
-            initial={shouldReduceMotion ? false : "hidden"}
-            animate={shouldReduceMotion ? undefined : "visible"}
             className="max-w-3xl text-balance font-brand text-[2.35rem] font-semibold leading-[1.08] text-ink min-[375px]:text-4xl sm:text-5xl lg:text-[4.1rem]"
           >
             {landingHeroCopy.headlineLines.map((line) => (
               <motion.span
                 key={line.text}
-                variants={landingFadeUp}
+                variants={headingLineEntrance}
                 className={line.accent ? "block text-paper-gradient" : "block"}
               >
                 {line.text}
@@ -178,34 +285,58 @@ export function LandingHeroSection() {
             ))}
           </MotionH1>
 
-          <p className="mt-5 max-w-2xl text-base leading-7 text-ink-soft sm:mt-6 sm:text-lg sm:leading-8">
+          <MotionP
+            variants={landingFadeUp}
+            className="mt-5 max-w-2xl text-base leading-7 text-ink-soft sm:mt-6 sm:text-lg sm:leading-8"
+          >
             {landingHeroCopy.subheadline}
-          </p>
+          </MotionP>
 
-          <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
-            <Link
+          <MotionDiv
+            variants={landingFadeUp}
+            className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center"
+          >
+            <MotionLink
               to="/try"
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-accent bg-accent px-8 py-4 text-base font-semibold leading-none text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed sm:w-auto"
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
+              className={primaryCtaClassName}
             >
               {landingHeroCopy.primaryCta}
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
-            </Link>
-            <Link
+              <ArrowRight
+                className="h-5 w-5 transition duration-300 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                aria-hidden="true"
+              />
+            </MotionLink>
+            <MotionLink
               to="/login?mode=register"
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-border-strong bg-bg-elevated/85 px-7 py-4 text-base font-semibold leading-none text-ink shadow-xs transition duration-fast ease-out hover:border-border-strong hover:bg-bg-elevated/85 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated sm:w-auto"
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
+              className={secondaryCtaClassName}
             >
               {landingHeroCopy.secondaryCta}
-            </Link>
-          </div>
+            </MotionLink>
+          </MotionDiv>
 
           <HeroDecisionCard shouldReduceMotion={shouldReduceMotion} />
 
-          <p className="mt-3 max-w-xl text-sm leading-6 text-ink-muted">
+          <MotionP
+            variants={landingFadeUp}
+            className="mt-3 max-w-xl text-sm leading-6 text-ink-muted"
+          >
             Pierwsza generacja bez konta. Profil zapisze preferencje i historię.
-          </p>
-        </div>
+          </MotionP>
+        </MotionDiv>
 
         <MotionDiv
+          onPointerMove={handleHeroCardPointerMove}
+          onPointerLeave={handleHeroCardPointerLeave}
+          variants={cardEntrance}
+          initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.97 }}
+          animate={shouldReduceMotion ? undefined : { opacity: 1, scale: 1 }}
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { delay: 0.24, duration: 0.56, ease: [0.22, 1, 0.36, 1] }
+          }
           style={
             shouldReduceMotion
               ? undefined
@@ -215,63 +346,93 @@ export function LandingHeroSection() {
         >
           <MotionDiv
             aria-hidden="true"
-            className="absolute -left-4 top-5 hidden h-[92%] w-[96%] -rotate-3 rounded-sm border border-border-strong bg-basil-soft/70 shadow-xs sm:block"
-            animate={shouldReduceMotion ? undefined : { y: [0, 4, 0], rotate: [-3, -2.5, -3] }}
-            transition={shouldReduceMotion ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -left-4 top-5 hidden h-[92%] w-[96%] -rotate-3 rounded-sm border border-basil/20 bg-basil-soft/70 shadow-[0_16px_38px_-34px_rgba(58,40,24,0.58)] sm:block"
+            style={
+              shouldReduceMotion
+                ? undefined
+                : { ...basilLayerParallax.style, rotate: -3 }
+            }
           />
           <MotionDiv
             aria-hidden="true"
-            className="absolute -right-3 top-10 hidden h-[88%] w-[94%] rotate-3 rounded-sm border border-border-strong bg-accent-soft/75 shadow-xs sm:block"
-            animate={shouldReduceMotion ? undefined : { y: [0, -3, 0], rotate: [3, 2.4, 3] }}
-            transition={shouldReduceMotion ? undefined : { duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -right-3 top-10 hidden h-[88%] w-[94%] rotate-3 rounded-sm border border-accent/20 bg-accent-soft/75 shadow-[0_14px_34px_-32px_rgba(58,40,24,0.54)] sm:block"
+            style={
+              shouldReduceMotion
+                ? undefined
+                : { ...accentLayerParallax.style, rotate: 3 }
+            }
           />
-          <div className="group relative">
-            <MotionDiv
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-5 rounded-[2rem] bg-[conic-gradient(from_180deg_at_50%_50%,rgba(194,87,40,0.28),rgba(90,138,74,0.18),rgba(194,87,40,0.28))] opacity-25 blur-2xl"
-              animate={
-                shouldReduceMotion
-                  ? undefined
-                  : { rotate: [0, 8, 0], opacity: [0.18, 0.28, 0.18] }
-              }
-              transition={
-                shouldReduceMotion
-                  ? undefined
-                  : { duration: 8, repeat: Infinity, ease: "easeInOut" }
-              }
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-4 rounded-lg bg-[radial-gradient(circle_at_50%_0%,rgba(194,87,40,0.18),transparent_58%),radial-gradient(circle_at_90%_28%,rgba(90,138,74,0.16),transparent_42%)] blur-2xl"
-            />
-            <article
-              aria-label="Karta przykładowego przepisu"
-              className="relative overflow-hidden rounded-sm border border-border-strong bg-bg-elevated p-4 text-ink shadow-[0_38px_90px_-52px_rgba(58,40,24,0.9),0_1px_0_rgba(255,255,255,0.45)_inset,0_0_0_1px_rgba(255,255,255,0.18)_inset] ring-1 ring-white/5 transition duration-base ease-out group-hover:border-accent/45 group-hover:shadow-[0_44px_100px_-52px_rgba(58,40,24,0.95),0_1px_0_rgba(255,255,255,0.45)_inset] sm:p-5"
-            >
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-accent/35 to-transparent"
+          <MotionDiv
+            className="group relative will-change-transform"
+            style={shouldReduceMotion ? undefined : mainCardParallax.style}
+          >
+            <div className="relative overflow-hidden rounded-[14px] p-[2px] shadow-[0_18px_48px_-38px_rgba(58,40,24,0.62),0_0_42px_-22px_rgba(194,87,40,0.35)] transition duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_24px_56px_-42px_rgba(58,40,24,0.58),0_0_56px_-24px_rgba(194,87,40,0.45)] motion-reduce:group-hover:translate-y-0">
+              <MotionDiv
+                className="absolute inset-0 rounded-[14px] opacity-95 dark:opacity-100"
+                initial={{ "--border-angle": "0deg" } as CSSProperties}
+                animate={
+                  shouldReduceMotion
+                    ? undefined
+                    : ({ "--border-angle": "360deg" } as CSSProperties)
+                }
+                transition={
+                  shouldReduceMotion
+                    ? undefined
+                    : { duration: 5.2, repeat: Infinity, ease: "linear" }
+                }
+                style={{
+                  background:
+                    "conic-gradient(from var(--border-angle), transparent 0deg, rgba(194,87,40,0.28) 34deg, var(--accent) 78deg, var(--saffron) 142deg, var(--basil) 214deg, rgba(90,138,74,0.34) 266deg, transparent 326deg)",
+                }}
               />
-              <div className="relative">
-                <div className="mb-4 space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-pill bg-bg-sunken px-3 py-1 font-script text-lg leading-none text-accent sm:text-xl">
-                      domowy pomysł
-                    </span>
-                    <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">
-                      zwykłe składniki, spokojny wybór
-                    </p>
+
+              <MotionDiv
+                className="absolute inset-[-18px] rounded-[22px] opacity-45 blur-2xl dark:opacity-75"
+                initial={{ "--border-angle": "0deg" } as CSSProperties}
+                animate={
+                  shouldReduceMotion
+                    ? undefined
+                    : ({ "--border-angle": "360deg" } as CSSProperties)
+                }
+                transition={
+                  shouldReduceMotion
+                    ? undefined
+                    : { duration: 5.2, repeat: Infinity, ease: "linear" }
+                }
+                style={{
+                  background:
+                    "conic-gradient(from var(--border-angle), transparent 0deg, var(--accent) 82deg, var(--saffron) 152deg, var(--basil) 226deg, transparent 322deg)",
+                }}
+              />
+
+              <article
+                aria-label="Karta przykładowego przepisu"
+                className="relative h-full w-full overflow-hidden rounded-[12px] bg-bg-elevated p-4 text-ink shadow-[0_1px_0_rgba(255,255,255,0.68)_inset,0_0_0_1px_rgba(255,255,255,0.28)_inset] dark:shadow-[0_1px_0_rgba(255,255,255,0.06)_inset] sm:p-5"
+              >
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-4 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-accent/35 to-transparent"
+                />
+                <div className="relative">
+                  <div className="mb-4 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-pill bg-bg-sunken px-3 py-1 font-script text-lg leading-none text-accent sm:text-xl">
+                        domowy pomysł
+                      </span>
+                      <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">
+                        zwykłe składniki, spokojny wybór
+                      </p>
+                    </div>
+                    <h2 className="font-brand text-xl font-semibold leading-tight text-ink min-[375px]:text-2xl">
+                      Łosoś z puree kalafiorowym i bazylią
+                    </h2>
                   </div>
-                  <h2 className="font-brand text-xl font-semibold leading-tight text-ink min-[375px]:text-2xl">
-                    Łosoś z puree kalafiorowym i bazylią
-                  </h2>
-                </div>
 
                 <div className="relative overflow-hidden rounded-sm border border-border bg-bg-sunken">
                   <img
                     src={heroImages[0].src}
                     alt={heroImages[0].alt}
-                    className="aspect-[16/11] w-full object-cover transition duration-base ease-out group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                    className="aspect-[16/11] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.035] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                   />
                   <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-pill border border-border bg-bg-elevated/95 px-3 py-1 text-xs font-bold text-ink shadow-xs backdrop-blur">
                     <Clock3 className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
@@ -307,7 +468,7 @@ export function LandingHeroSection() {
                           <img
                             src={recipe.src}
                             alt={recipe.alt}
-                            className="aspect-square w-full object-cover transition duration-base ease-out group-hover/alt:scale-105 motion-reduce:transition-none motion-reduce:group-hover/alt:scale-100"
+                            className="aspect-square w-full object-cover transition duration-500 ease-out group-hover/alt:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover/alt:scale-100"
                           />
                         </div>
                         <p className="mt-2 text-center font-brand text-xs font-bold leading-tight text-ink-soft transition duration-base ease-out group-hover/alt:text-ink">
@@ -320,11 +481,12 @@ export function LandingHeroSection() {
                     ))}
                   </div>
                 </div>
-              </div>
-            </article>
-          </div>
+                </div>
+              </article>
+            </div>
+          </MotionDiv>
         </MotionDiv>
-      </div>
+      </MotionDiv>
     </MotionSection>
   );
 }

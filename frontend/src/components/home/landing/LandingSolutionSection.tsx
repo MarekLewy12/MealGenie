@@ -3,10 +3,26 @@ import { ArrowRight, Sparkles } from "lucide-react";
 
 import { HandwrittenKicker } from "../../ui";
 import { solutionContextItems } from "./landingContent";
-import { landingFadeUp, landingSoftScale, landingStagger } from "./landingMotion";
+import {
+  cardEntrance,
+  contentStagger,
+  headingLineEntrance,
+  landingFadeUp,
+  landingSoftScale,
+  landingStagger,
+  revealViewport,
+  sectionEntrance,
+} from "./landingMotion";
+import { usePointerParallax } from "./usePointerParallax";
 
 export function LandingSolutionSection() {
   const shouldReduceMotion = useReducedMotion();
+  const solutionCardParallax = usePointerParallax({
+    maxRotate: 3.8,
+    maxTranslate: 8,
+    scale: 1.01,
+    spring: { damping: 28, stiffness: 150 },
+  });
 
   return (
     <section
@@ -18,22 +34,33 @@ export function LandingSolutionSection() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(194,87,40,0.11),transparent_32%),radial-gradient(circle_at_82%_40%,rgba(90,138,74,0.10),transparent_34%)]"
       />
 
-      <div className="relative mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+      <motion.div
+        initial={shouldReduceMotion ? false : "hidden"}
+        whileInView={shouldReduceMotion ? undefined : "visible"}
+        viewport={revealViewport}
+        variants={sectionEntrance}
+        className="relative mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.85fr_1.15fr] lg:items-center"
+      >
         <motion.div
-          initial={shouldReduceMotion ? false : "hidden"}
-          whileInView={shouldReduceMotion ? undefined : "visible"}
-          viewport={{ once: true, amount: 0.3 }}
-          variants={landingStagger}
+          variants={contentStagger}
         >
-          <HandwrittenKicker>zamiast losowego przepisu</HandwrittenKicker>
+          <motion.div variants={headingLineEntrance}>
+            <HandwrittenKicker>zamiast losowego przepisu</HandwrittenKicker>
+          </motion.div>
           <motion.h2
             id="landing-solution-heading"
-            variants={landingFadeUp}
+            variants={contentStagger}
             className="mt-3 font-brand text-3xl font-semibold leading-[1.12] text-ink sm:text-4xl lg:text-[2.75rem]"
           >
-            <span className="block">Nie zaczynasz od przepisu.</span>
-            <span className="block">Zaczynasz od tego,</span>
-            <span className="block text-accent">jak wygląda Twój dzień.</span>
+            <motion.span variants={headingLineEntrance} className="block">
+              Nie zaczynasz od przepisu.
+            </motion.span>
+            <motion.span variants={headingLineEntrance} className="block">
+              Zaczynasz od tego,
+            </motion.span>
+            <motion.span variants={headingLineEntrance} className="block text-accent">
+              jak wygląda Twój dzień.
+            </motion.span>
           </motion.h2>
           <motion.p
             variants={landingFadeUp}
@@ -46,13 +73,16 @@ export function LandingSolutionSection() {
         </motion.div>
 
         <motion.div
-          initial={shouldReduceMotion ? false : "hidden"}
-          whileInView={shouldReduceMotion ? undefined : "visible"}
-          viewport={{ once: true, amount: 0.3 }}
-          variants={landingStagger}
+          onPointerMove={solutionCardParallax.onPointerMove}
+          onPointerLeave={solutionCardParallax.onPointerLeave}
+          variants={cardEntrance}
+          style={shouldReduceMotion ? undefined : solutionCardParallax.style}
           className="relative rounded-[1.6rem] border border-border-strong bg-bg-elevated p-5 shadow-[0_30px_70px_-50px_rgba(58,40,24,0.88)] sm:p-6"
         >
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+          <motion.div
+            variants={landingStagger}
+            className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center"
+          >
             <div className="space-y-3">
               {solutionContextItems.map((item) => (
                 <motion.div
@@ -98,9 +128,9 @@ export function LandingSolutionSection() {
                 danie.
               </p>
             </motion.div>
-          </div>
+          </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
