@@ -4,7 +4,7 @@ export const landingEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export const revealViewport = {
   once: true,
-  amount: 0.14,
+  amount: 0.24,
 } as const;
 
 export const sectionEntrance: Variants = {
@@ -16,11 +16,10 @@ export const sectionEntrance: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.58,
+      duration: 0.78,
       ease: landingEase,
-      when: "beforeChildren",
-      staggerChildren: 0.08,
-      delayChildren: 0.03,
+      staggerChildren: 0.12,
+      delayChildren: 0.06,
     },
   },
 };
@@ -34,7 +33,7 @@ export const headingLineEntrance: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.48,
+      duration: 0.64,
       ease: landingEase,
     },
   },
@@ -44,8 +43,8 @@ export const contentStagger: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.04,
+      staggerChildren: 0.12,
+      delayChildren: 0.06,
     },
   },
 };
@@ -61,7 +60,7 @@ export const cardEntrance: Variants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.52,
+      duration: 0.68,
       ease: landingEase,
     },
   },
@@ -71,8 +70,8 @@ export const landingStagger: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.09,
-      delayChildren: 0.06,
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
     },
   },
 };
@@ -86,7 +85,7 @@ export const landingFadeUp: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.46,
+      duration: 0.62,
       ease: landingEase,
     },
   },
@@ -103,7 +102,7 @@ export const landingSoftScale: Variants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.48,
+      duration: 0.64,
       ease: landingEase,
     },
   },

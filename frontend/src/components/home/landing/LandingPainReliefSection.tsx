@@ -1,8 +1,8 @@
 import {
   motion,
-  useAnimationControls,
   useReducedMotion,
 } from "framer-motion";
+import { useState } from "react";
 import type { PointerEvent } from "react";
 
 import { HandwrittenKicker } from "../../ui";
@@ -11,6 +11,7 @@ import {
   cardEntrance,
   contentStagger,
   headingLineEntrance,
+  landingEase,
   landingFadeUp,
   landingStagger,
   revealViewport,
@@ -34,24 +35,22 @@ function ProblemNote({
   note: string;
   shouldReduceMotion: boolean;
 }) {
-  const controls = useAnimationControls();
   const baseRotate = noteRotations[index];
+  const [hoverTarget, setHoverTarget] = useState({
+    rotate: baseRotate,
+    x: 0,
+    y: 0,
+  });
 
   const settleNote = (event: PointerEvent<HTMLDivElement>) => {
     const canHoverPrecisely = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
     if (shouldReduceMotion || event.pointerType !== "mouse" || !canHoverPrecisely) return;
 
-    void controls.start({
-      borderColor: "rgba(214,207,200,0.95)",
-      boxShadow: "0 16px 34px -30px rgba(58,40,24,0.46)",
+    setHoverTarget({
       rotate: baseRotate + randomBetween(-3, 3),
       x: randomBetween(-10, 10),
       y: randomBetween(-10, 10),
-      transition: {
-        duration: 0.36,
-        ease: [0.22, 1, 0.36, 1],
-      },
     });
   };
 
@@ -66,33 +65,44 @@ function ProblemNote({
     >
       <motion.div
         className="rounded-[1.15rem] border border-border-strong bg-bg-elevated/90 px-5 py-4 shadow-[0_14px_34px_-30px_rgba(58,40,24,0.52)] ring-1 ring-ink/5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-accent/40 hover:bg-bg-elevated/95 hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.82)] dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
-        initial={
-          shouldReduceMotion
-            ? false
+        variants={{
+          hidden: shouldReduceMotion
+            ? {}
             : {
                 opacity: 0,
                 y: 28,
                 rotate: baseRotate - 3,
+              },
+          visible: shouldReduceMotion
+            ? {}
+            : {
+                opacity: 1,
+                y: 0,
+                x: 0,
+                rotate: baseRotate,
+                transition: {
+                  duration: 0.55,
+                  delay: index * 0.08,
+                  ease: landingEase,
+                },
+              },
+        }}
+        whileHover={
+          shouldReduceMotion
+            ? undefined
+            : {
+                borderColor: "rgba(214,207,200,0.95)",
+                boxShadow: "0 16px 34px -30px rgba(58,40,24,0.46)",
+                rotate: hoverTarget.rotate,
+                x: hoverTarget.x,
+                y: hoverTarget.y,
+                transition: {
+                  duration: 0.36,
+                  ease: landingEase,
+                },
               }
         }
-        animate={controls}
-        onViewportEnter={() => {
-          if (shouldReduceMotion) return;
-
-          void controls.start({
-            opacity: 1,
-            y: 0,
-            x: 0,
-            rotate: baseRotate,
-            transition: {
-              duration: 0.55,
-              delay: index * 0.08,
-              ease: [0.22, 1, 0.36, 1],
-            },
-          });
-        }}
         onPointerEnter={settleNote}
-        viewport={{ once: true, amount: 0.45 }}
       >
         <p className="font-brand text-lg font-semibold leading-tight text-ink">
           {note}

@@ -344,14 +344,20 @@ function ShoppingPreview({ shouldReduceMotion }: { shouldReduceMotion: boolean }
             >
               {item.checked ? (
                 <motion.span
-                  initial={shouldReduceMotion ? false : { scale: 0.45, opacity: 0 }}
-                  whileInView={shouldReduceMotion ? undefined : { scale: 1, opacity: 1 }}
-                  viewport={{ once: true, amount: 0.8 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 420,
-                    damping: 18,
-                    delay: 0.12 + index * 0.1,
+                  variants={{
+                    hidden: shouldReduceMotion ? {} : { scale: 0.45, opacity: 0 },
+                    visible: shouldReduceMotion
+                      ? {}
+                      : {
+                          scale: 1,
+                          opacity: 1,
+                          transition: {
+                            type: "spring",
+                            stiffness: 420,
+                            damping: 18,
+                            delay: 0.12 + index * 0.1,
+                          },
+                        },
                   }}
                 >
                   <Check className="h-3.5 w-3.5" />
@@ -380,10 +386,16 @@ function AssistantPreview({ shouldReduceMotion }: { shouldReduceMotion: boolean 
         </p>
         <motion.p
           className="ml-auto w-fit max-w-[88%] rounded-lg bg-accent px-4 py-3 text-sm leading-6 text-ink-inverse"
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ delay: 0.32, duration: 0.32, ease: "easeOut" }}
+          variants={{
+            hidden: shouldReduceMotion ? {} : { opacity: 0, y: 8 },
+            visible: shouldReduceMotion
+              ? {}
+              : {
+                  opacity: 1,
+                  y: 0,
+                  transition: { delay: 0.32, duration: 0.32, ease: "easeOut" },
+                },
+          }}
         >
           {assistantMessages[1].text}
         </motion.p>
@@ -453,11 +465,11 @@ export function LandingProductShowcaseSection() {
         initial={motionDisabled ? false : "hidden"}
         whileInView={motionDisabled ? undefined : "visible"}
         viewport={revealViewport}
-        variants={contentStagger}
+        variants={sectionEntrance}
         className="relative mx-auto max-w-6xl px-4 sm:px-6"
       >
         <motion.div
-          variants={sectionEntrance}
+          variants={contentStagger}
           className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(18rem,0.55fr)] lg:items-end"
         >
           <motion.div variants={contentStagger}>
