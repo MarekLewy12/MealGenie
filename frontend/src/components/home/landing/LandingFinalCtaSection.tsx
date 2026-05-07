@@ -68,7 +68,7 @@ export function LandingFinalCtaSection() {
             <MotionLink
               to="/try"
               whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
-              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-6 py-3 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(194,87,40,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-6 py-3 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(232,111,69,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               Zobacz pomysł na dziś
               <ArrowRight
@@ -79,7 +79,7 @@ export function LandingFinalCtaSection() {
             <MotionLink
               to="/login?mode=register"
               whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated px-6 py-3 text-sm font-semibold leading-none text-accent shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent hover:bg-accent-soft hover:text-accent-deep hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated px-6 py-3 text-sm font-semibold leading-none text-accent shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent hover:bg-accent-soft hover:text-accent-deep hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <UserPlus className="h-4 w-4" aria-hidden="true" />
               Załóż profil
@@ -100,10 +100,10 @@ export function LandingFinalCtaSection() {
         >
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -inset-8 rounded-full bg-[radial-gradient(circle,rgba(194,87,40,0.18),rgba(90,138,74,0.10)_42%,transparent_68%)] blur-3xl"
+            className="pointer-events-none absolute -inset-8 rounded-full bg-[radial-gradient(circle,rgba(232,111,69,0.18),rgba(47,138,95,0.10)_42%,transparent_68%)] blur-3xl"
           />
 
-          <div className="relative rounded-[1.8rem] border border-border-strong bg-bg-elevated/85 p-4 shadow-[0_32px_80px_-52px_rgba(58,40,24,0.9)] backdrop-blur sm:p-5">
+          <div className="relative rounded-[1.8rem] border border-border-strong bg-bg-elevated/85 p-4 shadow-[0_32px_80px_-52px_rgba(32,37,31,0.9)] backdrop-blur sm:p-5">
             <div className="rounded-[1.1rem] border border-border bg-bg-sunken/70 p-4">
               <p className="font-brand text-xs font-bold uppercase tracking-[0.14em] text-accent">
                 Start bez ciężaru

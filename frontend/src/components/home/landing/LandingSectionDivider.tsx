@@ -27,9 +27,9 @@ const dividerWashClassName: Record<
   string
 > = {
   warm:
-    "bg-[radial-gradient(ellipse_at_center,rgba(194,87,40,0.075),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(232,138,74,0.055),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)]",
+    "bg-[radial-gradient(ellipse_at_center,rgba(232,111,69,0.075),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(232,138,74,0.055),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)]",
   basil:
-    "bg-[radial-gradient(ellipse_at_center,rgba(90,138,74,0.075),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(139,194,122,0.05),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)]",
+    "bg-[radial-gradient(ellipse_at_center,rgba(47,138,95,0.075),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(139,194,122,0.05),transparent_58%),linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)]",
   quiet:
     "bg-[linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_50%,var(--bg)_100%)]",
 };

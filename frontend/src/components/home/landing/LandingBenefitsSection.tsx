@@ -80,7 +80,7 @@ export function LandingBenefitsSection() {
               variants={landingFadeUp}
               whileHover={shouldReduceMotion ? undefined : { y: -6, rotate: -0.25 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="group relative overflow-hidden rounded-[1.35rem] border border-border-strong bg-bg-elevated p-5 shadow-sm transition duration-base ease-out hover:border-accent/35 hover:shadow-[0_22px_50px_-42px_rgba(58,40,24,0.82)] motion-reduce:hover:translate-y-0 sm:p-6"
+              className="group relative overflow-hidden rounded-[1.35rem] border border-border-strong bg-bg-elevated p-5 shadow-sm transition duration-base ease-out hover:border-accent/35 hover:shadow-[0_22px_50px_-42px_rgba(32,37,31,0.82)] motion-reduce:hover:translate-y-0 sm:p-6"
             >
               <div
                 aria-hidden="true"

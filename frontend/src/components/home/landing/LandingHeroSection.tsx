@@ -59,10 +59,10 @@ const MotionP = motion.p;
 const MotionLink = motion(Link);
 
 const primaryCtaClassName =
-  "group inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-accent bg-accent px-8 py-4 text-base font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(194,87,40,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
+  "group inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-accent bg-accent px-8 py-4 text-base font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(232,111,69,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
 
 const secondaryCtaClassName =
-  "inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-border-strong bg-bg-elevated/85 px-7 py-4 text-base font-semibold leading-none text-ink shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent/40 hover:bg-bg-elevated hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
+  "inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-border-strong bg-bg-elevated/85 px-7 py-4 text-base font-semibold leading-none text-ink shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent/40 hover:bg-bg-elevated hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
 
 function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
@@ -71,13 +71,13 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
       className="relative mt-[4.5rem] max-w-2xl sm:mt-20 lg:mt-24"
     >
       <div
-        className="pointer-events-none absolute -inset-4 rounded-[1.25rem] bg-[radial-gradient(circle_at_18%_0%,rgba(194,87,40,0.14),transparent_56%),radial-gradient(circle_at_92%_28%,rgba(90,138,74,0.12),transparent_52%)] blur-2xl"
+        className="pointer-events-none absolute -inset-4 rounded-[1.25rem] bg-[radial-gradient(circle_at_18%_0%,rgba(232,111,69,0.14),transparent_56%),radial-gradient(circle_at_92%_28%,rgba(47,138,95,0.12),transparent_52%)] blur-2xl"
         aria-hidden="true"
       />
-      <div className="relative overflow-hidden rounded-[1rem] border border-border bg-[linear-gradient(135deg,rgba(255,255,255,0.82),rgba(255,255,255,0.56))] shadow-[0_18px_45px_-34px_rgba(58,40,24,0.75),0_0_32px_-24px_rgba(194,87,40,0.32)] backdrop-blur-2xl dark:border-white/18 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.11),rgba(255,255,255,0.055))]">
+      <div className="relative overflow-hidden rounded-[1rem] border border-border bg-[linear-gradient(135deg,rgba(255,255,255,0.82),rgba(255,255,255,0.56))] shadow-[0_18px_45px_-34px_rgba(32,37,31,0.75),0_0_32px_-24px_rgba(232,111,69,0.32)] backdrop-blur-2xl dark:border-white/18 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.11),rgba(255,255,255,0.055))]">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[1rem] bg-[radial-gradient(circle_at_14%_0%,rgba(194,87,40,0.18),transparent_38%),radial-gradient(circle_at_88%_18%,rgba(90,138,74,0.18),transparent_42%)] dark:bg-[radial-gradient(circle_at_14%_0%,rgba(232,138,74,0.22),transparent_38%),radial-gradient(circle_at_88%_18%,rgba(139,194,122,0.18),transparent_42%)]"
+          className="pointer-events-none absolute inset-0 rounded-[1rem] bg-[radial-gradient(circle_at_14%_0%,rgba(232,111,69,0.18),transparent_38%),radial-gradient(circle_at_88%_18%,rgba(47,138,95,0.18),transparent_42%)] dark:bg-[radial-gradient(circle_at_14%_0%,rgba(232,138,74,0.22),transparent_38%),radial-gradient(circle_at_88%_18%,rgba(139,194,122,0.18),transparent_42%)]"
         />
         <MotionDiv
           initial={shouldReduceMotion ? false : { opacity: 0, y: 14, rotate: -0.6 }}
@@ -106,7 +106,7 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
             </MotionDiv>
           </div>
 
-          <div className="mt-5 rounded-md border border-white/65 bg-[linear-gradient(135deg,rgba(255,255,255,0.54),rgba(251,225,208,0.28),rgba(219,232,211,0.22))] p-4 shadow-[0_12px_30px_-26px_rgba(58,40,24,0.72)] ring-1 ring-white/60 backdrop-blur-xl dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.09),rgba(139,194,122,0.07))] dark:ring-white/10">
+          <div className="mt-5 rounded-md border border-white/65 bg-[linear-gradient(135deg,rgba(255,255,255,0.54),rgba(251,225,208,0.28),rgba(219,232,211,0.22))] p-4 shadow-[0_12px_30px_-26px_rgba(32,37,31,0.72)] ring-1 ring-white/60 backdrop-blur-xl dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.09),rgba(139,194,122,0.07))] dark:ring-white/10">
             <p className="font-brand text-2xl font-semibold leading-tight text-ink">
               Dziś pasuje coś ciepłego, prostego i bez kombinowania.
             </p>
@@ -240,7 +240,7 @@ export function LandingHeroSection() {
         />
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.42),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.32),transparent_30%)]" />
-        <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.58)_0_1px,transparent_1.6px),radial-gradient(circle_at_70%_65%,rgba(58,40,24,0.18)_0_1px,transparent_1.4px)] [background-position:0_0,9px_13px] [background-size:19px_23px,29px_31px] dark:opacity-[0.06]" />
+        <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.58)_0_1px,transparent_1.6px),radial-gradient(circle_at_70%_65%,rgba(32,37,31,0.18)_0_1px,transparent_1.4px)] [background-position:0_0,9px_13px] [background-size:19px_23px,29px_31px] dark:opacity-[0.06]" />
         <div className="absolute inset-x-0 bottom-[-1px] h-72 bg-gradient-to-b from-transparent via-bg/62 to-bg" />
       </div>
 
@@ -339,7 +339,7 @@ export function LandingHeroSection() {
         >
           <MotionDiv
             aria-hidden="true"
-            className="absolute -left-4 top-5 hidden h-[92%] w-[96%] -rotate-3 rounded-sm border border-basil/20 bg-basil-soft/70 shadow-[0_16px_38px_-34px_rgba(58,40,24,0.58)] sm:block"
+            className="absolute -left-4 top-5 hidden h-[92%] w-[96%] -rotate-3 rounded-sm border border-basil/20 bg-basil-soft/70 shadow-[0_16px_38px_-34px_rgba(32,37,31,0.58)] sm:block"
             style={
               shouldReduceMotion
                 ? undefined
@@ -348,7 +348,7 @@ export function LandingHeroSection() {
           />
           <MotionDiv
             aria-hidden="true"
-            className="absolute -right-3 top-10 hidden h-[88%] w-[94%] rotate-3 rounded-sm border border-accent/20 bg-accent-soft/75 shadow-[0_14px_34px_-32px_rgba(58,40,24,0.54)] sm:block"
+            className="absolute -right-3 top-10 hidden h-[88%] w-[94%] rotate-3 rounded-sm border border-accent/20 bg-accent-soft/75 shadow-[0_14px_34px_-32px_rgba(32,37,31,0.54)] sm:block"
             style={
               shouldReduceMotion
                 ? undefined
@@ -359,7 +359,7 @@ export function LandingHeroSection() {
             className="group relative will-change-transform"
             style={shouldReduceMotion ? undefined : mainCardParallax.style}
           >
-            <div className="relative overflow-hidden rounded-[14px] p-[2px] shadow-[0_18px_48px_-38px_rgba(58,40,24,0.62),0_0_34px_-24px_rgba(194,87,40,0.32)] transition duration-300 ease-out group-hover:shadow-[0_24px_56px_-42px_rgba(58,40,24,0.58),0_0_46px_-26px_rgba(194,87,40,0.4)]">
+            <div className="relative overflow-hidden rounded-[14px] p-[2px] shadow-[0_18px_48px_-38px_rgba(32,37,31,0.62),0_0_34px_-24px_rgba(232,111,69,0.32)] transition duration-300 ease-out group-hover:shadow-[0_24px_56px_-42px_rgba(32,37,31,0.58),0_0_46px_-26px_rgba(232,111,69,0.4)]">
               <div
                 aria-hidden="true"
                 className="hero-card-border-flow absolute inset-0 rounded-[14px] opacity-95 dark:opacity-100"

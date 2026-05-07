@@ -73,7 +73,7 @@ export function LandingSolutionSection() {
 
         <motion.div
           variants={cardEntrance}
-          className="relative rounded-[1.6rem] border border-border-strong bg-bg-elevated/90 p-5 shadow-[0_30px_70px_-50px_rgba(58,40,24,0.9)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-6"
+          className="relative rounded-[1.6rem] border border-border-strong bg-bg-elevated/90 p-5 shadow-[0_30px_70px_-50px_rgba(32,37,31,0.9)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-6"
         >
           <motion.div
             variants={landingStagger}

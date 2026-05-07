@@ -64,7 +64,7 @@ function ProblemNote({
       }}
     >
       <motion.div
-        className="rounded-[1.15rem] border border-border-strong bg-bg-elevated/90 px-5 py-4 shadow-[0_14px_34px_-30px_rgba(58,40,24,0.52)] ring-1 ring-ink/5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-accent/40 hover:bg-bg-elevated/95 hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.82)] dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
+        className="rounded-[1.15rem] border border-border-strong bg-bg-elevated/90 px-5 py-4 shadow-[0_14px_34px_-30px_rgba(32,37,31,0.52)] ring-1 ring-ink/5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-accent/40 hover:bg-bg-elevated/95 hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.82)] dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
         variants={{
           hidden: shouldReduceMotion
             ? {}
@@ -92,7 +92,7 @@ function ProblemNote({
             ? undefined
             : {
                 borderColor: "rgba(214,207,200,0.95)",
-                boxShadow: "0 16px 34px -30px rgba(58,40,24,0.46)",
+                boxShadow: "0 16px 34px -30px rgba(32,37,31,0.46)",
                 rotate: hoverTarget.rotate,
                 x: hoverTarget.x,
                 y: hoverTarget.y,
@@ -121,7 +121,7 @@ export function LandingPainReliefSection() {
       className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-x-0 top-[-18rem] h-[34rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(212,160,23,0.12),rgba(194,87,40,0.07)_38%,rgba(90,138,74,0.05)_58%,transparent_78%)] blur-[80px] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(240,192,80,0.08),rgba(232,138,74,0.08)_40%,rgba(139,194,122,0.05)_60%,transparent_78%)]" />
+        <div className="absolute inset-x-0 top-[-18rem] h-[34rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(242,201,76,0.12),rgba(232,111,69,0.07)_38%,rgba(47,138,95,0.05)_58%,transparent_78%)] blur-[80px] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(240,192,80,0.08),rgba(232,138,74,0.08)_40%,rgba(139,194,122,0.05)_60%,transparent_78%)]" />
         <div className="absolute left-[-10%] top-[22%] h-[40rem] w-[40rem] rounded-full bg-saffron/8 blur-[120px] dark:bg-saffron/6" />
         <div className="absolute -bottom-[10%] right-[-5%] h-[45rem] w-[45rem] rounded-full bg-accent/6 blur-[120px] dark:bg-accent/10" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-bg/70 to-bg" />
@@ -186,7 +186,7 @@ export function LandingPainReliefSection() {
 
           <motion.div
             variants={cardEntrance}
-            className="relative overflow-hidden rounded-[1.8rem] border border-border-strong bg-bg-elevated/90 p-6 shadow-[0_30px_70px_-48px_rgba(58,40,24,0.88)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-8"
+            className="relative overflow-hidden rounded-[1.8rem] border border-border-strong bg-bg-elevated/90 p-6 shadow-[0_30px_70px_-48px_rgba(32,37,31,0.88)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-8"
           >
             <div
               aria-hidden="true"

@@ -151,10 +151,10 @@ function ProductWindow({
     <div className="relative mx-auto mt-12 w-full max-w-[1120px]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-10 top-12 h-72 rounded-full bg-[radial-gradient(circle_at_45%_20%,rgba(194,87,40,0.22),transparent_46%),radial-gradient(circle_at_72%_35%,rgba(90,138,74,0.18),transparent_42%)] blur-3xl dark:bg-[radial-gradient(circle_at_45%_20%,rgba(232,138,74,0.14),transparent_48%),radial-gradient(circle_at_72%_35%,rgba(139,194,122,0.10),transparent_42%)]"
+        className="pointer-events-none absolute -inset-x-10 top-12 h-72 rounded-full bg-[radial-gradient(circle_at_45%_20%,rgba(232,111,69,0.22),transparent_46%),radial-gradient(circle_at_72%_35%,rgba(47,138,95,0.18),transparent_42%)] blur-3xl dark:bg-[radial-gradient(circle_at_45%_20%,rgba(232,138,74,0.14),transparent_48%),radial-gradient(circle_at_72%_35%,rgba(139,194,122,0.10),transparent_42%)]"
       />
 
-      <div className="relative rounded-[2rem] border border-ink/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(194,87,40,0.16),rgba(90,138,74,0.14))] p-2 shadow-[0_42px_100px_-54px_rgba(58,40,24,0.88)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.14),rgba(139,194,122,0.08))]">
+      <div className="relative rounded-[2rem] border border-ink/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(232,111,69,0.16),rgba(47,138,95,0.14))] p-2 shadow-[0_42px_100px_-54px_rgba(32,37,31,0.88)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.14),rgba(139,194,122,0.08))]">
         <div className="overflow-hidden rounded-[1.45rem] border border-border bg-bg-elevated/95 backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg-elevated/80 px-4 py-3 sm:px-5">
             <div className="flex min-w-0 items-center gap-3">
@@ -167,7 +167,7 @@ function ProductWindow({
             </div>
 
             <div className="flex items-center gap-2 rounded-pill border border-basil/25 bg-basil/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-basil">
-              <span className="h-2 w-2 rounded-full bg-basil shadow-[0_0_0_4px_rgba(90,138,74,0.14)]" />
+              <span className="h-2 w-2 rounded-full bg-basil shadow-[0_0_0_4px_rgba(47,138,95,0.14)]" />
               wysokie dopasowanie
             </div>
           </div>
@@ -235,7 +235,7 @@ function CookingGlow({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
       className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-[72%] -translate-x-1/2 -translate-y-1/2"
     >
       <motion.div
-        className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(194,87,40,0.16),rgba(90,138,74,0.10)_42%,transparent_68%)] blur-3xl"
+        className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(232,111,69,0.16),rgba(47,138,95,0.10)_42%,transparent_68%)] blur-3xl"
         animate={
           shouldReduceMotion
             ? undefined
@@ -426,7 +426,7 @@ function PlanSignalRail() {
 
 function ShowcaseMockup({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
-    <div className="relative overflow-hidden bg-[radial-gradient(circle_at_20%_8%,rgba(194,87,40,0.12),transparent_34%),radial-gradient(circle_at_84%_12%,rgba(90,138,74,0.12),transparent_34%),var(--bg-elevated)] p-4 sm:p-6 lg:p-7">
+    <div className="relative overflow-hidden bg-[radial-gradient(circle_at_20%_8%,rgba(232,111,69,0.12),transparent_34%),radial-gradient(circle_at_84%_12%,rgba(47,138,95,0.12),transparent_34%),var(--bg-elevated)] p-4 sm:p-6 lg:p-7">
       <CookingGlow shouldReduceMotion={shouldReduceMotion} />
 
       <div className="relative space-y-4">
@@ -457,7 +457,7 @@ export function LandingProductShowcaseSection() {
       className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-[linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_48%,var(--bg)_100%)] py-16 text-ink sm:py-20 lg:py-24"
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(194,87,40,0.10),transparent_32%),radial-gradient(circle_at_82%_12%,rgba(90,138,74,0.13),transparent_34%)] dark:bg-[linear-gradient(135deg,rgba(232,138,74,0.07),transparent_34%),radial-gradient(circle_at_82%_12%,rgba(139,194,122,0.07),transparent_34%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(232,111,69,0.10),transparent_32%),radial-gradient(circle_at_82%_12%,rgba(47,138,95,0.13),transparent_34%)] dark:bg-[linear-gradient(135deg,rgba(232,138,74,0.07),transparent_34%),radial-gradient(circle_at_82%_12%,rgba(139,194,122,0.07),transparent_34%)]"
         aria-hidden="true"
       />
 
