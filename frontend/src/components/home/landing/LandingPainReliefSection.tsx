@@ -121,9 +121,9 @@ export function LandingPainReliefSection() {
       className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-x-0 top-[-18rem] h-[34rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(242,201,76,0.12),rgba(232,111,69,0.07)_38%,rgba(47,138,95,0.05)_58%,transparent_78%)] blur-[80px] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(240,192,80,0.08),rgba(232,138,74,0.08)_40%,rgba(139,194,122,0.05)_60%,transparent_78%)]" />
-        <div className="absolute left-[-10%] top-[22%] h-[40rem] w-[40rem] rounded-full bg-saffron/8 blur-[120px] dark:bg-saffron/6" />
-        <div className="absolute -bottom-[10%] right-[-5%] h-[45rem] w-[45rem] rounded-full bg-accent/6 blur-[120px] dark:bg-accent/10" />
+        <div className="absolute inset-x-0 top-[-20rem] h-[32rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(242,201,76,0.08),rgba(232,111,69,0.045)_38%,rgba(47,138,95,0.025)_58%,transparent_78%)] blur-[90px] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(240,192,80,0.08),rgba(232,138,74,0.08)_40%,rgba(139,194,122,0.05)_60%,transparent_78%)]" />
+        <div className="absolute left-[-16%] top-[30%] h-[32rem] w-[32rem] rounded-full bg-saffron/5 blur-[130px] dark:bg-saffron/6" />
+        <div className="absolute -bottom-[12%] right-[-10%] h-[36rem] w-[36rem] rounded-full bg-accent/4 blur-[130px] dark:bg-accent/10" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-bg/70 to-bg" />
       </div>
 
@@ -190,7 +190,7 @@ export function LandingPainReliefSection() {
           >
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-basil/16 blur-3xl"
+              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-basil/10 blur-3xl"
             />
 
             <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">

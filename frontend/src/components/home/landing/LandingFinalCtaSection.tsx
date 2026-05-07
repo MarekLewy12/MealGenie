@@ -49,7 +49,7 @@ export function LandingFinalCtaSection() {
             <motion.span variants={headingLineEntrance} className="block">
               Zacznij od jednego posiłku.
             </motion.span>
-            <motion.span variants={headingLineEntrance} className="block text-paper-gradient">
+            <motion.span variants={headingLineEntrance} className="block text-paper-gradient text-cta-gradient">
               Gotuj spokojniej już dziś.
             </motion.span>
           </motion.h2>

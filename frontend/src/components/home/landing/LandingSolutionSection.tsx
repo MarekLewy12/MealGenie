@@ -23,11 +23,11 @@ export function LandingSolutionSection() {
       className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[5%] top-[-8%] h-[35rem] w-[35rem] rounded-full bg-basil/8 blur-[100px] dark:bg-basil/6" />
-        <div className="absolute bottom-[-15%] right-[10%] h-[40rem] w-[40rem] rounded-full bg-saffron/8 blur-[120px] dark:bg-saffron/6" />
+        <div className="absolute left-[-12%] top-[16%] h-[28rem] w-[28rem] rounded-full bg-basil/4 blur-[110px] dark:left-[5%] dark:top-[-8%] dark:h-[35rem] dark:w-[35rem] dark:bg-basil/6 dark:blur-[100px]" />
+        <div className="absolute bottom-[-18%] right-[6%] h-[34rem] w-[34rem] rounded-full bg-saffron/5 blur-[130px] dark:bg-saffron/6" />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,var(--accent),transparent_2px)] bg-[length:32px_32px] opacity-[0.03]"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,var(--accent),transparent_2px)] bg-[length:32px_32px] opacity-[0.018]"
         />
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-bg via-bg/75 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-bg/70 to-bg" />

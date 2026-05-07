@@ -108,7 +108,9 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
 
           <div className="mt-5 rounded-md border border-white/65 bg-[linear-gradient(135deg,rgba(255,255,255,0.54),rgba(251,225,208,0.28),rgba(219,232,211,0.22))] p-4 shadow-[0_12px_30px_-26px_rgba(32,37,31,0.72)] ring-1 ring-white/60 backdrop-blur-xl dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.09),rgba(139,194,122,0.07))] dark:ring-white/10">
             <p className="font-brand text-2xl font-semibold leading-tight text-ink">
-              Dziś pasuje coś ciepłego, prostego i bez kombinowania.
+              Dziś pasuje coś <span className="text-bordeaux dark:text-saffron">ciepłego</span>,{" "}
+              <span className="text-basil">prostego</span> i{" "}
+              <span className="text-accent">bez spiny</span>.
             </p>
             <p className="mt-2 text-sm leading-6 text-ink-soft">
               Nie musisz znaleźć idealnego przepisu. Wystarczy dobry kierunek,
@@ -276,7 +278,11 @@ export function LandingHeroSection() {
               <motion.span
                 key={line.text}
                 variants={headingLineEntrance}
-                className={line.accent ? "block text-paper-gradient" : "block"}
+                className={
+                  line.accent
+                    ? "block text-paper-gradient text-hero-gradient"
+                    : "block"
+                }
               >
                 {line.text}
               </motion.span>

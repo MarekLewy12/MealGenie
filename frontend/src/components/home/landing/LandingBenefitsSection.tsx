@@ -84,7 +84,7 @@ export function LandingBenefitsSection() {
             >
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/0 blur-2xl transition duration-300 group-hover:bg-accent/12"
+                className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/0 blur-2xl transition duration-300 group-hover:bg-accent/8"
               />
 
               <div className="relative">
