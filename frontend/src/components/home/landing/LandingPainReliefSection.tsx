@@ -1,60 +1,11 @@
 import { motion, useReducedMotion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
-import {
-  BookOpenCheck,
-  ChefHat,
-  Clock3,
-  Leaf,
-  ListChecks,
-  Repeat2,
-} from "lucide-react";
 
-import { Badge, Card, FolkDivider, HandwrittenKicker } from "../../ui";
+import { HandwrittenKicker } from "../../ui";
+import { problemCards, problemNotes } from "./landingContent";
 
-type PainReliefPoint = {
-  title: string;
-  pain: string;
-  relief: string;
-  icon: LucideIcon;
-};
-
-type ReliefStep = {
-  text: string;
-};
-
-const painReliefPoints: PainReliefPoint[] = [
-  {
-    title: "Nie wiem, co dziś zjeść",
-    pain: "Przeglądasz lodówkę i odkładasz decyzję.",
-    relief: "MealGenie zaczyna od składników, które już masz.",
-    icon: ChefHat,
-  },
-  {
-    title: "Monotonia posiłków",
-    pain: "W kółko wraca ten sam zestaw dań.",
-    relief: "Dostajesz świeże warianty domowych składników.",
-    icon: Repeat2,
-  },
-  {
-    title: "Brak czasu",
-    pain: "Nie ma miejsca na długie gotowanie.",
-    relief: "Plan wybiera dania na dzisiejszy rytm dnia.",
-    icon: Clock3,
-  },
-  {
-    title: "Zbyt skomplikowane przepisy",
-    pain: "Przepis robi się dłuższy niż wieczór.",
-    relief: "Kroki są krótkie, konkretne i łatwe do przejścia.",
-    icon: BookOpenCheck,
-  },
-];
-
-const reliefSteps: ReliefStep[] = [
-  { text: "składniki pod ręką" },
-  { text: "realny czas gotowania" },
-  { text: "prosty przepis" },
-  { text: "gotowa lista zakupów" },
-];
+const noteRotations = [-5, 4, -2, 6, -4, 3];
+const noteMarginsTop = [-145, -82, -18, 46, 112, 170];
+const noteMarginsLeft = [-44, 42, -34, 38, -18, 28];
 
 export function LandingPainReliefSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -64,86 +15,132 @@ export function LandingPainReliefSection() {
   return (
     <section
       aria-labelledby="landing-pain-relief-heading"
-      className="bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
+      className="scroll-mt-24 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-2xl text-center">
-          <HandwrittenKicker>spokojniej przy obiedzie</HandwrittenKicker>
+          <HandwrittenKicker>codzienność, nie showroom</HandwrittenKicker>
           <h2
             id="landing-pain-relief-heading"
             className="mt-3 font-brand text-3xl font-semibold leading-[1.12] text-ink sm:text-4xl lg:text-[2.75rem]"
           >
-            Z „co dziś zjeść?” do spokojnej decyzji
+            <span className="block">Najtrudniejszy składnik</span>
+            <span className="block">do znalezienia?</span>
+            <span className="block text-basil">Dobry pomysł na dziś.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-ink-soft sm:text-lg sm:leading-8">
-            MealGenie porządkuje składniki, czas i apetyt w jeden wykonalny plan
-            na domowy posiłek.
+            Lodówka coś ma, czasu jest mało, a przepisy z internetu często
+            zakładają idealne warunki. W normalnej kuchni najpierw trzeba
+            znaleźć kierunek.
           </p>
         </div>
 
-        <FolkDivider className="mx-auto mt-7 max-w-md text-accent/75" />
+        <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <motion.div
+            initial={cardInitial}
+            whileInView={cardWhileInView}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.42, ease: "easeOut" }}
+            className="relative min-h-[430px]"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full bg-accent/10 blur-3xl"
+            />
 
-        <div className="mt-9 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-start">
-          <Card className="overflow-hidden border-border-strong p-0">
-            <div className="grid border-b border-dashed border-border-strong px-5 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted sm:grid-cols-[1fr_1fr] sm:px-6">
-              <span>Problem</span>
-              <span className="mt-1 text-basil sm:mt-0">Ulga z MealGenie</span>
-            </div>
+            {problemNotes.map((note, index) => (
+              <div
+                key={note}
+                className="absolute left-1/2 top-1/2 w-[min(88%,21rem)]"
+                style={{
+                  transform: "translate(-50%, -50%)",
+                  marginTop: noteMarginsTop[index],
+                  marginLeft: noteMarginsLeft[index],
+                }}
+              >
+                <motion.div
+                  className="rounded-[1.15rem] border border-border bg-bg-elevated px-5 py-4 shadow-sm"
+                  initial={
+                    shouldReduceMotion
+                      ? false
+                      : {
+                          opacity: 0,
+                          y: 28,
+                          rotate: noteRotations[index] - 3,
+                        }
+                  }
+                  whileInView={
+                    shouldReduceMotion
+                      ? undefined
+                      : { opacity: 1, y: 0, rotate: noteRotations[index] }
+                  }
+                  viewport={{ once: true, amount: 0.45 }}
+                  transition={
+                    shouldReduceMotion
+                      ? undefined
+                      : {
+                          duration: 0.55,
+                          delay: index * 0.08,
+                          ease: [0.22, 1, 0.36, 1],
+                        }
+                  }
+                  whileHover={
+                    shouldReduceMotion ? undefined : { y: -5, scale: 1.015 }
+                  }
+                >
+                  <p className="font-brand text-lg font-semibold leading-tight text-ink">
+                    {note}
+                  </p>
+                </motion.div>
+              </div>
+            ))}
+          </motion.div>
 
-            <div className="divide-y divide-dashed divide-border">
-              {painReliefPoints.map((point, index) => {
-                const Icon = point.icon;
+          <motion.div
+            initial={cardInitial}
+            whileInView={cardWhileInView}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.48, delay: 0.08, ease: "easeOut" }}
+            className="relative overflow-hidden rounded-[1.8rem] border border-border-strong bg-bg-elevated p-6 shadow-[0_30px_70px_-48px_rgba(58,40,24,0.85)] sm:p-8"
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-basil/16 blur-3xl"
+            />
 
-                return (
-                  <motion.article
-                    key={point.title}
-                    className="grid gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-start sm:px-6"
-                    initial={cardInitial}
-                    whileInView={cardWhileInView}
-                    viewport={{ once: true, amount: 0.32 }}
-                    transition={{ duration: 0.36, delay: index * 0.04, ease: "easeOut" }}
-                  >
-                    <div className="flex min-w-0 gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border-strong bg-accent-soft text-accent-deep shadow-xs">
-                        <Icon className="h-5 w-5" aria-hidden="true" />
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="font-brand text-lg font-semibold leading-snug text-ink">
-                          {point.title}
-                        </h3>
-                        <p className="mt-1 text-sm leading-6 text-ink-soft">{point.pain}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm leading-6 text-ink-soft sm:pt-1">{point.relief}</p>
-                  </motion.article>
-                );
-              })}
-            </div>
-          </Card>
-
-          <Card className="relative overflow-hidden border-border-strong p-6 sm:p-7">
-            <div className="pointer-events-none absolute right-5 top-5 text-basil/20" aria-hidden="true">
-              <Leaf className="h-14 w-14" />
-            </div>
-            <Badge variant="basil">MealGenie porządkuje</Badge>
-            <h3 className="mt-4 max-w-xs font-brand text-2xl font-semibold leading-tight text-ink">
-              Jasna decyzja na dziś
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-ink-soft sm:text-base sm:leading-7">
-              Z luźnych warunków powstaje konkret: danie, kroki i lista zakupów.
+            <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">
+              Przed pierwszym krokiem
             </p>
 
-            <div className="mt-6 space-y-3">
-              {reliefSteps.map((step) => (
-                <div key={step.text} className="flex items-center gap-3 text-sm font-semibold text-ink">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-basil-soft text-basil">
-                    <ListChecks className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                  <span>{step.text}</span>
-                </div>
+            <h3 className="mt-3 max-w-xl font-brand text-3xl font-semibold leading-tight text-ink">
+              <span className="block">Zanim cokolwiek pokroisz,</span>
+              <span className="block">trzeba jeszcze wybrać.</span>
+            </h3>
+
+            <div className="mt-7 grid gap-3">
+              {problemCards.map((card, index) => (
+                <motion.article
+                  key={card.title}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.45 }}
+                  transition={{
+                    delay: shouldReduceMotion ? 0 : index * 0.08,
+                    duration: 0.34,
+                    ease: "easeOut",
+                  }}
+                  className="rounded-md border border-border bg-bg-sunken px-4 py-4"
+                >
+                  <h4 className="font-brand text-lg font-semibold leading-tight text-ink">
+                    {card.title}
+                  </h4>
+                  <p className="mt-1 text-sm leading-6 text-ink-soft">
+                    {card.description}
+                  </p>
+                </motion.article>
               ))}
             </div>
-          </Card>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -1,40 +1,34 @@
 import { motion, type MotionProps, useReducedMotion } from "framer-motion";
+import type { ReactNode } from "react";
 import {
   Bot,
   Check,
-  ChefHat,
   Clock3,
-  Heart,
-  History,
   ListChecks,
-  MessageCircle,
   Sparkles,
-  Sprout,
   Utensils,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import {
-  Badge,
-  Button,
-  Card,
-  DottedRow,
-  FolkDivider,
-  HandwrittenKicker,
-} from "../../ui";
+import { Badge, HandwrittenKicker } from "../../ui";
 import { cn } from "../../../utils/cn";
+import { experienceHighlights, type Tone } from "./landingContent";
 
-type ProductMode = {
+type ExperienceHighlight = {
   label: string;
   helper: string;
   icon: LucideIcon;
-  tone: "accent" | "basil" | "saffron" | "neutral";
+  tone: Tone;
+};
+
+type AssistantMessage = {
+  role: "user" | "assistant";
+  text: string;
 };
 
 type Macro = {
   label: string;
   value: string;
-  barClassName: string;
 };
 
 type ShoppingItem = {
@@ -43,80 +37,386 @@ type ShoppingItem = {
   checked?: boolean;
 };
 
-const productModes: ProductMode[] = [
-  {
-    label: "Generator",
-    helper: "pomysł z tego, co jest w kuchni",
-    icon: Sparkles,
-    tone: "accent",
-  },
-  {
-    label: "Przepis",
-    helper: "czytelne kroki i czas gotowania",
-    icon: ChefHat,
-    tone: "basil",
-  },
-  {
-    label: "Makro",
-    helper: "białko, kalorie i porcje pod ręką",
-    icon: Utensils,
-    tone: "saffron",
-  },
-  {
-    label: "Lista zakupów",
-    helper: "braki zebrane w prostą checklistę",
-    icon: ListChecks,
-    tone: "neutral",
-  },
-  {
-    label: "Asystent",
-    helper: "podpowiada zamiany w trakcie gotowania",
-    icon: MessageCircle,
-    tone: "basil",
-  },
-  {
-    label: "Historia",
-    helper: "wracasz do udanych obiadów",
-    icon: History,
-    tone: "accent",
-  },
-];
-
 const macros: Macro[] = [
-  { label: "Białko", value: "32 g", barClassName: "w-[72%] bg-basil" },
-  { label: "Węgle", value: "48 g", barClassName: "w-[86%] bg-saffron" },
-  { label: "Tłuszcze", value: "18 g", barClassName: "w-[58%] bg-accent" },
+  { label: "Białko", value: "32 g" },
+  { label: "Węgle", value: "48 g" },
+  { label: "Tłuszcze", value: "18 g" },
 ];
 
 const shoppingItems: ShoppingItem[] = [
-  { name: "kasza pęczak", amount: "180 g", checked: true },
-  { name: "pieczarki", amount: "300 g", checked: true },
+  { name: "kasza pęczak", amount: "masz", checked: true },
+  { name: "pieczarki", amount: "masz", checked: true },
   { name: "jarmuż", amount: "2 garści" },
   { name: "twaróg wędzony", amount: "120 g" },
 ];
 
-const assistantMessages = [
-  "Zamień koper na natkę?",
-  "Tak. Doda świeżości i zostanie w limicie 35 minut.",
+const contextSignals = ["25 minut", "2 porcje + lunch", "bez mięsa", "średni głód"];
+
+const contextIngredients = [
+  { label: "masz", value: "kasza, pieczarki, czosnek" },
+  { label: "ważne", value: "bez mięsa, bez ciężkiego sosu" },
+  { label: "decyzja", value: "kremowe pęczotto" },
 ];
 
-const recentRecipes = [
-  "Pomidorowa z pieczoną papryką",
-  "Placki z cukinii i fety",
-  "Ryba po kaszubsku light",
+const recipeStepsPreview = [
+  "Podsmaż pieczarki z czosnkiem.",
+  "Dodaj pęczak i podlewaj bulionem.",
+  "Na końcu wmieszaj jarmuż i twaróg.",
 ];
 
-const productModeToneClassName: Record<ProductMode["tone"], string> = {
+const planSignals = [
+  { label: "Przepis", value: "kroki" },
+  { label: "Makro", value: "pełniej" },
+  { label: "Zakupy", value: "2 braki" },
+  { label: "Asystent", value: "zamienniki" },
+];
+
+const assistantMessages: AssistantMessage[] = [
+  {
+    role: "user",
+    text: "Nie mam koperku. Co zamiast?",
+  },
+  {
+    role: "assistant",
+    text: "Daj natkę albo szczypiorek. Dodaj pod koniec. Czas przepisu bez zmian.",
+  },
+];
+
+const outcomeHighlights = [
+  { label: "Plan", value: "1" },
+  { label: "Braki", value: "2" },
+  { label: "Chaos", value: "0" },
+];
+
+const productModeToneClassName: Record<Tone, string> = {
   accent: "bg-accent-soft text-accent-deep",
   basil: "bg-basil/12 text-basil",
   saffron: "bg-saffron/20 text-ink",
   neutral: "bg-bg-sunken text-ink-soft",
 };
 
+function FeatureMiniCard({ mode }: { mode: ExperienceHighlight }) {
+  return (
+    <div className="group inline-flex min-h-12 items-center gap-3 rounded-pill border border-border/80 bg-bg-elevated/80 px-3 py-2 shadow-xs backdrop-blur transition duration-base ease-out hover:-translate-y-0.5 hover:border-accent/35 hover:bg-accent-soft/35 hover:shadow-sm motion-reduce:hover:translate-y-0">
+      <span
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-pill transition duration-base ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100",
+          productModeToneClassName[mode.tone],
+        )}
+      >
+        <mode.icon className="h-4 w-4" aria-hidden="true" />
+      </span>
+
+      <span className="min-w-0">
+        <span className="block whitespace-nowrap font-brand text-sm font-semibold leading-5 text-ink">
+          {mode.label}
+        </span>
+        <span className="hidden text-xs leading-4 text-ink-soft sm:block">
+          {mode.helper}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function ProductWindow({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative mx-auto mt-12 w-full max-w-[1120px]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-10 top-12 h-72 rounded-full bg-[radial-gradient(circle_at_45%_20%,rgba(194,87,40,0.22),transparent_46%),radial-gradient(circle_at_72%_35%,rgba(90,138,74,0.18),transparent_42%)] blur-3xl dark:bg-[radial-gradient(circle_at_45%_20%,rgba(232,138,74,0.14),transparent_48%),radial-gradient(circle_at_72%_35%,rgba(139,194,122,0.10),transparent_42%)]"
+      />
+
+      <div className="relative rounded-[2rem] border border-ink/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(194,87,40,0.16),rgba(90,138,74,0.14))] p-2 shadow-[0_42px_100px_-54px_rgba(58,40,24,0.88)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.14),rgba(139,194,122,0.08))]">
+        <div className="overflow-hidden rounded-[1.45rem] border border-border bg-bg-elevated/95 backdrop-blur-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg-elevated/80 px-4 py-3 sm:px-5">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="rounded-pill border border-accent/25 bg-accent-soft px-3 py-1 font-brand text-xs font-bold uppercase tracking-[0.14em] text-accent-deep">
+                MealGenie plan
+              </span>
+              <span className="min-w-0 truncate text-sm font-semibold text-ink-soft">
+                wybrane danie zostaje pod ręką
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-pill border border-basil/25 bg-basil/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-basil">
+              <span className="h-2 w-2 rounded-full bg-basil shadow-[0_0_0_4px_rgba(90,138,74,0.14)]" />
+              wysokie dopasowanie
+            </div>
+          </div>
+
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ContextPanel() {
+  return (
+    <div className="relative overflow-hidden rounded-[1.25rem] border border-border bg-bg-sunken/80 p-4">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-basil/14 blur-2xl"
+      />
+
+      <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">
+            Kontekst uwzględniony
+          </p>
+          <h3 className="mt-2 font-brand text-2xl font-semibold leading-tight text-ink">
+            Plan gotowania już zna dzisiejsze warunki
+          </h3>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {contextSignals.map((signal) => (
+              <span
+                key={signal}
+                className="rounded-pill border border-border bg-bg-elevated px-3 py-1.5 text-sm font-semibold text-ink shadow-xs"
+              >
+                {signal}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-2 min-[420px]:grid-cols-3 lg:min-w-[18rem]">
+          {contextIngredients.map((condition) => (
+            <div
+              key={condition.label}
+              className="rounded-[0.9rem] border border-border bg-bg-elevated/80 px-3 py-2 text-center"
+            >
+              <p className="font-brand text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink-muted">
+                {condition.label}
+              </p>
+              <p className="mt-1 text-sm font-semibold leading-tight text-ink">
+                {condition.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CookingGlow({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-[72%] -translate-x-1/2 -translate-y-1/2"
+    >
+      <motion.div
+        className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(194,87,40,0.16),rgba(90,138,74,0.10)_42%,transparent_68%)] blur-3xl"
+        animate={
+          shouldReduceMotion
+            ? undefined
+            : { opacity: [0.28, 0.46, 0.28], scale: [1, 1.035, 1] }
+        }
+        transition={
+          shouldReduceMotion
+            ? undefined
+            : { duration: 5.8, repeat: Infinity, ease: "easeInOut" }
+        }
+      />
+    </div>
+  );
+}
+
+function MacroCard({ macro }: { macro: Macro }) {
+  return (
+    <div className="rounded-pill border border-border bg-bg-elevated/60 px-3 py-2 text-center">
+      <p className="text-[11px] leading-4 text-ink-muted">{macro.label}</p>
+      <p className="font-brand text-sm font-bold leading-5 text-ink">
+        {macro.value}
+      </p>
+    </div>
+  );
+}
+
+function RecipePreview() {
+  const metrics = [
+    { label: "Czas", value: "25 min", icon: Clock3 },
+    { label: "Porcje", value: "2", icon: Utensils },
+    { label: "Kalorie", value: "510 kcal", icon: Sparkles },
+  ];
+
+  return (
+    <div className="h-full rounded-md border border-border-strong bg-bg p-4 shadow-sm sm:p-5">
+      <Badge variant="basil">Wybrane danie</Badge>
+      <h3 className="mt-3 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">
+        Kremowe pęczotto z pieczarkami i jarmużem
+      </h3>
+      <p className="mt-2 max-w-xl text-sm leading-6 text-ink-soft">
+        Ciepły obiad z produktów, które już są w kuchni. Braki i pomoc przy
+        zamianach zostają pod spodem.
+      </p>
+
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {metrics.map((metric) => (
+          <div
+            key={metric.label}
+            className="rounded-md border border-border bg-bg-elevated px-2 py-2 text-center"
+          >
+            <metric.icon className="mx-auto h-4 w-4 text-accent" aria-hidden="true" />
+            <p className="mt-1 text-xs leading-4 text-ink-muted">{metric.label}</p>
+            <p className="font-brand text-sm font-bold leading-5 text-ink sm:text-base">
+              {metric.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
+        {macros.map((macro) => (
+          <MacroCard key={macro.label} macro={macro} />
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-[1rem] border border-border bg-bg-elevated/70 p-4">
+        <p className="font-brand text-xs font-bold uppercase tracking-[0.14em] text-accent">
+          Plan przepisu
+        </p>
+        <ol className="mt-3 space-y-2">
+          {recipeStepsPreview.map((step, index) => (
+            <li key={step} className="flex gap-3 text-sm leading-6 text-ink-soft">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-accent-soft font-brand text-xs font-bold text-accent-deep">
+                {index + 1}
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+function ShoppingPreview({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  return (
+    <div className="rounded-md border border-border bg-bg p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <ListChecks className="h-4 w-4 text-accent" aria-hidden="true" />
+        <h3 className="font-brand text-sm font-bold text-ink">Lista braków</h3>
+      </div>
+      <div className="space-y-2">
+        {shoppingItems.map((item, index) => (
+          <div
+            key={item.name}
+            className="flex items-center gap-3 rounded-md bg-bg-elevated px-3 py-2.5 text-sm"
+          >
+            <span
+              className={cn(
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-xs border",
+                item.checked
+                  ? "border-basil bg-basil text-ink-inverse"
+                  : "border-border-strong bg-bg",
+              )}
+              aria-hidden="true"
+            >
+              {item.checked ? (
+                <motion.span
+                  initial={shouldReduceMotion ? false : { scale: 0.45, opacity: 0 }}
+                  whileInView={shouldReduceMotion ? undefined : { scale: 1, opacity: 1 }}
+                  viewport={{ once: true, amount: 0.8 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 420,
+                    damping: 18,
+                    delay: 0.12 + index * 0.1,
+                  }}
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </motion.span>
+              ) : null}
+            </span>
+            <span className="min-w-0 flex-1 leading-5 text-ink">{item.name}</span>
+            <span className="shrink-0 text-ink-soft">{item.amount}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AssistantPreview({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  return (
+    <div className="rounded-md border border-border-strong bg-bg-sunken p-4 text-ink">
+      <div className="mb-3 flex items-center gap-2">
+        <Bot className="h-4 w-4 text-accent" aria-hidden="true" />
+        <h3 className="font-brand text-sm font-bold">Asystent przepisu</h3>
+      </div>
+      <div className="space-y-2">
+        <p className="w-fit max-w-[88%] rounded-lg bg-bg-elevated px-4 py-3 text-sm leading-6 text-ink">
+          {assistantMessages[0].text}
+        </p>
+        <motion.p
+          className="ml-auto w-fit max-w-[88%] rounded-lg bg-accent px-4 py-3 text-sm leading-6 text-ink-inverse"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ delay: 0.32, duration: 0.32, ease: "easeOut" }}
+        >
+          {assistantMessages[1].text}
+        </motion.p>
+      </div>
+    </div>
+  );
+}
+
+function PlanSignalRail() {
+  return (
+    <div className="grid gap-2 sm:grid-cols-4">
+      {planSignals.map((signal, index) => (
+        <div
+          key={signal.label}
+          className="relative overflow-hidden rounded-[0.95rem] border border-border bg-bg-sunken/65 px-4 py-3"
+        >
+          <span className="font-brand text-[0.68rem] font-bold uppercase tracking-[0.14em] text-ink-muted">
+            {String(index + 1).padStart(2, "0")} · {signal.label}
+          </span>
+          <p className="mt-1 font-brand text-base font-semibold leading-tight text-ink">
+            {signal.value}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ShowcaseMockup({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  return (
+    <div className="relative overflow-hidden bg-[radial-gradient(circle_at_20%_8%,rgba(194,87,40,0.12),transparent_34%),radial-gradient(circle_at_84%_12%,rgba(90,138,74,0.12),transparent_34%),var(--bg-elevated)] p-4 sm:p-6 lg:p-7">
+      <CookingGlow shouldReduceMotion={shouldReduceMotion} />
+
+      <div className="relative space-y-4">
+        <ContextPanel />
+
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
+          <RecipePreview />
+
+          <div className="grid gap-4">
+            <ShoppingPreview shouldReduceMotion={shouldReduceMotion} />
+            <AssistantPreview shouldReduceMotion={shouldReduceMotion} />
+          </div>
+        </div>
+
+        <PlanSignalRail />
+      </div>
+    </div>
+  );
+}
+
 export function LandingProductShowcaseSection() {
   const shouldReduceMotion = useReducedMotion();
+  const motionDisabled = Boolean(shouldReduceMotion);
 
-  const sectionMotion: MotionProps = shouldReduceMotion
+  const sectionMotion: MotionProps = motionDisabled
     ? {}
     : {
         initial: { opacity: 0, y: 24 },
@@ -125,267 +425,62 @@ export function LandingProductShowcaseSection() {
         transition: { duration: 0.6, ease: "easeOut" },
       };
 
-  const floatMotion: MotionProps = shouldReduceMotion
-    ? {}
-    : {
-        animate: { y: [0, -8, 0] },
-        transition: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-      };
-
   return (
     <section
       aria-labelledby="landing-product-showcase-title"
-      className="relative overflow-hidden bg-bg py-14 text-ink sm:py-16 lg:py-20"
+      className="relative scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,var(--bg-sunken)_0%,var(--bg)_48%,var(--bg-sunken)_100%)] py-16 text-ink sm:py-20 lg:py-24"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(194,87,40,0.08),transparent_34%),linear-gradient(180deg,transparent_42%,rgba(90,138,74,0.06))] dark:bg-[linear-gradient(135deg,rgba(232,138,74,0.07),transparent_36%),linear-gradient(180deg,transparent_44%,rgba(139,194,122,0.05))]" />
+      <div
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(194,87,40,0.10),transparent_32%),radial-gradient(circle_at_82%_12%,rgba(90,138,74,0.13),transparent_34%)] dark:bg-[linear-gradient(135deg,rgba(232,138,74,0.07),transparent_34%),radial-gradient(circle_at_82%_12%,rgba(139,194,122,0.07),transparent_34%)]"
+        aria-hidden="true"
+      />
 
-      <motion.div
-        className="relative mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-12"
-        {...sectionMotion}
-      >
-        <div>
-          <HandwrittenKicker>z domowej kuchni</HandwrittenKicker>
-          <h2
-            id="landing-product-showcase-title"
-            className="mt-3 max-w-xl font-brand text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl"
-          >
-            MealGenie pokazuje cały obiad, nie tylko pomysł.
-          </h2>
-          <p className="mt-5 max-w-xl text-base leading-7 text-ink-soft sm:text-lg">
-            Od pierwszej zachcianki po listę zakupów: generator, pełny przepis,
-            makro, asystent gotowania oraz historia ulubionych dań są w jednym
-            spokojnym widoku.
-          </p>
+      <motion.div className="relative mx-auto max-w-6xl px-4 sm:px-6" {...sectionMotion}>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(18rem,0.55fr)] lg:items-end">
+          <div>
+            <HandwrittenKicker>po wyborze dania</HandwrittenKicker>
+            <h2
+              id="landing-product-showcase-title"
+              className="mx-auto mt-3 max-w-3xl font-brand text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl"
+            >
+              <span className="block">Kiedy wybierzesz danie,</span>
+              <span className="block text-accent">plan zostaje przy blacie.</span>
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-ink-soft sm:text-lg">
+              Kroki, makro, zakupy i asystent są w jednym miejscu, więc nie
+              wracasz do chaotycznych notatek w połowie gotowania.
+            </p>
+          </div>
 
-          <FolkDivider className="mt-7 max-w-sm text-accent" />
-
-          <div className="mt-8 grid gap-2.5 sm:grid-cols-2">
-            {productModes.map((mode) => (
-              <div
-                key={mode.label}
-                className="flex items-start gap-3 rounded-md border border-border/80 bg-bg-elevated/80 px-3 py-2.5"
-              >
-                <span
-                  className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-sm",
-                    productModeToneClassName[mode.tone],
-                  )}
-                >
-                  <mode.icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <span>
-                  <span className="block font-brand text-sm font-semibold leading-5 text-ink">
-                    {mode.label}
-                  </span>
-                  <span className="mt-0.5 block text-sm leading-5 text-ink-soft">
-                    {mode.helper}
-                  </span>
-                </span>
+          <div className="grid grid-cols-3 gap-2 rounded-[1.4rem] border border-border bg-bg-elevated/70 p-2 shadow-sm backdrop-blur">
+            {outcomeHighlights.map((item) => (
+              <div key={item.label} className="rounded-[1rem] bg-bg-sunken/75 px-3 py-3 text-center">
+                <p className="font-brand text-2xl font-semibold leading-none text-accent">
+                  {item.value}
+                </p>
+                <p className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.13em] text-ink-muted">
+                  {item.label}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[720px] lg:mx-0">
-          <motion.div
-            aria-hidden="true"
-            className="absolute -right-2 -top-5 hidden rounded-md border border-border bg-bg-elevated px-4 py-3 shadow-md sm:block lg:-right-4"
-            {...floatMotion}
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold text-basil">
-              <Sprout className="h-4 w-4" aria-hidden="true" />
-              bazylia i sezon
-            </div>
-          </motion.div>
+        <motion.div
+          initial={motionDisabled ? false : { opacity: 0, y: 40, scale: 0.965 }}
+          whileInView={motionDisabled ? undefined : { opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <ProductWindow>
+            <ShowcaseMockup shouldReduceMotion={motionDisabled} />
+          </ProductWindow>
+        </motion.div>
 
-          <Card className="relative overflow-hidden p-0 shadow-lg">
-            <div className="border-b border-border bg-bg-elevated px-4 py-3 sm:px-5">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2" aria-hidden="true">
-                  <span className="h-3 w-3 rounded-full bg-accent" />
-                  <span className="h-3 w-3 rounded-full bg-saffron" />
-                  <span className="h-3 w-3 rounded-full bg-basil" />
-                </div>
-                <div className="min-w-0 flex-1 rounded-pill border border-border bg-bg-sunken px-3 py-1.5 text-xs font-semibold text-ink-soft">
-                  MealGenie / dzisiejsza kolacja
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-0 lg:grid-cols-[0.86fr_1.14fr]">
-              <aside className="border-b border-border bg-bg-sunken p-3 sm:p-4 lg:border-r lg:border-b-0">
-                <div className="flex items-center gap-2">
-                  <Badge variant="accent">Generator</Badge>
-                  <Badge variant="basil">25 min</Badge>
-                </div>
-
-                <div className="mt-3 rounded-md border border-border bg-bg-elevated p-3 shadow-xs sm:mt-4 sm:p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-ink-muted">
-                    Mam w domu
-                  </p>
-                  <p className="mt-2 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">
-                    kaszę, pieczarki, jarmuż
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
-                    <Badge variant="neutral">bez mięsa</Badge>
-                    <Badge variant="neutral">ciepły obiad</Badge>
-                    <Badge variant="neutral" className="hidden sm:inline-flex">
-                      polska kuchnia
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="primary"
-                    className="mt-4 w-full sm:mt-5"
-                    leftIcon={<Sparkles className="h-4 w-4" />}
-                  >
-                    Generuj przepis
-                  </Button>
-                </div>
-
-                <div className="mt-4 hidden rounded-md border border-border bg-bg-elevated p-4 lg:block">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <h3 className="font-brand text-sm font-bold text-ink">
-                      Historia i ulubione
-                    </h3>
-                    <Heart className="h-4 w-4 fill-accent text-accent" aria-hidden="true" />
-                  </div>
-                  <div className="space-y-2">
-                    {recentRecipes.map((recipe) => (
-                      <div
-                        key={recipe}
-                        className="rounded-sm border border-border bg-bg-sunken px-3 py-2 text-sm text-ink-soft"
-                      >
-                        {recipe}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </aside>
-
-              <div className="bg-bg-elevated p-3 sm:p-5">
-                <div className="rounded-md border border-border-strong bg-bg p-3 shadow-sm sm:p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <Badge variant="basil">Pełny przepis</Badge>
-                      <h3 className="mt-3 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">
-                        Kremowe pęczotto z pieczarkami i jarmużem
-                      </h3>
-                    </div>
-                    <div className="rounded-md bg-accent-soft px-3 py-2 text-center text-accent-deep">
-                      <Clock3 className="mx-auto h-4 w-4" aria-hidden="true" />
-                      <span className="mt-1 block text-xs font-bold">25 min</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-5 sm:gap-4">
-                    {macros.map((macro) => (
-                      <div
-                        key={macro.label}
-                        className="rounded-md border border-border bg-bg-elevated p-2 sm:p-3"
-                      >
-                        <div
-                          className="mb-2 h-2 overflow-hidden rounded-pill bg-bg-sunken"
-                          aria-hidden="true"
-                        >
-                          <div className={cn("h-full rounded-pill", macro.barClassName)} />
-                        </div>
-                        <p className="text-xs leading-4 text-ink-muted">
-                          {macro.label}
-                        </p>
-                        <p className="font-brand text-base font-bold leading-6 text-ink sm:text-lg">
-                          {macro.value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 hidden space-y-3 sm:block">
-                    <DottedRow label="Porcje" value="2" />
-                    <DottedRow label="Kalorie" value="510 kcal" />
-                    <DottedRow label="Sprzęt" value="garnek + patelnia" />
-                  </div>
-                </div>
-
-                <div className="mt-3 grid grid-cols-1 gap-2 min-[375px]:grid-cols-2 lg:hidden">
-                  <div className="rounded-md border border-border bg-bg p-3">
-                    <div className="mb-2 flex items-center gap-2">
-                      <ListChecks className="h-4 w-4 text-accent" aria-hidden="true" />
-                      <h3 className="font-brand text-sm font-bold text-ink">
-                        Lista zakupów
-                      </h3>
-                    </div>
-                    <p className="text-sm font-semibold text-ink">4 produkty</p>
-                    <p className="mt-1 text-sm leading-5 text-ink-soft">
-                      2 już masz w koszyku
-                    </p>
-                  </div>
-
-                  <div className="rounded-md border border-border bg-bg-elevated p-3 text-ink">
-                    <div className="mb-2 flex items-center gap-2">
-                      <Bot className="h-4 w-4 text-basil" aria-hidden="true" />
-                      <h3 className="font-brand text-sm font-bold">Asystent</h3>
-                    </div>
-                    <p className="text-sm leading-5 text-ink-soft">
-                      Zamieni składnik i pilnuje czasu.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 hidden gap-4 lg:grid xl:grid-cols-2">
-                  <div className="rounded-md border border-border bg-bg p-4">
-                    <div className="mb-3 flex items-center gap-2">
-                      <ListChecks className="h-4 w-4 text-accent" aria-hidden="true" />
-                      <h3 className="font-brand text-sm font-bold text-ink">Lista zakupów</h3>
-                    </div>
-                    <div className="space-y-2">
-                      {shoppingItems.map((item) => (
-                        <div
-                          key={item.name}
-                          className="flex items-center gap-3 rounded-md bg-bg-elevated px-4 py-3 text-sm"
-                        >
-                          <span
-                            className={cn(
-                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-xs border",
-                              item.checked
-                                ? "border-basil bg-basil text-ink-inverse"
-                                : "border-border-strong bg-bg",
-                            )}
-                            aria-hidden="true"
-                          >
-                            {item.checked ? <Check className="h-3.5 w-3.5" /> : null}
-                          </span>
-                          <span className="min-w-0 flex-1 leading-5 text-ink">{item.name}</span>
-                          <span className="text-ink-soft">{item.amount}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-md border border-border-strong bg-[#2b2521] p-4 text-[#fdf8ec] shadow-md dark:bg-bg-sunken dark:text-ink">
-                    <div className="mb-3 flex items-center gap-2">
-                      <Bot className="h-4 w-4 text-accent" aria-hidden="true" />
-                      <h3 className="font-brand text-sm font-bold">Asystent przepisu</h3>
-                    </div>
-                    <div className="space-y-3">
-                      {assistantMessages.map((message, index) => (
-                        <p
-                          key={message}
-                          className={cn(
-                            "max-w-[92%] rounded-lg px-4 py-3 text-sm leading-6",
-                            index === 0
-                              ? "bg-[#fdf8ec] text-ink dark:bg-bg-elevated dark:text-ink"
-                              : "ml-auto bg-accent text-ink-inverse",
-                          )}
-                        >
-                          {message}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
+        <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {experienceHighlights.map((mode) => (
+            <FeatureMiniCard key={mode.label} mode={mode} />
+          ))}
         </div>
       </motion.div>
     </section>

@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 
 import { Logo } from "../components/Logo";
 import {
+  LandingBenefitsSection,
   LandingFinalCtaSection,
   LandingHeroSection,
   LandingHowItWorksSection,
   LandingPainReliefSection,
   LandingProductShowcaseSection,
+  LandingSolutionSection,
   LandingTrustSection,
 } from "../components/home/landing";
 
@@ -21,7 +23,9 @@ export function HomePage() {
     <div className="relative isolate overflow-hidden bg-bg text-ink">
       <LandingHeroSection />
       <LandingPainReliefSection />
+      <LandingSolutionSection />
       <LandingHowItWorksSection />
+      <LandingBenefitsSection />
       <LandingProductShowcaseSection />
       <LandingTrustSection />
       <LandingFinalCtaSection />
@@ -31,8 +35,8 @@ export function HomePage() {
           <div className="max-w-sm">
             <Logo />
             <p className="mt-3 text-sm leading-6 text-ink-soft">
-              Praktyczna pomoc w codziennym gotowaniu: od pytania „co dziś?” do
-              przepisu, zakupów i spokojnego planu.
+              MealGenie pomaga rozwiązać codzienną decyzję: co dziś ugotować,
+              żeby pasowało do czasu, preferencji i zwykłej kuchni.
             </p>
           </div>
 

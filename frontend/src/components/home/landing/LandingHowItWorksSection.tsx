@@ -1,110 +1,70 @@
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
-import { Card, FolkDivider, HandwrittenKicker } from "../../ui";
-
-const steps = [
-  {
-    number: "01",
-    title: "Podajesz składniki",
-    description: "Dodajesz to, co masz pod ręką, czas i najważniejsze ograniczenia.",
-  },
-  {
-    number: "02",
-    title: "Dostajesz propozycje",
-    description: "MealGenie wybiera dania pasujące do lodówki i rytmu dnia.",
-  },
-  {
-    number: "03",
-    title: "Wybierasz przepis",
-    description: "Porównujesz krótkie opcje i wybierasz tę, na którą naprawdę masz ochotę.",
-  },
-  {
-    number: "04",
-    title: "Gotujesz spokojnie",
-    description: "Kroki przepisu i lista zakupów zostają w jednym miejscu.",
-  },
-];
+import { HandwrittenKicker } from "../../ui";
+import { landingHowSteps } from "./landingContent";
+import { landingFadeUp, landingStagger } from "./landingMotion";
 
 export function LandingHowItWorksSection() {
   const shouldReduceMotion = useReducedMotion();
 
-  const listVariants: Variants = {
-    hidden: { opacity: shouldReduceMotion ? 1 : 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-      },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: {
-      opacity: shouldReduceMotion ? 1 : 0,
-      y: shouldReduceMotion ? 0 : 18,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: shouldReduceMotion ? 0 : 0.45,
-        ease: "easeOut",
-      },
-    },
-  };
-
   return (
     <section
       aria-labelledby="landing-how-it-works-heading"
-      className="relative overflow-hidden bg-bg-sunken px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
+      className="relative scroll-mt-24 overflow-hidden bg-bg px-4 py-16 text-ink sm:px-6 sm:py-20 lg:px-8"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-2xl text-center">
-          <HandwrittenKicker>Jak w zeszycie z przepisami</HandwrittenKicker>
+          <HandwrittenKicker>bez wielkiej instrukcji</HandwrittenKicker>
           <h2
             id="landing-how-it-works-heading"
-            className="mt-3 font-brand text-3xl font-semibold leading-[1.12] text-ink sm:text-4xl"
+            className="mt-3 font-brand text-3xl font-semibold leading-[1.12] text-ink sm:text-4xl lg:text-[2.75rem]"
           >
-            Od lodówki do kolacji w czterech krokach
+            <span className="block">Od braku pomysłu</span>
+            <span className="block text-accent">do gotowania.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-ink-soft sm:leading-8">
-            Krótki przepływ bez przebudowy domowych nawyków: podajesz, wybierasz,
-            gotujesz.
+            Bez planowania całego tygodnia. Wystarczy opisać dzisiejszą
+            sytuację i wybrać kierunek, który pasuje do Twojej kuchni.
           </p>
         </div>
 
-        <FolkDivider className="mx-auto my-7 max-w-md text-accent/75" />
-
-        <Card className="mx-auto max-w-5xl overflow-hidden border-border-strong p-0">
+        <div className="relative mt-12">
           <motion.ol
-            className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-4"
-            initial="hidden"
-            whileInView="visible"
+            className="relative grid gap-8 lg:grid-cols-3 lg:gap-6"
+            initial={shouldReduceMotion ? false : "hidden"}
+            whileInView={shouldReduceMotion ? undefined : "visible"}
             viewport={{ once: true, amount: 0.25 }}
-            variants={listVariants}
+            variants={landingStagger}
           >
-            {steps.map((step) => {
+            {landingHowSteps.map((step) => {
               return (
                 <motion.li
                   key={step.number}
-                  variants={itemVariants}
-                  className="min-w-0 bg-bg-elevated p-5 sm:p-6"
+                  variants={landingFadeUp}
+                  whileHover={shouldReduceMotion ? undefined : { y: -4 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="relative border-l border-border-strong pl-6 lg:border-l-0 lg:pl-0 lg:pt-10"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-pill border border-accent/25 bg-accent-soft font-brand text-lg font-semibold text-accent-deep shadow-xs dark:text-accent">
-                    {step.number}
+                  <div className="relative border-t border-border-strong pt-7 lg:min-h-[12rem]">
+                    <span
+                      aria-hidden="true"
+                      className="absolute -top-3 left-0 h-6 w-6 rounded-full border border-accent/30 bg-bg shadow-xs"
+                    />
+                    <p className="font-brand text-[4rem] font-semibold leading-none text-accent/[0.14]">
+                      {step.number}
+                    </p>
+                    <h3 className="relative z-10 mt-2 font-brand text-xl font-semibold leading-tight text-ink">
+                      {step.title}
+                    </h3>
+                    <p className="relative z-10 mt-3 max-w-xs text-sm leading-6 text-ink-soft">
+                      {step.description}
+                    </p>
                   </div>
-
-                  <h3 className="mt-6 font-brand text-xl font-semibold leading-tight text-ink">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">
-                    {step.description}
-                  </p>
                 </motion.li>
               );
             })}
           </motion.ol>
-        </Card>
+        </div>
       </div>
     </section>
   );
