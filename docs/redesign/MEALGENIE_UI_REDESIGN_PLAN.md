@@ -15,6 +15,7 @@ Kierunek: Direction A - Cozy Polish home kitchen
 | Etap 6 - Generator i suggestions | Gotowe do review | 2026-05-06 | Przebudowano wizualnie auth i guest generator w Direction A: ciepłe wrappery stron, trzy spokojne sekcje formularza, paper-card suggestions, loading/error polish oraz dostępniejszy `TagInput`. Zachowano mutacje, payloady, query paramy, guest 429, `formatRetryAfter`, `unusedImageUrls`, `handleGuestCta` i przejście do `/recipe`. Zmienione pliki: `frontend/src/pages/GeneratorPage.tsx`, `frontend/src/pages/GuestGeneratorPage.tsx`, `frontend/src/components/MealGenerator.tsx`, `frontend/src/components/TagInput.tsx`, `frontend/src/components/LoadingExperience.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` na Direction A: ciepły greeting, generator/asystent, papierowa lista zakupów, nowe loading/error/empty states oraz biblioteka przepisów oparta o `MealHistoryCard`. Zachowano query keys, `getMealHistory`, store'y zakupów/chat, eksport listy i routing. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 8 - Chat drawer | Gotowe do review | 2026-05-06 | Przebudowano `ChatDrawer` w Direction A: prawostronny drawer desktop/full-screen mobile, ciepłe surfaces, odróżnienie recipe/global mode, spokojne bubbles, input paper-card, loading dots oraz a11y baseline z `role="dialog"`, `aria-modal`, `aria-labelledby`, ESC, focus trap przez `focus-trap`, focus on open, return focus i `role="log" aria-live="polite"`. Zmienione pliki: `frontend/src/components/ChatDrawer.tsx`, `frontend/package.json`, `frontend/package-lock.json`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
+| Etap 9A - Landing Page | Gotowe do review | 2026-05-07 | Przebudowano `HomePage` jako pełny landing Direction A i wykonano polish pass po review screenshotów oraz detalicznym review UI: krótszy hero claim z wyróżnieniem „co dziś zjeść?”, nagłówki landingu w `Outfit`, poprawiona karta hero bez przerywanej kreski/overlapu/powtórzonej miniatury, kroki bez duplikowania ikon i numerów, lżejszy trust/CTA oraz poprawione karty listy zakupów/asystenta. Po dodatkowym review light-mode przyjęto czystszą paletę Fresh Herb + Apricot, stonowano glowy, dopracowano kontrast gradientów hero/CTA i timing animacji wejścia. `MobilePage` przeniesiony do follow-upu Etap 9B. Zmienione pliki: `frontend/src/pages/HomePage.tsx`, `frontend/src/components/home/landing/LandingHeroSection.tsx`, `frontend/src/components/home/landing/LandingPainReliefSection.tsx`, `frontend/src/components/home/landing/LandingHowItWorksSection.tsx`, `frontend/src/components/home/landing/LandingProductShowcaseSection.tsx`, `frontend/src/components/home/landing/LandingTrustSection.tsx`, `frontend/src/components/home/landing/LandingFinalCtaSection.tsx`, `frontend/src/components/home/landing/index.ts`, `frontend/src/index.css`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 
 ## Strategia branchowania redesignu
 
@@ -52,13 +53,32 @@ Najważniejsza korekta względem prototypu: produkcyjnie nie używamy Fraunces/I
 
 Decyzja typograficzna po review Etapu 4: `Outfit` zostaje jako font brandowy dla logo, nazw kart i krótkich tytułów produktowych. `Source Serif 4` pozostaje dla display/hero/recipe editorial headings, a `Source Sans 3` dla tekstu UI i body.
 
-Decyzja kolorystyczna po review Etapu 6: dark mode Direction A nie używa już pierwotnej, mocno brązowej palety `hearth dark` z handoffu jako wartości docelowych. Po audycie Marka tła dark-mode zostały świadomie przesunięte w stronę neutralnego, ciepłego grafitu, aby poprawić czytelność i nadać UI bardziej profesjonalny charakter. Ciepło Direction A ma pochodzić głównie z terracotta/basil/saffron oraz drobnych poświat, nie z zalania całej aplikacji brązem.
+Decyzja kolorystyczna po review LandingPage 2026-05-07: light-mode Direction A pozostaje ciepły i domowy, ale nie idzie dalej w stronę przybrudzonego pergaminu, beżu i ciężkiej terracotty. Dla landingu przyjęto czystszy kierunek Fresh Herb + Apricot: jasne tło, świeża bazylia, morelowy akcent CTA, kontrolowany saffron i bordeaux tylko jako mały akcent tekstowy. To ma dawać wrażenie świeżej, spokojnej kuchni, a nie starego papieru.
+
+Aktualny kierunek light-mode:
+
+- `--bg: #fbfcf8`
+- `--bg-elevated: #ffffff`
+- `--bg-sunken: #eef5ec`
+- `--ink: #20251f`
+- `--ink-soft: #536054`
+- `--ink-muted: #7f8d80`
+- `--border: #dce8dc`
+- `--border-strong: #c7d8c9`
+- `--accent: #e86f45`
+- `--basil: #2f8a5f`
+- `--saffron: #f2c94c`
+- `--bordeaux: #9f4f4b`
+
+W light-mode nie wzmacniać żółci jako koloru tekstu na jasnym tle. `--saffron` działa lepiej jako miękki akcent tła lub akcent w dark-mode. Dla ważnych gradientów tekstowych landing ma lokalne klasy `text-hero-gradient` i `text-cta-gradient`, bo zwykły gradient papierowy był za słaby na tle zorzy.
+
+Decyzja kolorystyczna po review Etapu 6: dark mode Direction A nie używa już pierwotnej, mocno brązowej palety `hearth dark` z handoffu jako wartości docelowych. Po audycie Marka tła dark-mode zostały świadomie przesunięte w stronę neutralnego, ciepłego grafitu, aby poprawić czytelność i nadać UI bardziej profesjonalny charakter. Ciepło Direction A ma pochodzić głównie z apricot/basil/saffron oraz bardzo subtelnych poświat, nie z zalania całej aplikacji brązem.
 
 Aktualne źródło prawdy dla produkcyjnych tokenów to `frontend/src/index.css`. Przy dalszych etapach i w kolejnych sesjach należy używać poniższego kierunku dark-mode zamiast przywracać stare wartości `#1c1410 -> #271c15` z pierwotnego README:
 
-- `--bg: #151312`
-- `--bg-elevated: #1e1b1a`
-- `--bg-sunken: #0d0b0a`
+- `--bg: #120e0c`
+- `--bg-elevated: #1a1512`
+- `--bg-sunken: #0a0807`
 - `--ink: #f0eae4`
 - `--ink-soft: #c4bdb6`
 - `--ink-muted: #a49d96`
@@ -67,7 +87,9 @@ Aktualne źródło prawdy dla produkcyjnych tokenów to `frontend/src/index.css`
 - `--border-dotted: #5a514b`
 - `--accent: #e88a4a`
 - `--basil: #8bc27a`
-- Dark-mode radial overlays mają być bardzo subtelne; nie wzmacniać ich ponad obecne wartości bez osobnego review.
+- `--saffron: #f0c050`
+- `--bordeaux: #c26060`
+- Dark-mode radial overlays i landingowe glowy mają być bardzo subtelne; nie wzmacniać ich ponad obecne wartości bez osobnego review.
 
 ## 2. Pliki referencyjne
 
@@ -393,9 +415,9 @@ Nowe zależności:
 
 - `focus-trap`
 
-### Etap 9 - Landing i MobilePage
+### Etap 9A - Landing Page
 
-Cel: dopracować powierzchnie marketingowe na końcu, gdy system UI jest już stabilny.
+Cel: przebudować główną powierzchnię marketingową na końcu, gdy system UI jest już stabilny.
 
 Zakres:
 
@@ -404,17 +426,60 @@ Zakres:
   - nowy claim,
   - karta przepisu jako kartka z notesu,
   - sekcje poniżej w ciepłym stylu, bez dużych tech-gradientów.
-- `MobilePage.tsx`:
-  - dopasować kolory i typografię do Direction A,
-  - nie wymieniać jeszcze `public/mobile-screens/*`, dopóki realne ekrany nie są gotowe.
 - Zachować:
-  - linki `/try`, `/login`, `/onboarding`,
-  - APK download i QR.
+  - linki `/try`, `/login`, `/mobile`,
+  - routing i redirect `/` dla użytkownika po ukończonym onboardingu.
 
 Checklist testowy:
 
 - Guest landing.
 - Linki CTA.
+- Mobile 320/375/768.
+- Dark mode.
+- Reduced motion.
+
+Status po implementacji 2026-05-06: `Gotowe do review`.
+
+Zmienione pliki:
+
+- `frontend/src/pages/HomePage.tsx`
+- `frontend/src/components/home/landing/LandingHeroSection.tsx`
+- `frontend/src/components/home/landing/LandingPainReliefSection.tsx`
+- `frontend/src/components/home/landing/LandingHowItWorksSection.tsx`
+- `frontend/src/components/home/landing/LandingProductShowcaseSection.tsx`
+- `frontend/src/components/home/landing/LandingTrustSection.tsx`
+- `frontend/src/components/home/landing/LandingFinalCtaSection.tsx`
+- `frontend/src/components/home/landing/index.ts`
+- `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`
+
+Notatki:
+
+- Landing używa istniejących obrazów z `frontend/public/hero-images/*`.
+- Po review screenshotów wykonano polish pass: skrócono copy, zmniejszono card density, poprawiono rytm sekcji i zachowanie hero/showcase/CTA na 320/375/768/1280 px.
+- Po detalicznym review UI dopracowano hero card, wyróżnienie `„co dziś zjeść?”`, landingowe nagłówki w `Outfit`, kroki bez ikon oraz responsywność kart `Lista zakupów` i `Asystent`.
+- Po review kolorystyki light-mode przyjęto Fresh Herb + Apricot zamiast brudniejszej palety pergamin/terracotta: czyste tło, bazylia jako świeży akcent, morelowy CTA, oszczędny saffron i bordeaux.
+- Landingowe glowy są dopuszczalne tylko jako delikatne tło atmosferyczne. Nie powinny tworzyć zielonego halo za tekstem ani męczyć oczu przy dłuższym scrollowaniu.
+- Hero i final CTA używają dedykowanych gradientów tekstowych (`text-hero-gradient`, `text-cta-gradient`) dla lepszego kontrastu niż bazowy `text-paper-gradient`.
+- W hero card wyróżnienia tekstu mają pozostać czytelne w obu motywach: `ciepłego`, `prostego`, `bez spiny`. Nie używać żółtego tekstu w light-mode na jasnym tle.
+- Animacje wejścia landingu zostały naprawione przez oddzielenie pierwszego page transition od animacji sekcji oraz dostrojenie `viewport.amount` i czasu trwania. Nie przywracać globalnego blokowania animacji dzieci przez `initial={false}`.
+- `MobilePage` nie jest zmieniany w tym etapie i przechodzi do follow-upu `Etap 9B - MobilePage`.
+- Stare komponenty `FloatingFoodElements`, `PainPointsSection`, `StatsSection` i `ScrollIndicator` nie są usuwane, ale nie są już używane przez `HomePage`.
+
+### Etap 9B - MobilePage
+
+Cel: dopasować marketingową stronę aplikacji mobilnej po zakończeniu landingu.
+
+Zakres follow-upu:
+
+- `MobilePage.tsx`:
+  - dopasować kolory i typografię do Direction A,
+  - nie wymieniać jeszcze `public/mobile-screens/*`, dopóki realne ekrany nie są gotowe.
+- Zachować:
+  - APK download i QR,
+  - screenshoty mobile i istniejące assety.
+
+Checklist testowy:
+
 - `/mobile` i download APK.
 - QR i screenshoty nadal ładują się z `public/`.
 - Mobile 320/375/768.
@@ -687,7 +752,7 @@ Szczególne ryzyko produkcyjne: `VITE_API_URL`, `/api`, `/meal-images` i `handle
 | Hybryda starego i nowego UI | Ekrany mieszają indigo/fuchsia z parchment/terracotta | Najpierw foundation i atomy, potem ekrany. Nie robić page rewrite bez komponentów bazowych. |
 | Kopiowanie prototypu 1:1 | Kod inline-style, Fraunces/Inter, niedopasowane do repo | Traktować JSX/HTML jako referencję. Implementować w obecnym React/Tailwind/TypeScript. |
 | Słaba typografia polska | Nierówne diakrytyki, zły display | Użyć Source Serif 4 i Source Sans 3. Test `ąęćłńóśźż`. |
-| Dark mode robi się zimny | Powrót do tech dark `#020617` i indigo glow | Użyć hearth dark: ciepłe brązy, kremowy tekst, jaśniejsza terracotta. |
+| Dark mode robi się zimny albo zbyt ciężki | Powrót do tech dark `#020617` i indigo glow albo do zalania UI brązem | Trzymać ciepły grafit z `index.css`, kremowy tekst i kontrolowane akcenty apricot/basil/saffron; nie wracać do ciężkiego `hearth dark`. |
 | FOUC motywu | Flash jasnego/ciemnego motywu przed hydracją | W osobnym kroku dodać inline script w `index.html`, jeśli zmieniamy theme API. |
 | Chat drawer niedostępny | Focus ucieka pod drawer, ESC nie działa | Potraktować chat jako osobny PR a11y z focus trap i `aria-modal`. |
 | Zepsucie API/obrazków | `/api/api`, brak obrazków, błędy logowania | Nie dotykać `services/api.ts`, `VITE_API_URL`, Caddy/nginx i URL-i obrazków. |
@@ -780,7 +845,8 @@ Ta sekcja powinna być aktualizowana po każdym etapie.
 | Etap 6 - Generator | Gotowe do review | 2026-05-06 | Przebudowano `GeneratorPage`, `GuestGeneratorPage`, `MealGenerator`, `TagInput` i lekko `LoadingExperience`; zachowano payloady i mutacje. |
 | Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` w Direction A. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 8 - Chat drawer | Gotowe do review | 2026-05-06 | Przebudowano `frontend/src/components/ChatDrawer.tsx` wizualnie i accessibility-wise w Direction A. Zachowano `useChatStore`, `chatWithAssistant`, tryby global/recipe, historię, `HISTORY_WINDOW`, chipsy recipe, Enter/Shift+Enter i payloady. Dodano `focus-trap` dla Tab/Shift+Tab, ESC i return focus. |
-| Etap 9 - Landing i MobilePage | Nie rozpoczęto | - | Na końcu, po stabilizacji komponentów. |
+| Etap 9A - Landing Page | Gotowe do review | 2026-05-07 | Przebudowano `HomePage` na pełny landing Direction A z nowymi sekcjami w `frontend/src/components/home/landing/`, wykonano polish pass po review screenshotów oraz przyjęto czystszy light-mode Fresh Herb + Apricot; `MobilePage` przechodzi do Etapu 9B. |
+| Etap 9B - MobilePage | Nie rozpoczęto | - | Follow-up po landingu; zachować APK, QR i screenshoty. |
 
 ## 11. Pierwszy mały krok po zaakceptowaniu planu
 

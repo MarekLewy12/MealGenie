@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 type PageTransitionProps = {
   children: ReactNode;
   className?: string;
+  skipInitialAnimation?: boolean;
 };
 
 const pageTransitionVariants = {
@@ -30,11 +31,12 @@ const pageTransitionVariants = {
 export function PageTransition({
   children,
   className = "",
+  skipInitialAnimation = false,
 }: PageTransitionProps) {
   return (
     <motion.div
       variants={pageTransitionVariants}
-      initial="initial"
+      initial={skipInitialAnimation ? false : "initial"}
       animate="animate"
       exit="exit"
       className={`w-full ${className}`}

@@ -1,4 +1,5 @@
 import { AnimatePresence } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GeneratorPage } from "./pages/GeneratorPage";
@@ -23,6 +24,14 @@ function App() {
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
   const location = useLocation();
   const isSharedPage = location.pathname.startsWith("/shared");
+  const shouldSkipInitialPageTransition = useRef(true);
+  const pageTransitionProps = {
+    skipInitialAnimation: shouldSkipInitialPageTransition.current,
+  };
+
+  useEffect(() => {
+    shouldSkipInitialPageTransition.current = false;
+  }, []);
 
   return (
     <div className="relative min-h-screen w-full overflow-x-clip bg-bg text-ink transition-colors duration-base ease-in-out">
@@ -33,7 +42,7 @@ function App() {
         Przejdź do treści
       </a>
       <NotificationContainer />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_18%_12%,rgba(194,87,40,0.08),transparent_38%),radial-gradient(ellipse_at_88%_8%,rgba(212,160,23,0.08),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.025),transparent_48%),radial-gradient(ellipse_at_80%_0%,rgba(139,194,122,0.018),transparent_34%)]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_18%_12%,rgba(232,111,69,0.055),transparent_38%),radial-gradient(ellipse_at_88%_8%,rgba(242,201,76,0.06),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.025),transparent_48%),radial-gradient(ellipse_at_80%_0%,rgba(139,194,122,0.018),transparent_34%)]">
         <div className="absolute inset-0 opacity-[0.22] [background-image:radial-gradient(var(--border)_0.75px,transparent_0.75px)] [background-size:18px_18px] dark:opacity-0" />
       </div>
 
@@ -42,12 +51,12 @@ function App() {
 
         <div>
           <main id="main-content" className="relative" tabIndex={-1}>
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="wait">
               <Routes location={location} key={location.pathname}>
                 <Route
                   path="/"
                   element={
-                    <PageTransition>
+                    <PageTransition {...pageTransitionProps}>
                       {hasCompletedOnboarding ? (
                         <Navigate to="/dashboard" replace />
                       ) : (
@@ -59,7 +68,7 @@ function App() {
                 <Route
                   path="/login"
                   element={
-                    <PageTransition>
+                    <PageTransition {...pageTransitionProps}>
                       <LoginPage />
                     </PageTransition>
                   }
@@ -67,7 +76,7 @@ function App() {
                 <Route
                   path="/try"
                   element={
-                    <PageTransition>
+                    <PageTransition {...pageTransitionProps}>
                       {token ? (
                         hasCompletedOnboarding ? (
                           <Navigate to="/generator" replace />
@@ -83,7 +92,7 @@ function App() {
                 <Route
                   path="/mobile"
                   element={
-                    <PageTransition>
+                    <PageTransition {...pageTransitionProps}>
                       <MobilePage />
                     </PageTransition>
                   }
@@ -91,7 +100,7 @@ function App() {
                 <Route
                   path="/shared/:shareId"
                   element={
-                    <PageTransition>
+                    <PageTransition {...pageTransitionProps}>
                       <SharedRecipePage />
                     </PageTransition>
                   }
@@ -103,7 +112,7 @@ function App() {
                     <Route
                       path="/dashboard"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           <DashboardPage />
                         </PageTransition>
                       }
@@ -111,7 +120,7 @@ function App() {
                     <Route
                       path="/onboarding"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           {hasCompletedOnboarding ? (
                             <Navigate to="/settings" replace />
                           ) : (
@@ -123,7 +132,7 @@ function App() {
                     <Route
                       path="/settings"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           <SettingsPage />
                         </PageTransition>
                       }
@@ -131,7 +140,7 @@ function App() {
                     <Route
                       path="/recipes"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           <RecipesPage />
                         </PageTransition>
                       }
@@ -139,7 +148,7 @@ function App() {
                     <Route
                       path="/generator"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           <GeneratorPage />
                         </PageTransition>
                       }
@@ -148,7 +157,7 @@ function App() {
                     <Route
                       path="/recipe/:id"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           <RecipePage />
                         </PageTransition>
                       }
@@ -156,7 +165,7 @@ function App() {
                     <Route
                       path="/recipe"
                       element={
-                        <PageTransition>
+                        <PageTransition {...pageTransitionProps}>
                           <RecipePage />
                         </PageTransition>
                       }
@@ -167,7 +176,7 @@ function App() {
                 <Route
                   path="*"
                   element={
-                    <PageTransition>
+                    <PageTransition {...pageTransitionProps}>
                       <Navigate to="/" replace />
                     </PageTransition>
                   }

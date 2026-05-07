@@ -4,34 +4,34 @@
 
 :root {
   /* Surfaces */
-  --bg: #f6efe2;
-  --bg-elevated: #fdf8ec;
-  --bg-sunken: #ece2d0;
-  --bg-inverse: #1f1612;
+  --bg: #fbfcf8;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #eef5ec;
+  --bg-inverse: #20251f;
 
   /* Ink */
-  --ink: #3a2818;
-  --ink-soft: #7a5d44;
-  --ink-muted: #a89580;
-  --ink-disabled: #c4b5a1;
-  --ink-inverse: #fdf8ec;
+  --ink: #20251f;
+  --ink-soft: #536054;
+  --ink-muted: #7f8d80;
+  --ink-disabled: #bdcabc;
+  --ink-inverse: #fbfff8;
 
   /* Borders */
-  --border: #e3d6bf;
-  --border-strong: #d0bd9e;
-  --border-dotted: #c4b094;
+  --border: #dce8dc;
+  --border-strong: #c7d8c9;
+  --border-dotted: #c7d8c9;
 
   /* Brand */
-  --accent: #c25728;
-  --accent-hover: #a8481f;
-  --accent-pressed: #8e3a18;
-  --accent-soft: #fbe1d0;
-  --accent-deep: #9a4220;
-  --basil: #5a8a4a;
-  --basil-soft: #dbe8d3;
-  --saffron: #d4a017;
-  --saffron-soft: #fbeec9;
-  --bordeaux: #8a3a3a;
+  --accent: #e86f45;
+  --accent-hover: #d95f37;
+  --accent-pressed: #bd4f2e;
+  --accent-soft: #ffe2d2;
+  --accent-deep: #b9522f;
+  --basil: #2f8a5f;
+  --basil-soft: #dcefe5;
+  --saffron: #f2c94c;
+  --saffron-soft: #fff2bd;
+  --bordeaux: #9f4f4b;
 
   /* Radii */
   --radius-xs: 4px;
@@ -42,11 +42,11 @@
   --radius-pill: 999px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(58, 40, 24, 0.06);
-  --shadow-sm: 0 4px 10px -2px rgba(58, 40, 24, 0.08);
-  --shadow-md: 0 12px 24px -8px rgba(58, 40, 24, 0.14);
-  --shadow-lg: 0 30px 60px -20px rgba(58, 40, 24, 0.25);
-  --shadow-accent: 0 12px 24px -8px rgba(194, 87, 40, 0.4);
+  --shadow-xs: 0 1px 2px rgba(32, 37, 31, 0.035);
+  --shadow-sm: 0 4px 10px -2px rgba(32, 37, 31, 0.05);
+  --shadow-md: 0 14px 28px -12px rgba(32, 37, 31, 0.1);
+  --shadow-lg: 0 32px 68px -24px rgba(32, 37, 31, 0.16);
+  --shadow-accent: 0 14px 28px -12px rgba(232, 111, 69, 0.28);
 
   /* Type */
   --font-brand: "Outfit", var(--font-sans);
@@ -63,7 +63,7 @@
   --duration-slow: 380ms;
   --duration-drawer: 320ms;
 
-  --focus-ring-soft: rgba(194, 87, 40, 0.22);
+  --focus-ring-soft: rgba(232, 111, 69, 0.2);
   color: var(--ink);
   background-color: var(--bg);
   color-scheme: light;
@@ -72,9 +72,9 @@
 
 :root.dark,
 :root[data-theme="dark"] {
-  --bg: #151312;
-  --bg-elevated: #1e1b1a;
-  --bg-sunken: #0d0b0a;
+  --bg: #120e0c;
+  --bg-elevated: #1a1512;
+  --bg-sunken: #0a0807;
   --bg-inverse: #fdf8ec;
 
   --ink: #f0eae4;
@@ -126,8 +126,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 16% 8%, rgba(194, 87, 40, 0.08), transparent 34%),
-    radial-gradient(ellipse at 86% 0%, rgba(212, 160, 23, 0.08), transparent 32%),
+    radial-gradient(ellipse at 16% 8%, rgba(232, 111, 69, 0.045), transparent 34%),
+    radial-gradient(ellipse at 86% 0%, rgba(47, 138, 95, 0.045), transparent 32%),
     var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
@@ -154,6 +154,113 @@ select {
 ::selection {
   background: var(--accent-soft);
   color: var(--ink);
+}
+
+.text-paper-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--accent) 0%,
+    var(--saffron) 48%,
+    var(--basil) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: transparent;
+  padding-bottom: 0.08em;
+}
+
+.dark .text-paper-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--accent) 0%,
+    var(--saffron) 42%,
+    var(--basil) 100%
+  );
+}
+
+.text-hero-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--accent-deep) 0%,
+    var(--accent) 42%,
+    var(--basil) 100%
+  );
+  filter: drop-shadow(0 1px 0 rgba(251, 255, 248, 0.78));
+}
+
+.dark .text-hero-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--accent) 0%,
+    var(--saffron) 42%,
+    var(--basil) 100%
+  );
+  filter: none;
+}
+
+.text-cta-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--accent-deep) 0%,
+    var(--accent) 52%,
+    var(--basil) 100%
+  );
+}
+
+.dark .text-cta-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--accent) 0%,
+    var(--saffron) 42%,
+    var(--basil) 100%
+  );
+}
+
+@property --hero-card-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes hero-card-border-flow {
+  to {
+    --hero-card-border-angle: 360deg;
+  }
+}
+
+.hero-card-border-flow {
+  animation: hero-card-border-flow 5.2s linear infinite;
+  background: conic-gradient(
+    from var(--hero-card-border-angle),
+    rgba(232, 111, 69, 0.48) 0deg,
+    var(--accent) 58deg,
+    var(--saffron) 132deg,
+    rgba(242, 201, 76, 0.72) 176deg,
+    var(--basil) 240deg,
+    rgba(47, 138, 95, 0.5) 306deg,
+    rgba(232, 111, 69, 0.48) 360deg
+  );
+}
+
+.hero-card-border-glow {
+  animation: hero-card-border-flow 5.2s linear infinite;
+  background: conic-gradient(
+    from var(--hero-card-border-angle),
+    transparent 0deg,
+    var(--accent) 82deg,
+    var(--saffron) 152deg,
+    var(--basil) 226deg,
+    transparent 322deg
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card-border-flow,
+  .hero-card-border-glow {
+    animation: none;
+  }
 }
 
 :is(a, button, input, textarea, select, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
