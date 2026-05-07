@@ -12,23 +12,16 @@ import {
   revealViewport,
   sectionEntrance,
 } from "./landingMotion";
-import { usePointerParallax } from "./usePointerParallax";
 
 const MotionLink = motion(Link);
 
 export function LandingFinalCtaSection() {
   const shouldReduceMotion = useReducedMotion();
-  const ctaCardParallax = usePointerParallax({
-    maxRotate: 3.4,
-    maxTranslate: 8,
-    scale: 1.012,
-    spring: { damping: 28, stiffness: 150 },
-  });
 
   return (
     <section
       aria-labelledby="landing-final-cta-heading"
-      className="relative scroll-mt-24 overflow-hidden bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
       <motion.div
         initial={shouldReduceMotion ? false : "hidden"}
@@ -103,10 +96,7 @@ export function LandingFinalCtaSection() {
 
         <motion.div
           variants={cardEntrance}
-          className="relative will-change-transform"
-          onPointerMove={ctaCardParallax.onPointerMove}
-          onPointerLeave={ctaCardParallax.onPointerLeave}
-          style={shouldReduceMotion ? undefined : ctaCardParallax.style}
+          className="relative"
         >
           <div
             aria-hidden="true"

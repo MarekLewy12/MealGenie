@@ -13,33 +13,32 @@ import {
   revealViewport,
   sectionEntrance,
 } from "./landingMotion";
-import { usePointerParallax } from "./usePointerParallax";
 
 export function LandingSolutionSection() {
   const shouldReduceMotion = useReducedMotion();
-  const solutionCardParallax = usePointerParallax({
-    maxRotate: 3.8,
-    maxTranslate: 8,
-    scale: 1.01,
-    spring: { damping: 28, stiffness: 150 },
-  });
 
   return (
     <section
       aria-labelledby="landing-solution-heading"
-      className="relative scroll-mt-24 overflow-hidden bg-bg-sunken/50 px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(194,87,40,0.11),transparent_32%),radial-gradient(circle_at_82%_40%,rgba(90,138,74,0.10),transparent_34%)]"
-      />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[5%] top-[-8%] h-[35rem] w-[35rem] rounded-full bg-basil/8 blur-[100px] dark:bg-basil/6" />
+        <div className="absolute bottom-[-15%] right-[10%] h-[40rem] w-[40rem] rounded-full bg-saffron/8 blur-[120px] dark:bg-saffron/6" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,var(--accent),transparent_2px)] bg-[length:32px_32px] opacity-[0.03]"
+        />
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-bg via-bg/75 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-bg/70 to-bg" />
+      </div>
 
       <motion.div
         initial={shouldReduceMotion ? false : "hidden"}
         whileInView={shouldReduceMotion ? undefined : "visible"}
         viewport={revealViewport}
         variants={sectionEntrance}
-        className="relative mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.85fr_1.15fr] lg:items-center"
+        className="relative z-10 mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.85fr_1.15fr] lg:items-center"
       >
         <motion.div
           variants={contentStagger}
@@ -73,11 +72,8 @@ export function LandingSolutionSection() {
         </motion.div>
 
         <motion.div
-          onPointerMove={solutionCardParallax.onPointerMove}
-          onPointerLeave={solutionCardParallax.onPointerLeave}
           variants={cardEntrance}
-          style={shouldReduceMotion ? undefined : solutionCardParallax.style}
-          className="relative rounded-[1.6rem] border border-border-strong bg-bg-elevated p-5 shadow-[0_30px_70px_-50px_rgba(58,40,24,0.88)] sm:p-6"
+          className="relative rounded-[1.6rem] border border-border-strong bg-bg-elevated/90 p-5 shadow-[0_30px_70px_-50px_rgba(58,40,24,0.9)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-6"
         >
           <motion.div
             variants={landingStagger}
@@ -88,7 +84,7 @@ export function LandingSolutionSection() {
                 <motion.div
                   key={item.label}
                   variants={landingFadeUp}
-                  className="rounded-md border border-border bg-bg-sunken px-4 py-3"
+                  className="rounded-md border border-border bg-bg-sunken/85 px-4 py-3 shadow-xs ring-1 ring-ink/5 backdrop-blur-md dark:border-white/15 dark:bg-bg-sunken/75 dark:ring-white/10"
                 >
                   <p className="font-brand text-xs font-bold uppercase tracking-[0.14em] text-ink-muted">
                     {item.label}

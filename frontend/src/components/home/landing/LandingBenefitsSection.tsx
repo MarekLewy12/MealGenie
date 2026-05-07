@@ -17,7 +17,7 @@ export function LandingBenefitsSection() {
   return (
     <section
       aria-labelledby="landing-benefits-heading"
-      className="relative scroll-mt-24 overflow-hidden bg-bg-elevated/40 px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
       <motion.div
         initial={shouldReduceMotion ? false : "hidden"}
@@ -51,14 +51,23 @@ export function LandingBenefitsSection() {
             </motion.h2>
           </motion.div>
 
-          <motion.p
+          <motion.div
             variants={landingFadeUp}
-            className="max-w-2xl text-base leading-7 text-ink-soft sm:text-lg sm:leading-8 lg:justify-self-end"
+            className="relative max-w-[38rem] py-2 pl-5 lg:-translate-y-3 lg:justify-self-end"
           >
-            Nie musisz planować życia w tabelce. Wystarczy szybciej wybrać
-            posiłek, zużyć to, co już masz, i wejść do kuchni z jasnym
-            kierunkiem.
-          </motion.p>
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-1 left-0 w-px rounded-full bg-gradient-to-b from-accent via-saffron to-basil"
+            />
+            <p className="font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">
+              Nie musisz planować życia w tabelce.
+            </p>
+            <p className="mt-3 text-base leading-7 text-ink-soft sm:text-lg sm:leading-8">
+              Wystarczy szybciej wybrać posiłek, zużyć to, co już masz,
+              <br className="hidden sm:block" /> i wejść do kuchni z{" "}
+              <span className="font-semibold text-accent">jasnym kierunkiem.</span>
+            </p>
+          </motion.div>
         </motion.div>
 
         <motion.div
@@ -82,10 +91,10 @@ export function LandingBenefitsSection() {
                 <span className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-bg-sunken text-accent transition duration-base group-hover:border-accent/30 group-hover:bg-accent-soft group-hover:text-accent-deep">
                   <benefit.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <h3 className="mt-5 font-brand text-xl font-semibold leading-tight text-ink">
+                <h3 className="mt-5 font-brand text-[1.35rem] font-semibold leading-tight text-ink sm:text-2xl">
                   {benefit.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">
+                <p className="mt-2 text-base leading-7 text-ink-soft">
                   {benefit.description}
                 </p>
               </div>

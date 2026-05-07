@@ -17,7 +17,7 @@ export function LandingHowItWorksSection() {
   return (
     <section
       aria-labelledby="landing-how-it-works-heading"
-      className="relative scroll-mt-24 overflow-hidden bg-bg px-4 py-16 text-ink sm:px-6 sm:py-20 lg:px-8"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-16 text-ink sm:px-6 sm:py-20 lg:px-8"
     >
       <motion.div
         initial={shouldReduceMotion ? false : "hidden"}
@@ -71,9 +71,9 @@ export function LandingHowItWorksSection() {
                   <div className="relative border-t border-border-strong pt-7 lg:min-h-[12rem]">
                     <span
                       aria-hidden="true"
-                      className="absolute -top-3 left-0 h-6 w-6 rounded-full border border-accent/30 bg-bg shadow-xs"
+                      className="absolute -top-3 left-0 h-6 w-6 rounded-full border border-accent/30 bg-bg shadow-xs dark:border-accent/45 dark:bg-accent/15"
                     />
-                    <p className="font-brand text-[4rem] font-semibold leading-none text-accent/[0.14]">
+                    <p className="font-brand text-[4rem] font-semibold leading-none text-accent/[0.14] dark:text-accent/30">
                       {step.number}
                     </p>
                     <h3 className="relative z-10 mt-2 font-brand text-xl font-semibold leading-tight text-ink">

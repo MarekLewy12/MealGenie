@@ -442,7 +442,7 @@ export function LandingProductShowcaseSection() {
   return (
     <section
       aria-labelledby="landing-product-showcase-title"
-      className="relative scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,var(--bg-sunken)_0%,var(--bg)_48%,var(--bg-sunken)_100%)] py-16 text-ink sm:py-20 lg:py-24"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-[linear-gradient(180deg,var(--bg)_0%,var(--bg-sunken)_48%,var(--bg)_100%)] py-16 text-ink sm:py-20 lg:py-24"
     >
       <div
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(194,87,40,0.10),transparent_32%),radial-gradient(circle_at_82%_12%,rgba(90,138,74,0.13),transparent_34%)] dark:bg-[linear-gradient(135deg,rgba(232,138,74,0.07),transparent_34%),radial-gradient(circle_at_82%_12%,rgba(139,194,122,0.07),transparent_34%)]"

@@ -19,7 +19,7 @@ export function LandingTrustSection() {
   return (
     <section
       aria-labelledby="landing-trust-heading"
-      className="relative scroll-mt-24 overflow-hidden bg-bg px-4 py-14 text-ink sm:px-6 lg:py-20"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 lg:py-20"
     >
       <motion.div
         initial={shouldReduceMotion ? false : "hidden"}

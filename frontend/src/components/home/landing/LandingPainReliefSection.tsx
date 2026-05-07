@@ -43,8 +43,8 @@ function ProblemNote({
     if (shouldReduceMotion || event.pointerType !== "mouse" || !canHoverPrecisely) return;
 
     void controls.start({
-      borderColor: "rgba(194,87,40,0.34)",
-      boxShadow: "0 18px 42px -34px rgba(58,40,24,0.82)",
+      borderColor: "rgba(214,207,200,0.95)",
+      boxShadow: "0 16px 34px -30px rgba(58,40,24,0.46)",
       rotate: baseRotate + randomBetween(-3, 3),
       x: randomBetween(-10, 10),
       y: randomBetween(-10, 10),
@@ -65,7 +65,7 @@ function ProblemNote({
       }}
     >
       <motion.div
-        className="rounded-[1.15rem] border border-border bg-bg-elevated px-5 py-4 shadow-sm transition-colors duration-300 ease-out hover:border-accent/35 hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.82)]"
+        className="rounded-[1.15rem] border border-border-strong bg-bg-elevated/90 px-5 py-4 shadow-[0_14px_34px_-30px_rgba(58,40,24,0.52)] ring-1 ring-ink/5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-accent/40 hover:bg-bg-elevated/95 hover:shadow-[0_18px_42px_-34px_rgba(58,40,24,0.82)] dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
         initial={
           shouldReduceMotion
             ? false
@@ -108,14 +108,21 @@ export function LandingPainReliefSection() {
   return (
     <section
       aria-labelledby="landing-pain-relief-heading"
-      className="scroll-mt-24 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
+      className="relative scroll-mt-24 overflow-hidden border-t border-border dark:border-border-strong/80 bg-bg px-4 py-14 text-ink sm:px-6 sm:py-16 lg:px-8"
     >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-x-0 top-[-18rem] h-[34rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(212,160,23,0.12),rgba(194,87,40,0.07)_38%,rgba(90,138,74,0.05)_58%,transparent_78%)] blur-[80px] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(240,192,80,0.08),rgba(232,138,74,0.08)_40%,rgba(139,194,122,0.05)_60%,transparent_78%)]" />
+        <div className="absolute left-[-10%] top-[22%] h-[40rem] w-[40rem] rounded-full bg-saffron/8 blur-[120px] dark:bg-saffron/6" />
+        <div className="absolute -bottom-[10%] right-[-5%] h-[45rem] w-[45rem] rounded-full bg-accent/6 blur-[120px] dark:bg-accent/10" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-bg/70 to-bg" />
+      </div>
+
       <motion.div
         initial={shouldReduceMotion ? false : "hidden"}
         whileInView={shouldReduceMotion ? undefined : "visible"}
         viewport={revealViewport}
         variants={sectionEntrance}
-        className="mx-auto max-w-6xl"
+        className="relative z-10 mx-auto max-w-6xl"
       >
         <motion.div
           variants={contentStagger}
@@ -157,11 +164,6 @@ export function LandingPainReliefSection() {
             variants={cardEntrance}
             className="relative min-h-[430px]"
           >
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full bg-accent/10 blur-3xl"
-            />
-
             {problemNotes.map((note, index) => (
               <ProblemNote
                 key={note}
@@ -174,7 +176,7 @@ export function LandingPainReliefSection() {
 
           <motion.div
             variants={cardEntrance}
-            className="relative overflow-hidden rounded-[1.8rem] border border-border-strong bg-bg-elevated p-6 shadow-[0_30px_70px_-48px_rgba(58,40,24,0.85)] sm:p-8"
+            className="relative overflow-hidden rounded-[1.8rem] border border-border-strong bg-bg-elevated/90 p-6 shadow-[0_30px_70px_-48px_rgba(58,40,24,0.88)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-8"
           >
             <div
               aria-hidden="true"
@@ -198,7 +200,7 @@ export function LandingPainReliefSection() {
                   transition={{
                     delay: shouldReduceMotion ? 0 : index * 0.04,
                   }}
-                  className="rounded-md border border-border bg-bg-sunken px-4 py-4"
+                  className="rounded-md border border-border bg-bg-sunken/85 px-4 py-4 shadow-xs ring-1 ring-ink/5 backdrop-blur-md dark:border-white/15 dark:bg-bg-sunken/75 dark:ring-white/10"
                 >
                   <h4 className="font-brand text-lg font-semibold leading-tight text-ink">
                     {card.title}

@@ -8,7 +8,6 @@ import {
   LandingHowItWorksSection,
   LandingPainReliefSection,
   LandingProductShowcaseSection,
-  LandingSectionDivider,
   LandingSolutionSection,
   LandingTrustSection,
 } from "../components/home/landing";
@@ -29,11 +28,9 @@ export function HomePage() {
       <LandingHowItWorksSection />
       <LandingBenefitsSection />
 
-      <LandingSectionDivider variant="warm" />
       <LandingProductShowcaseSection />
       <LandingTrustSection />
 
-      <LandingSectionDivider variant="basil" />
       <LandingFinalCtaSection />
 
       <footer className="border-t border-border bg-bg-elevated/85 text-ink backdrop-blur">

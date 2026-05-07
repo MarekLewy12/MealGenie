@@ -4,9 +4,9 @@
 
 :root {
   /* Surfaces */
-  --bg: #fcfaf8;
+  --bg: #fffaf5;
   --bg-elevated: #ffffff;
-  --bg-sunken: #f3f0eb;
+  --bg-sunken: #f5f0ea;
   --bg-inverse: #1f1612;
 
   /* Ink */
@@ -72,9 +72,9 @@
 
 :root.dark,
 :root[data-theme="dark"] {
-  --bg: #151312;
-  --bg-elevated: #1e1b1a;
-  --bg-sunken: #0d0b0a;
+  --bg: #120e0c;
+  --bg-elevated: #1a1512;
+  --bg-sunken: #0a0807;
   --bg-inverse: #fdf8ec;
 
   --ink: #f0eae4;
@@ -178,6 +178,51 @@ select {
     var(--saffron) 42%,
     var(--basil) 100%
   );
+}
+
+@property --hero-card-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes hero-card-border-flow {
+  to {
+    --hero-card-border-angle: 360deg;
+  }
+}
+
+.hero-card-border-flow {
+  animation: hero-card-border-flow 5.2s linear infinite;
+  background: conic-gradient(
+    from var(--hero-card-border-angle),
+    rgba(194, 87, 40, 0.48) 0deg,
+    var(--accent) 58deg,
+    var(--saffron) 132deg,
+    rgba(212, 160, 23, 0.72) 176deg,
+    var(--basil) 240deg,
+    rgba(90, 138, 74, 0.5) 306deg,
+    rgba(194, 87, 40, 0.48) 360deg
+  );
+}
+
+.hero-card-border-glow {
+  animation: hero-card-border-flow 5.2s linear infinite;
+  background: conic-gradient(
+    from var(--hero-card-border-angle),
+    transparent 0deg,
+    var(--accent) 82deg,
+    var(--saffron) 152deg,
+    var(--basil) 226deg,
+    transparent 322deg
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card-border-flow,
+  .hero-card-border-glow {
+    animation: none;
+  }
 }
 
 :is(a, button, input, textarea, select, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
