@@ -95,13 +95,13 @@ export function LandingTrustSection() {
               <motion.article
                 key={item.title}
                 variants={landingFadeUp}
-                className="grid gap-4 px-5 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-6"
+                className="grid gap-4 px-5 py-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center sm:px-6"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-bg-sunken text-accent">
                   <item.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
 
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-brand text-lg font-semibold leading-tight text-ink">
                     {item.title}
                   </h3>
@@ -110,7 +110,9 @@ export function LandingTrustSection() {
                   </p>
                 </div>
 
-                <Badge variant={item.badgeVariant}>{item.badge}</Badge>
+                <Badge variant={item.badgeVariant} className="justify-self-start md:justify-self-end">
+                  {item.badge}
+                </Badge>
               </motion.article>
             ))}
           </motion.div>

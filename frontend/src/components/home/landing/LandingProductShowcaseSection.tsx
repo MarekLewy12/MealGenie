@@ -131,7 +131,7 @@ function FeatureMiniCard({
       </span>
 
       <span className="min-w-0">
-        <span className="block whitespace-nowrap font-brand text-sm font-semibold leading-5 text-ink">
+        <span className="block font-brand text-sm font-semibold leading-tight text-ink sm:whitespace-nowrap sm:leading-5">
           {mode.label}
         </span>
         <span className="hidden text-xs leading-4 text-ink-soft sm:block">
@@ -148,25 +148,25 @@ function ProductWindow({
   children: ReactNode;
 }) {
   return (
-    <div className="relative mx-auto mt-12 w-full max-w-[1120px]">
+    <div className="relative mx-auto mt-10 w-full max-w-[1120px] sm:mt-12">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -inset-x-10 top-12 h-72 rounded-full bg-[radial-gradient(circle_at_45%_20%,rgba(232,111,69,0.22),transparent_46%),radial-gradient(circle_at_72%_35%,rgba(47,138,95,0.18),transparent_42%)] blur-3xl dark:bg-[radial-gradient(circle_at_45%_20%,rgba(232,138,74,0.14),transparent_48%),radial-gradient(circle_at_72%_35%,rgba(139,194,122,0.10),transparent_42%)]"
       />
 
-      <div className="relative rounded-[2rem] border border-ink/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(232,111,69,0.16),rgba(47,138,95,0.14))] p-2 shadow-[0_42px_100px_-54px_rgba(32,37,31,0.88)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.14),rgba(139,194,122,0.08))]">
-        <div className="overflow-hidden rounded-[1.45rem] border border-border bg-bg-elevated/95 backdrop-blur-xl">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg-elevated/80 px-4 py-3 sm:px-5">
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="rounded-pill border border-accent/25 bg-accent-soft px-3 py-1 font-brand text-xs font-bold uppercase tracking-[0.14em] text-accent-deep">
+      <div className="relative rounded-[1.35rem] border border-ink/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(232,111,69,0.16),rgba(47,138,95,0.14))] p-1.5 shadow-[0_42px_100px_-54px_rgba(32,37,31,0.88)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.14),rgba(139,194,122,0.08))] sm:rounded-[2rem] sm:p-2">
+        <div className="overflow-hidden rounded-[1rem] border border-border bg-bg-elevated/95 backdrop-blur-xl sm:rounded-[1.45rem]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-bg-elevated/80 px-3 py-2.5 sm:gap-3 sm:px-5 sm:py-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+              <span className="rounded-pill border border-accent/25 bg-accent-soft px-2.5 py-1 font-brand text-[0.65rem] font-bold uppercase tracking-[0.08em] text-accent-deep sm:px-3 sm:text-xs sm:tracking-[0.14em]">
                 MealGenie plan
               </span>
-              <span className="min-w-0 truncate text-sm font-semibold text-ink-soft">
+              <span className="min-w-0 truncate text-xs font-semibold text-ink-soft sm:text-sm">
                 wybrane danie zostaje pod ręką
               </span>
             </div>
 
-            <div className="flex items-center gap-2 rounded-pill border border-basil/25 bg-basil/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-basil">
+            <div className="flex w-full items-center justify-center gap-1.5 rounded-pill border border-basil/25 bg-basil/10 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-basil sm:w-auto sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.12em]">
               <span className="h-2 w-2 rounded-full bg-basil shadow-[0_0_0_4px_rgba(47,138,95,0.14)]" />
               wysokie dopasowanie
             </div>
@@ -280,7 +280,7 @@ function RecipePreview() {
         zamianach zostają pod spodem.
       </p>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid gap-2 min-[375px]:grid-cols-3">
         {metrics.map((metric) => (
           <div
             key={metric.label}
@@ -288,7 +288,7 @@ function RecipePreview() {
           >
             <metric.icon className="mx-auto h-4 w-4 text-accent" aria-hidden="true" />
             <p className="mt-1 text-xs leading-4 text-ink-muted">{metric.label}</p>
-            <p className="font-brand text-sm font-bold leading-5 text-ink sm:text-base">
+            <p className="font-brand text-sm font-bold leading-5 text-ink min-[375px]:text-[0.82rem] sm:text-base">
               {metric.value}
             </p>
           </div>

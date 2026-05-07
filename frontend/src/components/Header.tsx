@@ -65,19 +65,26 @@ export function Header() {
     >
       <div
         className={cn(
-          "mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-4 transition-[min-height,padding] duration-base ease-out sm:px-6",
+          "mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 transition-[min-height,padding] duration-base ease-out xs:px-4 sm:gap-4 sm:px-6",
           isScrolled ? "min-h-16 py-2" : "min-h-[4.5rem] py-3",
         )}
       >
         <Link
           to={homeLink}
-          className="group rounded-md transition duration-fast ease-out hover:opacity-95"
+          className="group shrink-0 rounded-md transition duration-fast ease-out hover:opacity-95"
           onClick={closeMenu}
           aria-label={`MealGenie - ${homeLabel}`}
         >
           <Logo
+            variant="compact"
             className={cn(
-              "transition duration-base ease-out group-hover:scale-[1.02]",
+              "transition duration-base ease-out group-hover:scale-[1.02] xs:hidden",
+              isScrolled ? "scale-[0.94]" : "scale-100",
+            )}
+          />
+          <Logo
+            className={cn(
+              "hidden transition duration-base ease-out group-hover:scale-[1.02] xs:inline-flex",
               isScrolled ? "scale-[0.94]" : "scale-100",
             )}
           />
@@ -144,7 +151,7 @@ export function Header() {
           </div>
         </nav>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-1.5 xs:gap-2 lg:hidden">
           {token && (
             <button
               onClick={openGlobalChat}

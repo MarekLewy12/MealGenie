@@ -56,7 +56,7 @@ function ProblemNote({
 
   return (
     <div
-      className="absolute left-1/2 top-1/2 w-[min(88%,21rem)]"
+      className="absolute left-1/2 top-1/2 hidden w-[min(88%,21rem)] sm:block"
       style={{
         transform: "translate(-50%, -50%)",
         marginTop: noteMarginsTop[index],
@@ -172,8 +172,20 @@ export function LandingPainReliefSection() {
         >
           <motion.div
             variants={cardEntrance}
-            className="relative min-h-[430px]"
+            className="grid gap-3 sm:relative sm:block sm:min-h-[430px]"
           >
+            {problemNotes.map((note) => (
+              <motion.div
+                key={`mobile-${note}`}
+                variants={landingFadeUp}
+                className="rounded-[1rem] border border-border-strong bg-bg-elevated/90 px-4 py-3 shadow-xs ring-1 ring-ink/5 backdrop-blur-xl sm:hidden dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
+              >
+                <p className="font-brand text-base font-semibold leading-tight text-ink">
+                  {note}
+                </p>
+              </motion.div>
+            ))}
+
             {problemNotes.map((note, index) => (
               <ProblemNote
                 key={note}
@@ -186,7 +198,7 @@ export function LandingPainReliefSection() {
 
           <motion.div
             variants={cardEntrance}
-            className="relative overflow-hidden rounded-[1.8rem] border border-border-strong bg-bg-elevated/90 p-6 shadow-[0_30px_70px_-48px_rgba(32,37,31,0.88)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:p-8"
+            className="relative overflow-hidden rounded-[1.25rem] border border-border-strong bg-bg-elevated/90 p-5 shadow-[0_30px_70px_-48px_rgba(32,37,31,0.88)] ring-1 ring-ink/5 backdrop-blur-2xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10 sm:rounded-[1.8rem] sm:p-8"
           >
             <div
               aria-hidden="true"
@@ -197,7 +209,7 @@ export function LandingPainReliefSection() {
               Przed pierwszym krokiem
             </p>
 
-            <h3 className="mt-3 max-w-xl font-brand text-3xl font-semibold leading-tight text-ink">
+            <h3 className="mt-3 max-w-xl font-brand text-2xl font-semibold leading-tight text-ink sm:text-3xl">
               <span className="block">Zanim cokolwiek pokroisz,</span>
               <span className="block">trzeba jeszcze wybrać.</span>
             </h3>

@@ -77,7 +77,7 @@ export function LandingSolutionSection() {
         >
           <motion.div
             variants={landingStagger}
-            className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center"
+            className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center"
           >
             <div className="space-y-3">
               {solutionContextItems.map((item) => (
@@ -98,7 +98,7 @@ export function LandingSolutionSection() {
 
             <motion.div
               variants={landingSoftScale}
-              className="hidden justify-center sm:flex"
+              className="hidden justify-center md:flex"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-pill border border-accent/25 bg-accent-soft text-accent-deep">
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />

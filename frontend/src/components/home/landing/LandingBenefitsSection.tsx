@@ -64,7 +64,7 @@ export function LandingBenefitsSection() {
             </p>
             <p className="mt-3 text-base leading-7 text-ink-soft sm:text-lg sm:leading-8">
               Wystarczy szybciej wybrać posiłek, zużyć to, co już masz,
-              <br className="hidden sm:block" /> i wejść do kuchni z{" "}
+              <br className="hidden lg:block" /> i wejść do kuchni z{" "}
               <span className="font-semibold text-accent">jasnym kierunkiem.</span>
             </p>
           </motion.div>
@@ -91,7 +91,7 @@ export function LandingBenefitsSection() {
                 <span className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-bg-sunken text-accent transition duration-base group-hover:border-accent/30 group-hover:bg-accent-soft group-hover:text-accent-deep">
                   <benefit.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <h3 className="mt-5 font-brand text-[1.35rem] font-semibold leading-tight text-ink sm:text-2xl">
+                <h3 className="mt-5 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">
                   {benefit.title}
                 </h3>
                 <p className="mt-2 text-base leading-7 text-ink-soft">

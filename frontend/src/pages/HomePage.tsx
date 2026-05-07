@@ -20,7 +20,7 @@ const footerLinks = [
 
 export function HomePage() {
   return (
-    <div className="relative isolate overflow-hidden bg-bg text-ink">
+    <div className="relative isolate overflow-x-hidden bg-bg text-ink">
       <LandingHeroSection />
 
       <LandingPainReliefSection />
@@ -34,7 +34,7 @@ export function HomePage() {
       <LandingFinalCtaSection />
 
       <footer className="border-t border-border bg-bg-elevated/85 text-ink backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="max-w-sm">
             <Logo />
             <p className="mt-3 text-sm leading-6 text-ink-soft">
@@ -43,7 +43,7 @@ export function HomePage() {
             </p>
           </div>
 
-          <nav aria-label="Linki stopki" className="flex flex-wrap gap-3">
+          <nav aria-label="Linki stopki" className="flex min-w-0 flex-wrap gap-3 lg:justify-end">
             {footerLinks.map((link) => (
               <Link
                 key={link.to}

@@ -59,16 +59,16 @@ const MotionP = motion.p;
 const MotionLink = motion(Link);
 
 const primaryCtaClassName =
-  "group inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-accent bg-accent px-8 py-4 text-base font-semibold leading-none text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(232,111,69,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
+  "group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-accent bg-accent px-5 py-3 text-center text-sm font-semibold leading-tight text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(232,111,69,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:min-h-14 sm:w-auto sm:gap-2.5 sm:px-8 sm:py-4 sm:text-base sm:leading-none";
 
 const secondaryCtaClassName =
-  "inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-md border border-border-strong bg-bg-elevated/85 px-7 py-4 text-base font-semibold leading-none text-ink shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent/40 hover:bg-bg-elevated hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto";
+  "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated/85 px-5 py-3 text-center text-sm font-semibold leading-tight text-ink shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent/40 hover:bg-bg-elevated hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:min-h-14 sm:w-auto sm:gap-2.5 sm:px-7 sm:py-4 sm:text-base sm:leading-none";
 
 function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
     <MotionDiv
       variants={cardEntrance}
-      className="relative mt-[4.5rem] max-w-2xl sm:mt-20 lg:mt-24"
+      className="relative mt-8 max-w-2xl sm:mt-16 lg:mt-24"
     >
       <div
         className="pointer-events-none absolute -inset-4 rounded-[1.25rem] bg-[radial-gradient(circle_at_18%_0%,rgba(232,111,69,0.14),transparent_56%),radial-gradient(circle_at_92%_28%,rgba(47,138,95,0.12),transparent_52%)] blur-2xl"
@@ -85,7 +85,7 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
           transition={shouldReduceMotion ? undefined : { delay: 0.28, duration: 0.45, ease: "easeOut" }}
           className="relative p-4 sm:p-5"
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
@@ -100,14 +100,14 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
               initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.88, rotate: 4 }}
               animate={shouldReduceMotion ? undefined : { opacity: 1, scale: 1, rotate: -3 }}
               transition={shouldReduceMotion ? undefined : { delay: 0.86, duration: 0.34, ease: "easeOut" }}
-              className="rounded-sm border border-accent/35 bg-accent-soft px-3 py-1 font-brand text-xs font-bold uppercase tracking-[0.14em] text-accent-deep"
+              className="rounded-sm border border-accent/35 bg-accent-soft px-2.5 py-1 font-brand text-[0.68rem] font-bold uppercase tracking-[0.08em] text-accent-deep sm:px-3 sm:text-xs sm:tracking-[0.14em]"
             >
               gotowe do wyboru
             </MotionDiv>
           </div>
 
-          <div className="mt-5 rounded-md border border-white/65 bg-[linear-gradient(135deg,rgba(255,255,255,0.54),rgba(251,225,208,0.28),rgba(219,232,211,0.22))] p-4 shadow-[0_12px_30px_-26px_rgba(32,37,31,0.72)] ring-1 ring-white/60 backdrop-blur-xl dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.09),rgba(139,194,122,0.07))] dark:ring-white/10">
-            <p className="font-brand text-2xl font-semibold leading-tight text-ink">
+          <div className="mt-4 rounded-md border border-white/65 bg-[linear-gradient(135deg,rgba(255,255,255,0.54),rgba(251,225,208,0.28),rgba(219,232,211,0.22))] p-3.5 shadow-[0_12px_30px_-26px_rgba(32,37,31,0.72)] ring-1 ring-white/60 backdrop-blur-xl dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(232,138,74,0.09),rgba(139,194,122,0.07))] dark:ring-white/10 sm:mt-5 sm:p-4">
+            <p className="font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">
               Dziś pasuje coś <span className="text-bordeaux dark:text-saffron">ciepłego</span>,{" "}
               <span className="text-basil">prostego</span> i{" "}
               <span className="text-accent">bez spiny</span>.
@@ -183,7 +183,7 @@ export function LandingHeroSection() {
       initial={shouldReduceMotion ? false : "hidden"}
       animate={shouldReduceMotion ? undefined : "visible"}
       variants={sectionEntrance}
-      className="relative isolate overflow-hidden border-b border-border dark:border-border-strong/80 bg-bg px-4 pt-12 pb-12 text-ink sm:px-6 sm:pt-16 lg:px-8 lg:pt-20 lg:pb-16"
+      className="relative isolate overflow-hidden border-b border-border dark:border-border-strong/80 bg-bg px-4 pt-8 pb-10 text-ink sm:px-6 sm:pt-14 sm:pb-12 lg:px-8 lg:pt-20 lg:pb-16"
       aria-labelledby="landing-hero-title"
     >
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-bg">
@@ -250,7 +250,7 @@ export function LandingHeroSection() {
         initial={shouldReduceMotion ? false : "hidden"}
         animate={shouldReduceMotion ? undefined : "visible"}
         variants={contentStagger}
-        className="mx-auto grid max-w-7xl items-start gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,0.92fr)] lg:gap-16 xl:gap-20"
+        className="mx-auto grid max-w-7xl items-start gap-7 sm:gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,0.92fr)] lg:gap-16 xl:gap-20"
       >
         <MotionDiv
           variants={contentStagger}
@@ -272,7 +272,7 @@ export function LandingHeroSection() {
           <MotionH1
             id="landing-hero-title"
             variants={landingStagger}
-            className="max-w-3xl text-balance font-brand text-[2.35rem] font-semibold leading-[1.08] text-ink min-[375px]:text-4xl sm:text-5xl lg:text-[4.1rem]"
+            className="max-w-3xl text-balance font-brand text-[2rem] font-semibold leading-[1.08] text-ink min-[375px]:text-[2.35rem] sm:text-5xl lg:text-[4.1rem]"
           >
             {landingHeroCopy.headlineLines.map((line) => (
               <motion.span
@@ -298,7 +298,7 @@ export function LandingHeroSection() {
 
           <MotionDiv
             variants={landingFadeUp}
-            className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center"
+            className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:items-center sm:gap-3"
           >
             <MotionLink
               to="/try"
