@@ -467,21 +467,31 @@ Notatki:
 
 ### Etap 9B - MobilePage
 
-Cel: dopasować marketingową stronę aplikacji mobilnej po zakończeniu landingu.
+Status: w planach / web first.
+
+Cel: komunikować, że aplikacja mobilna jest na roadmapie, ale wersja webowa ma priorytet przed natywną aplikacją.
 
 Zakres follow-upu:
 
 - `MobilePage.tsx`:
-  - dopasować kolory i typografię do Direction A,
-  - nie wymieniać jeszcze `public/mobile-screens/*`, dopóki realne ekrany nie są gotowe.
+  - zastąpić APK/QR/screenshoty spokojnym komunikatem Direction A,
+  - jasno zaznaczyć, że mobile jest w planach bez obietnicy daty, APK ani sklepu,
+  - zostawić direct route `/mobile`,
+  - skierować użytkownika do `/try` albo `/`.
+- `Header.tsx` i `HomePage.tsx`:
+  - przywrócić link do `/mobile` w headerze z subtelnym badge’em `w planach`,
+  - nie przywracać linku do `/mobile` w footerze.
 - Zachować:
-  - APK download i QR,
-  - screenshoty mobile i istniejące assety.
+  - APK, QR i screenshoty jako pliki w `public/`,
+  - możliwość powrotu do mobile jako osobnego etapu.
 
 Checklist testowy:
 
-- `/mobile` i download APK.
-- QR i screenshoty nadal ładują się z `public/`.
+- `/mobile` działa z direct linka.
+- Header desktop/mobile pokazuje link mobile z badge’em `w planach`.
+- UI nie linkuje do APK, QR ani screenshotów.
+- Footer nie pokazuje linku do `/mobile`.
+- Copy nie obiecuje daty, APK ani publikacji w sklepie.
 - Mobile 320/375/768.
 - Dark mode.
 
@@ -846,7 +856,7 @@ Ta sekcja powinna być aktualizowana po każdym etapie.
 | Etap 7 - Dashboard i Recipes | Gotowe do review | 2026-05-06 | Przebudowano `DashboardPage` i `RecipesPage` w Direction A. Zmienione pliki: `frontend/src/pages/DashboardPage.tsx`, `frontend/src/pages/RecipesPage.tsx`, `docs/redesign/MEALGENIE_UI_REDESIGN_PLAN.md`. |
 | Etap 8 - Chat drawer | Gotowe do review | 2026-05-06 | Przebudowano `frontend/src/components/ChatDrawer.tsx` wizualnie i accessibility-wise w Direction A. Zachowano `useChatStore`, `chatWithAssistant`, tryby global/recipe, historię, `HISTORY_WINDOW`, chipsy recipe, Enter/Shift+Enter i payloady. Dodano `focus-trap` dla Tab/Shift+Tab, ESC i return focus. |
 | Etap 9A - Landing Page | Gotowe do review | 2026-05-07 | Przebudowano `HomePage` na pełny landing Direction A z nowymi sekcjami w `frontend/src/components/home/landing/`, wykonano polish pass po review screenshotów oraz przyjęto czystszy light-mode Fresh Herb + Apricot; `MobilePage` przechodzi do Etapu 9B. |
-| Etap 9B - MobilePage | Nie rozpoczęto | - | Follow-up po landingu; zachować APK, QR i screenshoty. |
+| Etap 9B - MobilePage | W planach / web first | 2026-05-08 | `/mobile` zostaje jako route z komunikatem Direction A; link mobile wraca do headera z badge’em `w planach`; footer nie linkuje do mobile; APK, QR i screenshoty zostają w `public/`, ale nie są linkowane z UI. |
 
 ## 11. Pierwszy mały krok po zaakceptowaniu planu
 
