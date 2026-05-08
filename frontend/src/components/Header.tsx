@@ -118,9 +118,15 @@ export function Header() {
             </button>
           )}
 
-          <Link to="/mobile" className={cn(linkBaseClasses, "inline-flex items-center gap-2")}>
+          <Link
+            to="/mobile"
+            className={cn(linkBaseClasses, "inline-flex items-center gap-2")}
+          >
             <Smartphone className="h-4 w-4" aria-hidden="true" />
             Mobile
+            <span className="rounded-pill border border-saffron/35 bg-saffron-soft px-1.5 py-0.5 text-[0.6rem] font-bold uppercase leading-none tracking-[0.08em] text-ink">
+              plan
+            </span>
           </Link>
 
           {!token ? (
@@ -203,11 +209,14 @@ export function Header() {
 
               <Link
                 to="/mobile"
-                className={cn(mobileLinkClasses, "justify-start gap-3")}
+                className={cn(mobileLinkClasses, "gap-3")}
                 onClick={closeMenu}
               >
-                <Smartphone className="h-5 w-5" aria-hidden="true" />
-                Aplikacja mobilna
+                <Smartphone className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 flex-1">Aplikacja mobilna</span>
+                <span className="shrink-0 rounded-pill border border-saffron/35 bg-saffron-soft px-2 py-1 text-[0.65rem] font-bold uppercase leading-none tracking-[0.08em] text-ink">
+                  w planach
+                </span>
               </Link>
 
               {!token ? (

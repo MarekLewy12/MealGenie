@@ -15,7 +15,6 @@ import {
 const footerLinks = [
   { label: "Wypróbuj", to: "/try" },
   { label: "Zaloguj się", to: "/login" },
-  { label: "Aplikacja mobilna", to: "/mobile" },
 ];
 
 export function HomePage() {
