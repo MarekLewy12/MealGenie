@@ -78,17 +78,15 @@ export function LandingBenefitsSection() {
             <motion.article
               key={benefit.title}
               variants={landingFadeUp}
-              whileHover={shouldReduceMotion ? undefined : { y: -6, rotate: -0.25 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="group relative overflow-hidden rounded-[1.35rem] border border-border-strong bg-bg-elevated p-5 shadow-sm transition duration-base ease-out hover:border-accent/35 hover:shadow-[0_22px_50px_-42px_rgba(32,37,31,0.82)] motion-reduce:hover:translate-y-0 sm:p-6"
+              className="relative overflow-hidden rounded-lg border border-border-strong bg-bg-elevated p-5 shadow-sm sm:p-6"
             >
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/0 blur-2xl transition duration-300 group-hover:bg-accent/8"
+                className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/5 blur-2xl"
               />
 
               <div className="relative">
-                <span className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-bg-sunken text-accent transition duration-base group-hover:border-accent/30 group-hover:bg-accent-soft group-hover:text-accent-deep">
+                <span className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-bg-sunken text-accent">
                   <benefit.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <h3 className="mt-5 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl">

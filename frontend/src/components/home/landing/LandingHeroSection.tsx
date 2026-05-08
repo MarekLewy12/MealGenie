@@ -4,9 +4,9 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import type { PointerEvent } from "react";
-import { Link } from "react-router-dom";
 
 import { Badge, DottedRow, HandwrittenKicker } from "../../ui";
+import { LandingCtaLink } from "./LandingCtaLink";
 import { heroDecisionFacts, landingHeroCopy } from "./landingContent";
 import {
   cardEntrance,
@@ -56,13 +56,6 @@ const MotionSection = motion.section;
 const MotionDiv = motion.div;
 const MotionH1 = motion.h1;
 const MotionP = motion.p;
-const MotionLink = motion(Link);
-
-const primaryCtaClassName =
-  "group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-accent bg-accent px-5 py-3 text-center text-sm font-semibold leading-tight text-ink-inverse shadow-accent transition duration-300 ease-out hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(232,111,69,0.85)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:border-accent-pressed active:bg-accent-pressed motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:min-h-14 sm:w-auto sm:gap-2.5 sm:px-8 sm:py-4 sm:text-base sm:leading-none";
-
-const secondaryCtaClassName =
-  "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated/85 px-5 py-3 text-center text-sm font-semibold leading-tight text-ink shadow-xs transition duration-300 ease-out hover:-translate-y-1 hover:border-accent/40 hover:bg-bg-elevated hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.76)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent active:bg-bg-elevated motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:min-h-14 sm:w-auto sm:gap-2.5 sm:px-7 sm:py-4 sm:text-base sm:leading-none";
 
 function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
@@ -147,7 +140,7 @@ function HeroDecisionCard({ shouldReduceMotion }: { shouldReduceMotion: boolean 
 }
 
 export function LandingHeroSection() {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = Boolean(useReducedMotion());
   const mainCardParallax = usePointerParallax({
     maxRotate: 7,
     maxTranslate: 10,
@@ -280,7 +273,7 @@ export function LandingHeroSection() {
                 variants={headingLineEntrance}
                 className={
                   line.accent
-                    ? "block text-paper-gradient text-hero-gradient"
+                    ? "block text-hero-gradient"
                     : "block"
                 }
               >
@@ -300,24 +293,23 @@ export function LandingHeroSection() {
             variants={landingFadeUp}
             className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:items-center sm:gap-3"
           >
-            <MotionLink
+            <LandingCtaLink
               to="/try"
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
-              className={primaryCtaClassName}
+              className="sm:min-h-14 sm:gap-2.5 sm:px-8 sm:py-4 sm:text-base"
             >
               {landingHeroCopy.primaryCta}
               <ArrowRight
                 className="h-5 w-5 transition duration-300 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
                 aria-hidden="true"
               />
-            </MotionLink>
-            <MotionLink
+            </LandingCtaLink>
+            <LandingCtaLink
               to="/login?mode=register"
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.975 }}
-              className={secondaryCtaClassName}
+              variant="secondary"
+              className="text-ink hover:border-accent/40 hover:bg-bg-elevated hover:text-ink sm:min-h-14 sm:gap-2.5 sm:px-7 sm:py-4 sm:text-base"
             >
               {landingHeroCopy.secondaryCta}
-            </MotionLink>
+            </LandingCtaLink>
           </MotionDiv>
 
           <HeroDecisionCard shouldReduceMotion={shouldReduceMotion} />

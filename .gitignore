@@ -4,6 +4,9 @@ dist/
 .DS_Store
 .idea/
 
+# Playwright CLI artifacts.
+output/playwright/
+
 # Generated meal images for local/dev usage.
 backend/public/meal-images/*
 !backend/public/meal-images/.gitkeep

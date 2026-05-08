@@ -2,8 +2,6 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion";
-import { useState } from "react";
-import type { PointerEvent } from "react";
 
 import { HandwrittenKicker } from "../../ui";
 import { problemCards, problemNotes } from "./landingContent";
@@ -22,10 +20,6 @@ const noteRotations = [-5, 4, -2, 6, -4, 3];
 const noteMarginsTop = [-145, -82, -18, 46, 112, 170];
 const noteMarginsLeft = [-44, 42, -34, 38, -18, 28];
 
-function randomBetween(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
-
 function ProblemNote({
   index,
   note,
@@ -36,23 +30,6 @@ function ProblemNote({
   shouldReduceMotion: boolean;
 }) {
   const baseRotate = noteRotations[index];
-  const [hoverTarget, setHoverTarget] = useState({
-    rotate: baseRotate,
-    x: 0,
-    y: 0,
-  });
-
-  const settleNote = (event: PointerEvent<HTMLDivElement>) => {
-    const canHoverPrecisely = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-    if (shouldReduceMotion || event.pointerType !== "mouse" || !canHoverPrecisely) return;
-
-    setHoverTarget({
-      rotate: baseRotate + randomBetween(-3, 3),
-      x: randomBetween(-10, 10),
-      y: randomBetween(-10, 10),
-    });
-  };
 
   return (
     <div
@@ -64,7 +41,7 @@ function ProblemNote({
       }}
     >
       <motion.div
-        className="rounded-[1.15rem] border border-border-strong bg-bg-elevated/90 px-5 py-4 shadow-[0_14px_34px_-30px_rgba(32,37,31,0.52)] ring-1 ring-ink/5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-accent/40 hover:bg-bg-elevated/95 hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.82)] dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
+        className="rounded-lg border border-border-strong bg-bg-elevated/90 px-5 py-4 shadow-sm ring-1 ring-ink/5 backdrop-blur-xl dark:border-white/20 dark:bg-bg-elevated/85 dark:ring-white/10"
         variants={{
           hidden: shouldReduceMotion
             ? {}
@@ -87,22 +64,6 @@ function ProblemNote({
                 },
               },
         }}
-        whileHover={
-          shouldReduceMotion
-            ? undefined
-            : {
-                borderColor: "rgba(214,207,200,0.95)",
-                boxShadow: "0 16px 34px -30px rgba(32,37,31,0.46)",
-                rotate: hoverTarget.rotate,
-                x: hoverTarget.x,
-                y: hoverTarget.y,
-                transition: {
-                  duration: 0.36,
-                  ease: landingEase,
-                },
-              }
-        }
-        onPointerEnter={settleNote}
       >
         <p className="font-brand text-lg font-semibold leading-tight text-ink">
           {note}

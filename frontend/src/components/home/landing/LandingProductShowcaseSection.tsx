@@ -107,23 +107,17 @@ const productModeToneClassName: Record<Tone, string> = {
 
 function FeatureMiniCard({
   mode,
-  motionDisabled,
 }: {
   mode: ExperienceHighlight;
-  motionDisabled: boolean;
 }) {
   return (
     <motion.div
       variants={landingCardPop}
-      whileHover={
-        motionDisabled ? undefined : { y: -6, rotate: -0.4, scale: 1.025 }
-      }
-      transition={{ duration: 0.22, ease: "easeOut" }}
-      className="group inline-flex min-h-12 items-center gap-3 rounded-pill border border-border/80 bg-bg-elevated/80 px-3 py-2 shadow-xs backdrop-blur transition duration-base ease-out hover:border-accent/35 hover:bg-accent-soft/35 hover:shadow-sm motion-reduce:hover:translate-y-0"
+      className="inline-flex min-h-12 items-center gap-3 rounded-pill border border-border/80 bg-bg-elevated/80 px-3 py-2 shadow-xs backdrop-blur"
     >
       <span
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-pill transition duration-base ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-pill",
           productModeToneClassName[mode.tone],
         )}
       >
@@ -530,7 +524,6 @@ export function LandingProductShowcaseSection() {
             <FeatureMiniCard
               key={mode.label}
               mode={mode}
-              motionDisabled={motionDisabled}
             />
           ))}
         </motion.div>

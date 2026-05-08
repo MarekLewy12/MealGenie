@@ -64,8 +64,6 @@ export function LandingHowItWorksSection() {
                 <motion.li
                   key={step.number}
                   variants={landingFadeUp}
-                  whileHover={shouldReduceMotion ? undefined : { y: -4 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
                   className="relative border-l border-border-strong pl-6 lg:border-l-0 lg:pl-0 lg:pt-10"
                 >
                   <div className="relative border-t border-border-strong pt-7 lg:min-h-[12rem]">
