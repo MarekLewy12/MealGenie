@@ -45,13 +45,13 @@ export function HomePage() {
 
           <nav
             aria-label="Linki stopki"
-            className="flex flex-wrap gap-2 lg:justify-end"
+            className="flex flex-wrap justify-center gap-2 lg:justify-end"
           >
             {footerLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className="inline-flex min-h-10 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-ink-soft transition-colors duration-fast hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-bg-elevated px-4 py-2 text-sm font-semibold text-ink-soft shadow-xs transition duration-fast ease-out hover:border-accent/40 hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
               >
                 {link.label}
               </Link>
