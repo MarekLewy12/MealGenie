@@ -1,5 +1,6 @@
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GeneratorPage } from "./pages/GeneratorPage";
@@ -28,6 +29,15 @@ function App() {
   const pageTransitionProps = {
     skipInitialAnimation: shouldSkipInitialPageTransition.current,
   };
+  const renderOnboardedRoute = (children: ReactNode) => (
+    <PageTransition {...pageTransitionProps}>
+      {hasCompletedOnboarding ? (
+        children
+      ) : (
+        <Navigate to="/onboarding" replace />
+      )}
+    </PageTransition>
+  );
 
   useEffect(() => {
     shouldSkipInitialPageTransition.current = false;
@@ -111,18 +121,14 @@ function App() {
                     {/* Chronione trasy */}
                     <Route
                       path="/dashboard"
-                      element={
-                        <PageTransition {...pageTransitionProps}>
-                          <DashboardPage />
-                        </PageTransition>
-                      }
+                      element={renderOnboardedRoute(<DashboardPage />)}
                     />
                     <Route
                       path="/onboarding"
                       element={
                         <PageTransition {...pageTransitionProps}>
                           {hasCompletedOnboarding ? (
-                            <Navigate to="/settings" replace />
+                            <Navigate to="/dashboard" replace />
                           ) : (
                             <OnboardingPage />
                           )}
@@ -131,44 +137,24 @@ function App() {
                     />
                     <Route
                       path="/settings"
-                      element={
-                        <PageTransition {...pageTransitionProps}>
-                          <SettingsPage />
-                        </PageTransition>
-                      }
+                      element={renderOnboardedRoute(<SettingsPage />)}
                     />
                     <Route
                       path="/recipes"
-                      element={
-                        <PageTransition {...pageTransitionProps}>
-                          <RecipesPage />
-                        </PageTransition>
-                      }
+                      element={renderOnboardedRoute(<RecipesPage />)}
                     />
                     <Route
                       path="/generator"
-                      element={
-                        <PageTransition {...pageTransitionProps}>
-                          <GeneratorPage />
-                        </PageTransition>
-                      }
+                      element={renderOnboardedRoute(<GeneratorPage />)}
                     />
                     {/* /recipe/:id przed /recipe. */}
                     <Route
                       path="/recipe/:id"
-                      element={
-                        <PageTransition {...pageTransitionProps}>
-                          <RecipePage />
-                        </PageTransition>
-                      }
+                      element={renderOnboardedRoute(<RecipePage />)}
                     />
                     <Route
                       path="/recipe"
-                      element={
-                        <PageTransition {...pageTransitionProps}>
-                          <RecipePage />
-                        </PageTransition>
-                      }
+                      element={renderOnboardedRoute(<RecipePage />)}
                     />
                   </Route>
                 </Route>

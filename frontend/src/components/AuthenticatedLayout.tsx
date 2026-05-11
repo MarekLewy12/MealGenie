@@ -6,7 +6,8 @@ export function AuthenticatedLayout() {
   const { pathname } = useLocation();
   const isRecipePath =
     pathname === "/recipe" || pathname.startsWith("/recipe/");
-  const showBackLink = pathname !== "/dashboard" && !isRecipePath;
+  const showBackLink =
+    pathname !== "/dashboard" && pathname !== "/onboarding" && !isRecipePath;
 
   return (
     <div className="relative">

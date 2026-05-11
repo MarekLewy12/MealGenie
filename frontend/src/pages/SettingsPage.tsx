@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPreferences } from "../services/api";
+import { Loader2 } from "lucide-react";
+
 import { OnboardingForm } from "../components/OnboardingForm";
-import { User, ChefHat } from "lucide-react";
+import { HandwrittenKicker } from "../components/ui";
+import { getPreferences } from "../services/api";
 
 export function SettingsPage() {
   const { data, isLoading, isError } = useQuery({
@@ -11,75 +13,35 @@ export function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+      <div className="flex min-h-[50vh] items-center justify-center text-accent">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="text-center p-10 text-red-500">
+      <div className="p-10 text-center font-medium text-bordeaux">
         Nie udało się pobrać ustawień. Spróbuj odświeżyć stronę.
       </div>
     );
   }
 
   return (
-    <section className="mx-auto max-w-screen-2xl px-6 py-12">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-          Ustawienia
+    <section className="mx-auto max-w-4xl px-4 py-12 text-ink sm:px-6 lg:px-8">
+      <div className="mb-8 lg:mb-12">
+        <HandwrittenKicker>twoje zasady</HandwrittenKicker>
+        <h1 className="mt-2 font-brand text-3xl font-bold text-ink sm:text-4xl">
+          Profil kulinarny
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Zarządzaj swoim profilem i preferencjami kulinarnymi.
+        <p className="mt-3 max-w-2xl text-base leading-7 text-ink-soft">
+          Te ustawienia są używane przez AI do generowania Twoich posiłków i
+          doboru odpowiednich składników.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 items-start">
-        {/* LEWA KOLUMNA - NAWIGACJA (WIZUALNA) */}
-        <aside className="lg:col-span-3">
-          <nav className="sticky top-24 space-y-1">
-            <h3 className="mb-4 px-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Twoje Konto
-            </h3>
-
-            <button className="flex w-full items-center gap-3 rounded-xl bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 transition-colors dark:bg-indigo-500/10 dark:text-indigo-100">
-              <ChefHat className="h-5 w-5" />
-              Preferencje Smakowe
-            </button>
-
-            <button
-              disabled
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/5 opacity-50 cursor-not-allowed"
-            >
-              <User className="h-5 w-5" />
-              Dane logowania
-            </button>
-          </nav>
-        </aside>
-
-        {/* PRAWA KOLUMNA - TREŚĆ (FORMULARZ) */}
-        <div className="lg:col-span-9">
-          <div className="max-w-4xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-            <div className="mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                Profil Kulinarny
-              </h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Te ustawienia są używane przez AI do generowania Twoich
-                posiłków.
-              </p>
-            </div>
-
-            {/* Przekazujemy dane z bazy do formularza */}
-            {/* @ts-expect-error - Prisma types vs Zod types loose match */}
-            <OnboardingForm
-              initialValues={data || undefined}
-              isEditing={true}
-            />
-          </div>
-        </div>
+      <div className="rounded-2xl border border-border bg-bg-elevated p-6 shadow-sm sm:p-10">
+        <OnboardingForm initialValues={data ?? undefined} isEditing={true} />
       </div>
     </section>
   );

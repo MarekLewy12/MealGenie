@@ -1,4 +1,4 @@
-import { useId, useState, KeyboardEvent } from "react";
+import { useId, useState, type KeyboardEvent } from "react";
 import { Plus, X } from "lucide-react";
 
 type TagInputProps = {
@@ -42,29 +42,25 @@ export function TagInput({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <label
         htmlFor={inputId}
-        className={
-          label
-            ? "text-sm font-semibold text-ink"
-            : "sr-only"
-        }
+        className={label ? "text-sm font-semibold text-ink" : "sr-only"}
       >
         {accessibleLabel}
       </label>
 
-      <div className="flex min-h-14 flex-wrap items-center gap-2 rounded-lg border border-dashed border-border-strong bg-bg px-3 py-2 shadow-xs transition duration-fast ease-out focus-within:border-accent focus-within:bg-bg-elevated focus-within:ring-2 focus-within:ring-accent-soft">
+      <div className="flex min-h-14 flex-wrap items-center gap-2 rounded-xl border border-border bg-bg-sunken px-3 py-2 shadow-xs transition duration-fast ease-out focus-within:border-accent focus-within:bg-bg-elevated focus-within:ring-2 focus-within:ring-accent-soft">
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex min-h-10 items-center gap-1 rounded-pill border border-border bg-bg-elevated px-3 py-1.5 text-sm font-semibold text-ink shadow-xs animate-fadeIn"
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-border-strong bg-bg-elevated py-1 pl-3 pr-1 text-sm font-semibold text-ink shadow-xs"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="ml-0.5 inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-center rounded-pill text-ink-muted transition hover:bg-accent-soft hover:text-bordeaux focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-ink-muted transition hover:bg-bordeaux/10 hover:text-bordeaux focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               aria-label={`Usuń składnik: ${tag}`}
             >
               <X className="h-3.5 w-3.5" />
@@ -76,7 +72,7 @@ export function TagInput({
           <input
             id={inputId}
             aria-describedby={hintId}
-            className="min-h-10 w-full flex-1 bg-transparent px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-soft"
+            className="min-h-10 w-full flex-1 bg-transparent px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-disabled"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -86,7 +82,7 @@ export function TagInput({
             <button
               type="button"
               onClick={addTag}
-              className="ml-2 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border border-accent bg-accent text-ink-inverse shadow-accent transition hover:border-accent-hover hover:bg-accent-hover active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="ml-2 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-accent bg-accent text-ink-inverse shadow-accent transition hover:border-accent-hover hover:bg-accent-hover active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               aria-label={`Dodaj składnik: ${inputValue.trim()}`}
             >
               <Plus className="h-4 w-4" />
