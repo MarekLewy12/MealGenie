@@ -15,8 +15,8 @@ import {
   EyeOff,
   User,
   ListChecks,
-  Utensils,
   Clock3,
+  Plus,
 } from "lucide-react";
 
 import {
@@ -234,48 +234,99 @@ export function LoginPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-2 w-full rounded-2xl border border-border bg-bg-elevated p-6 shadow-xl xl:p-7"
+              className="mt-2 w-full"
+              aria-label="MealGenie łączy składniki, czas i preferencje w spokojną decyzję obiadową."
             >
-              <div className="flex items-center justify-between border-b border-border-dotted pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent">
-                    <Utensils className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <span className="font-brand text-sm font-bold uppercase tracking-wider text-ink-muted">
-                    Twój plan na dziś
-                  </span>
-                </div>
-                <span className="rounded-full bg-basil-soft px-3 py-1 text-xs font-bold uppercase tracking-wider text-basil">
-                  Idealne dopasowanie
-                </span>
+              <div className="flex flex-wrap items-center gap-3">
+                {[
+                  { label: "pół brokuła", emoji: "🥦", className: "rotate-[-2deg]" },
+                  { label: "2 jajka", emoji: "🥚", className: "rotate-[1.5deg]" },
+                  { label: "20 minut", icon: Clock3, className: "rotate-[-1deg]" },
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.35, delay: 0.7 + index * 0.08 }}
+                    className={`inline-flex min-h-12 items-center gap-2 rounded-pill border border-border bg-bg-elevated px-4 py-2.5 text-base font-semibold text-ink shadow-sm ${item.className}`}
+                  >
+                    {"emoji" in item ? (
+                      <span className="text-xl" aria-hidden="true">
+                        {item.emoji}
+                      </span>
+                    ) : (
+                      <item.icon className="h-5 w-5 text-accent" aria-hidden="true" />
+                    )}
+                    {item.label}
+                  </motion.div>
+                ))}
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.96 }}
+                  className="flex items-center justify-center text-ink-muted/50"
+                  aria-hidden="true"
+                >
+                  <Plus className="h-5 w-5" />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.38, delay: 1.04 }}
+                  className="inline-flex min-h-12 items-center gap-2 rounded-pill border border-accent/20 bg-accent-soft px-5 py-2.5 font-brand text-lg font-semibold text-accent-deep dark:bg-accent/15 dark:text-accent"
+                >
+                  <Sparkles className="h-5 w-5" aria-hidden="true" />
+                  spokojny obiad
+                </motion.div>
               </div>
 
-              <div className="pt-5">
-                <h3 className="font-brand text-2xl font-semibold text-ink xl:text-3xl">
-                  Łosoś z puree kalafiorowym
-                </h3>
-                <p className="mt-2 text-base text-ink-soft xl:text-lg">
-                  Szybki i lekki obiad. Wykorzystuje resztkę kalafiora z
-                  wczoraj i omija nabiał, tak jak lubisz.
-                </p>
-
-                <div className="mt-5 flex gap-6">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-ink-muted xl:text-base">
-                    <Clock3 className="h-5 w-5 text-accent" aria-hidden="true" />
-                    25 minut
-                  </div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-ink-muted xl:text-base">
-                    <ListChecks className="h-5 w-5 text-basil" aria-hidden="true" />
-                    2 składniki do kupienia
-                  </div>
-                </div>
-              </div>
+              <p className="mt-5 max-w-xl text-base leading-7 text-ink-soft">
+                MealGenie zaczyna od tego, co masz pod ręką, ile masz czasu i
+                czego dziś chcesz uniknąć.
+              </p>
             </motion.div>
           </div>
         </div>
 
         {/* PRAWA STRONA (Formularz) */}
         <div className="relative flex min-h-0 flex-col items-center justify-center overflow-y-auto bg-bg p-6 sm:p-12 lg:p-16">
+          <div className="absolute right-6 top-6 z-10 flex items-center gap-3 text-sm sm:right-12 sm:top-12">
+            <span className="hidden min-w-[6.75rem] justify-end font-medium text-ink-soft sm:inline-flex">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={`auth-switch-label-${mode}`}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  {mode === "login" ? "Nie masz konta?" : "Masz już profil?"}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="cursor-pointer rounded-full border border-border bg-bg-sunken px-4 py-2 font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-border-strong hover:bg-bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              <span className="inline-flex min-w-[4.75rem] justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={`auth-switch-action-${mode}`}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    {mode === "login" ? "Załóż profil" : "Zaloguj się"}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+            </button>
+          </div>
+
           <AnimatePresence mode="wait">
             <motion.div
               key={`auth-heading-${mode}`}
@@ -468,27 +519,6 @@ export function LoginPage() {
               <span>Zaloguj przez Google (wkrótce)</span>
             </button>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`auth-switch-${mode}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-                className="mt-8 flex items-center justify-center gap-2 text-sm"
-              >
-                <span className="text-ink-soft">
-                  {mode === "login" ? "Nie masz jeszcze profilu?" : "Masz już profil?"}
-                </span>
-                <button
-                  type="button"
-                  onClick={toggleMode}
-                  className="cursor-pointer font-semibold text-accent transition-colors hover:text-accent-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-                >
-                  {mode === "login" ? "Załóż profil" : "Zaloguj się"}
-                </button>
-              </motion.div>
-            </AnimatePresence>
           </div>
         </div>
       </div>

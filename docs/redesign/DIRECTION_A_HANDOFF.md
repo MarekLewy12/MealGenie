@@ -21,7 +21,7 @@ redesign/direction-a
 Aktualny branch roboczy:
 
 ```text
-feat/pause-mobile-page
+feat/auth-direction-a
 ```
 
 Zrobione:
@@ -35,12 +35,13 @@ Zrobione:
 | Recipe | Gotowe | UI Direction A, zachowane favorite/share/PDF/chat/shared view. |
 | Chat drawer | Gotowe | UI Direction A + focus trap, ESC, return focus. |
 | Landing | Gotowe / merged | PR #22: `feat/ui-redesign-landing-page` -> `redesign/direction-a`. |
-| Mobile roadmap | W trakcie | Branch `feat/pause-mobile-page`; mobile jako roadmap item, nie gotowa apka. |
+| Mobile roadmap | Gotowe / decyzja utrzymana | Mobile jako roadmap item, nie gotowa apka; `/mobile` i linki w UI zostaja zgodnie z decyzja Marka. |
+| Auth redesign | Gotowe do review | Branch `feat/auth-direction-a`; `/login` i `/login?mode=register` w Direction A, bez zmian kontraktow API. |
 
-Nastepny duzy etap po mobile:
+Nastepny duzy etap po auth:
 
 ```text
-Auth redesign: /login i /login?mode=register
+Onboarding + Settings redesign
 ```
 
 ## 2. Decyzje produktowe
@@ -52,10 +53,10 @@ Pierwotna rekomendacja audytu brzmiala: schowac `/mobile` z UI i zostawic direct
 Po rozmowie decyzja zostala doprecyzowana:
 
 - `/mobile` zostaje jako route.
-- Link `Mobile` wraca do headera.
+- Link `Mobile` zostaje w headerze.
 - Desktop header pokazuje `Mobile` z malym badge'em `plan`.
 - Mobile menu pokazuje `Aplikacja mobilna` z badge'em `w planach`.
-- Footer nie linkuje do `/mobile`.
+- Footer landingu nadal linkuje do `/mobile`; to swiadoma decyzja Marka, mimo ze poprzedni audyt sugerowal usuniecie linku ze stopki.
 - Strona `/mobile` nie pokazuje APK, QR, screenshotow ani Google Play promise.
 - Komunikat na `/mobile` ma mowic: mobile jest na roadmapie, ale web ma priorytet.
 - Nie obiecywac daty, APK, sklepu ani premiery.
@@ -149,20 +150,18 @@ Nie ruszac routingu glebiej bez potrzeby.
 
 ### 3.2. Co nadal odstaje
 
-Najwiekszy dysonans po landingu:
+Auth zostal przebudowany w `feat/auth-direction-a`.
 
-```text
-/login i /login?mode=register
-```
+`LoginPage` zachowuje dwukolumnowy, pelnoekranowy uklad i logike auth, ale ma juz Direction A:
 
-Obecny login ma dobra logike, ale stary wyglad:
-
-- indigo/violet/fuchsia,
-- glassmorphism,
-- zewnetrzny noise URL,
-- stare focusy,
-- `ChefHat` jako stare logo,
-- martwe `Zapomniałeś hasła?`.
+- lewa kolumna z cieplym tlem, typografia brandowa i ilustracja skladniki -> spokojny obiad,
+- prawa kolumna z formularzem w tokenach Direction A,
+- brak `ChefHat`, indigo/violet/fuchsia, glassmorphism i zewnetrznego noise URL,
+- brak martwego reset password UI,
+- staly przelacznik login/register w prawym gornym rogu,
+- normalizacja `hasCompletedOnboarding` przez `Boolean(...)`,
+- konto opisane uczciwie bez fikcyjnych linkow do regulaminu/polityki prywatnosci,
+- globalny scroll model dostal pierwszy polish: `App`/`PageTransition` uzywaja flex shell, a `/login` nie scrolluje dokumentu.
 
 Po rejestracji uzytkownik trafia dalej do onboardingu, wiec po auth nastepny zgrzyt to:
 
@@ -183,9 +182,9 @@ Globalne resztki:
 | Kolejnosc | PR | Branch | Status | Cel |
 | --- | --- | --- | --- | --- |
 | 1 | Landing redesign | `feat/ui-redesign-landing-page` | Merged | Pelny landing Direction A. |
-| 2 | Mobile roadmap page | `feat/pause-mobile-page` | In progress | Mobile jako roadmap/web-first, bez APK/QR w UI. |
-| 3 | Auth redesign | `feat/auth-direction-a` | Next | `/login` i `/login?mode=register` w Direction A. |
-| 4 | Onboarding + Settings | TBD | Planned | Wspolny refaktor preferencji i formularzy. |
+| 2 | Mobile roadmap page | `feat/pause-mobile-page` | Done / decision kept | Mobile jako roadmap/web-first, bez APK/QR w UI; footer link zostaje swiadomie. |
+| 3 | Auth redesign | `feat/auth-direction-a` | Done / ready for review | `/login` i `/login?mode=register` w Direction A. |
+| 4 | Onboarding + Settings | TBD | Next | Wspolny refaktor preferencji i formularzy. |
 | 5 | Notifications + cleanup | TBD | Planned | Global polish i sprzatanie. |
 | 6 | Final QA + release candidate | TBD | Planned | Pelny flow guest/auth/public/mobile/dark. |
 | 7 | Merge Direction A do master | TBD | Later | Dopiero po QA. |
@@ -206,7 +205,7 @@ Zakres:
   - badge `plan` w desktop nav,
   - `Aplikacja mobilna` + `w planach` w mobile menu.
 - Footer:
-  - bez linku do mobile.
+  - decyzja po rozmowie: link do `/mobile` zostaje w footerze landingu.
 - `/mobile`:
   - nowy ekran Direction A,
   - roadmap/web-first,
@@ -218,7 +217,7 @@ Acceptance:
 
 - Desktop header pokazuje `Mobile` + `plan`.
 - Mobile menu pokazuje `Aplikacja mobilna` + `w planach`.
-- Footer nie pokazuje mobile.
+- Footer moze pokazywac `Aplikacja mobilna`; to swiadome odejscie od pierwotnej rekomendacji audytu.
 - `/mobile` dziala z direct linka.
 - `/mobile` nie linkuje do APK, QR ani screenshotow.
 - Copy nie obiecuje daty, APK ani sklepu.
@@ -228,7 +227,7 @@ Acceptance:
 
 ## 6. PR 3 - Auth redesign
 
-Nastepny rekomendowany PR:
+Aktualny branch:
 
 ```text
 feat/auth-direction-a
@@ -263,13 +262,10 @@ Zmienic:
 - usunac stare logo `ChefHat`,
 - usunac stare klasy `slate`, `indigo`, `fuchsia`,
 - usunac martwe `Zapomniałeś hasła?`,
-- uzyc:
-  - `Logo`,
-  - `Card`,
-  - `Badge`,
-  - `Button`,
-  - `Input`,
-  - ewentualnie lokalnego wrappera dla password + eye toggle.
+- zachowac ogolny dwukolumnowy, pelnoekranowy layout, bo Marek lubi obecny uklad,
+- uzyc Direction A tokenow i typografii, bez przepisywania kontraktow API,
+- nie pokazywac konkretnego spersonalizowanego dania na loginie; zamiast tego ilustracja skladniki + czas -> spokojny obiad,
+- nie udawac istnienia regulaminu/polityki prywatnosci, dopoki nie ma realnych stron/dokumentow.
 
 Redirect:
 
@@ -291,6 +287,8 @@ Acceptance:
 - Login usera bez onboardingu -> `/onboarding`.
 - Rejestracja nowego usera -> `/onboarding`.
 - Brak reset password UI.
+- Dokument `/login` nie ma body/html scrolla; ewentualny overflow zostaje lokalnie w prawej kolumnie.
+- Przelacznik login/register nie zmienia polozenia przy zmianie wysokosci formularza.
 
 ## 7. PR 4 - Onboarding + Settings
 
