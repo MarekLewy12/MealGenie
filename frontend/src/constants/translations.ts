@@ -21,9 +21,12 @@ export const EQUIPMENT_LABELS: Record<keyof typeof Equipment, string> = {
     MICROWAVE: 'Mikrofalówka',
     BLENDER: 'Blender',
     MULTICOOKER: 'Multicooker',
+    SLOW_COOKER: 'Wolnowar',
+    RICE_COOKER: 'Ryżowar',
+    FOOD_PROCESSOR: 'Robot kuchenny',
     AIR_FRYER: 'Frytkownica beztłuszczowa',
-    SOUS_VIDE: 'Sous Vide',
     STEAMER: 'Parowar',
+    SOUS_VIDE: 'Sous Vide',
     ELECTRIC_GRILL: 'Grill elektryczny',
 }
 

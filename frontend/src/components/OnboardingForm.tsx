@@ -1,27 +1,54 @@
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
   type MouseEvent,
+  type ReactNode,
 } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  Coffee,
-  Droplets,
-  Flame,
   Loader2,
-  Microwave,
-  Thermometer,
-  Utensils,
-  Wind,
-  type LucideIcon,
 } from "lucide-react";
+import {
+  IconAward,
+  IconBasket,
+  IconBlender,
+  IconBowl,
+  IconBowlChopsticks,
+  IconBreadOff,
+  IconChefHat,
+  IconClock,
+  IconCoin,
+  IconCooker,
+  IconFlame,
+  IconGauge,
+  IconGrill,
+  IconHeart,
+  IconLeaf,
+  IconListCheck,
+  IconMeat,
+  IconMicrowave,
+  IconMoodSmile,
+  IconPepper,
+  IconPlant2,
+  IconReceipt,
+  IconSalad,
+  IconSoup,
+  IconSparkles,
+  IconSteam,
+  IconTemperature,
+  IconToolsKitchen,
+  IconToolsKitchen3,
+  IconWind,
+  type TablerIcon,
+} from "@tabler/icons-react";
 import {
   AnimatePresence,
   motion,
@@ -30,7 +57,7 @@ import {
 } from "framer-motion";
 import { z } from "zod";
 
-import { Button } from "./ui";
+import { Badge, Button } from "./ui";
 import { TagInput } from "./TagInput";
 import { savePreferences, type SavePreferencesPayload } from "../services/api";
 import { useAuthStore } from "../store/authStore";
@@ -56,16 +83,29 @@ const preferencesSchema = z.object({
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
 type EquipmentValue = PreferencesFormData["kitchenEquipment"][number];
+type ChoiceTone = "accent" | "basil" | "saffron" | "neutral";
+type ChoiceCardOption<TValue extends string> = {
+  value: TValue;
+  label: string;
+  description: string;
+  Icon: TablerIcon;
+  tone?: ChoiceTone;
+};
+type EquipmentOption = {
+  value: EquipmentValue;
+  label: string;
+  Icon: TablerIcon;
+};
+type EquipmentCategory = {
+  id: string;
+  title: string;
+  options: EquipmentOption[];
+};
 
 type OnboardingFormProps = {
   initialValues?: Partial<SavePreferencesPayload>;
   isEditing?: boolean;
 };
-
-const selectStyles =
-  "min-h-14 w-full rounded-xl border border-border bg-bg-sunken px-4 py-2.5 text-base text-ink shadow-xs outline-none transition duration-fast ease-out focus:border-accent focus:bg-bg-elevated focus:ring-2 focus:ring-accent-soft disabled:cursor-not-allowed disabled:bg-bg-sunken disabled:text-ink-disabled";
-const labelStyles = "mb-2 block text-sm font-semibold text-ink";
-const inlineLabelStyles = "text-sm font-semibold text-ink";
 
 const defaultValues: PreferencesFormData = {
   diet: Diet.NONE,
@@ -86,13 +126,213 @@ const spiceLevelLabels: Record<number, string> = {
   5: "Bardzo ostry",
 };
 
+const choiceToneClasses: Record<
+  ChoiceTone,
+  {
+    icon: string;
+    selected: string;
+  }
+> = {
+  accent: {
+    icon: "bg-accent-soft text-accent-deep",
+    selected: "border-accent bg-accent-soft text-accent-deep",
+  },
+  basil: {
+    icon: "bg-basil-soft text-basil",
+    selected: "border-basil bg-basil-soft text-basil",
+  },
+  saffron: {
+    icon: "bg-saffron-soft text-saffron",
+    selected: "border-saffron bg-saffron-soft text-saffron",
+  },
+  neutral: {
+    icon: "bg-bg-sunken text-ink-soft",
+    selected: "border-border-strong bg-bg-sunken text-ink",
+  },
+};
+
+const dietOptions = [
+  {
+    value: Diet.NONE,
+    label: DIET_LABELS.NONE,
+    description: "Bez sztywnych zasad. MealGenie może proponować pełen zakres dań.",
+    Icon: IconBowl,
+    tone: "neutral",
+  },
+  {
+    value: Diet.VEGETARIAN,
+    label: DIET_LABELS.VEGETARIAN,
+    description: "Dania bez mięsa, z nabiałem i jajkami, jeśli pasują do przepisu.",
+    Icon: IconLeaf,
+    tone: "basil",
+  },
+  {
+    value: Diet.VEGAN,
+    label: DIET_LABELS.VEGAN,
+    description: "Wyłącznie roślinne propozycje, bez produktów odzwierzęcych.",
+    Icon: IconPlant2,
+    tone: "basil",
+  },
+  {
+    value: Diet.KETO,
+    label: DIET_LABELS.KETO,
+    description: "Mniej węglowodanów, więcej tłuszczów i sycących składników.",
+    Icon: IconMeat,
+    tone: "accent",
+  },
+  {
+    value: Diet.PALEO,
+    label: DIET_LABELS.PALEO,
+    description: "Proste składniki, mięso, warzywa, owoce i orzechy.",
+    Icon: IconSalad,
+    tone: "saffron",
+  },
+  {
+    value: Diet.GLUTEN_FREE,
+    label: DIET_LABELS.GLUTEN_FREE,
+    description: "Pomijamy produkty z glutenem i szukamy naturalnych zamienników.",
+    Icon: IconBreadOff,
+    tone: "neutral",
+  },
+] satisfies ChoiceCardOption<(typeof Diet)[keyof typeof Diet]>[];
+
+const skillOptions = [
+  {
+    value: CookingSkill.BEGINNER,
+    label: SKILL_LABELS.BEGINNER,
+    description: "Wolisz proste techniki, krótkie instrukcje i mało naczyń.",
+    Icon: IconMoodSmile,
+    tone: "basil",
+  },
+  {
+    value: CookingSkill.INTERMEDIATE,
+    label: SKILL_LABELS.INTERMEDIATE,
+    description: "Gotujesz regularnie i chętnie łączysz kilka kroków naraz.",
+    Icon: IconChefHat,
+    tone: "accent",
+  },
+  {
+    value: CookingSkill.ADVANCED,
+    label: SKILL_LABELS.ADVANCED,
+    description: "Możesz wejść w precyzyjne techniki i bardziej ambitne przepisy.",
+    Icon: IconAward,
+    tone: "saffron",
+  },
+] satisfies ChoiceCardOption<
+  (typeof CookingSkill)[keyof typeof CookingSkill]
+>[];
+
+const budgetOptions = [
+  {
+    value: Budget.NONE,
+    label: BUDGET_LABELS.NONE,
+    description: "Priorytetem jest smak i dopasowanie, bez cięcia kosztów.",
+    Icon: IconSparkles,
+    tone: "neutral",
+  },
+  {
+    value: Budget.ECONOMICAL,
+    label: BUDGET_LABELS.ECONOMICAL,
+    description: "Tanie, dostępne składniki i mniej produktów specjalnych.",
+    Icon: IconCoin,
+    tone: "basil",
+  },
+  {
+    value: Budget.MEDIUM,
+    label: BUDGET_LABELS.MEDIUM,
+    description: "Rozsądny balans między ceną, wygodą i jakością.",
+    Icon: IconBasket,
+    tone: "accent",
+  },
+  {
+    value: Budget.PREMIUM,
+    label: BUDGET_LABELS.PREMIUM,
+    description: "Możemy sięgać po ciekawsze składniki i bardziej dopracowane dania.",
+    Icon: IconReceipt,
+    tone: "saffron",
+  },
+] satisfies ChoiceCardOption<(typeof Budget)[keyof typeof Budget]>[];
+
+const equipmentCategories = [
+  {
+    id: "basics",
+    title: "Podstawy",
+    options: [
+      { value: Equipment.OVEN, label: EQUIPMENT_LABELS.OVEN, Icon: IconCooker },
+      { value: Equipment.STOVE, label: EQUIPMENT_LABELS.STOVE, Icon: IconFlame },
+      {
+        value: Equipment.MICROWAVE,
+        label: EQUIPMENT_LABELS.MICROWAVE,
+        Icon: IconMicrowave,
+      },
+      {
+        value: Equipment.BLENDER,
+        label: EQUIPMENT_LABELS.BLENDER,
+        Icon: IconBlender,
+      },
+    ],
+  },
+  {
+    id: "automatic",
+    title: "Urządzenia automatyczne",
+    options: [
+      {
+        value: Equipment.MULTICOOKER,
+        label: EQUIPMENT_LABELS.MULTICOOKER,
+        Icon: IconSoup,
+      },
+      {
+        value: Equipment.SLOW_COOKER,
+        label: EQUIPMENT_LABELS.SLOW_COOKER,
+        Icon: IconClock,
+      },
+      {
+        value: Equipment.RICE_COOKER,
+        label: EQUIPMENT_LABELS.RICE_COOKER,
+        Icon: IconBowlChopsticks,
+      },
+      {
+        value: Equipment.FOOD_PROCESSOR,
+        label: EQUIPMENT_LABELS.FOOD_PROCESSOR,
+        Icon: IconToolsKitchen3,
+      },
+    ],
+  },
+  {
+    id: "special-techniques",
+    title: "Techniki specjalne",
+    options: [
+      {
+        value: Equipment.AIR_FRYER,
+        label: EQUIPMENT_LABELS.AIR_FRYER,
+        Icon: IconWind,
+      },
+      {
+        value: Equipment.STEAMER,
+        label: EQUIPMENT_LABELS.STEAMER,
+        Icon: IconSteam,
+      },
+      {
+        value: Equipment.SOUS_VIDE,
+        label: EQUIPMENT_LABELS.SOUS_VIDE,
+        Icon: IconTemperature,
+      },
+      {
+        value: Equipment.ELECTRIC_GRILL,
+        label: EQUIPMENT_LABELS.ELECTRIC_GRILL,
+        Icon: IconGrill,
+      },
+    ],
+  },
+] satisfies EquipmentCategory[];
+
 const stepDetails = [
   {
     label: "Jak jesz?",
     emoji: "🍽️",
-    title: "Zacznijmy od Twojego stylu jedzenia",
+    title: "Wybierz styl jedzenia",
     description:
-      "Dzięki temu MealGenie nie będzie proponować rzeczy, które od razu odpadają.",
+      "To baza dla propozycji, które mają pasować do Twojego sposobu odżywiania.",
   },
   {
     label: "Czego unikać?",
@@ -102,11 +342,18 @@ const stepDetails = [
       "Alergie, nietolerancje i składniki, których po prostu nie lubisz.",
   },
   {
-    label: "Jak gotujesz?",
-    emoji: "🍳",
-    title: "Dopasujmy przepisy do Twojej kuchni",
+    label: "Umiejętności",
+    emoji: "👩‍🍳",
+    title: "Dopasujmy trudność przepisów",
     description:
-      "Wybierz poziom i sprzęt, żeby przepisy były realne do zrobienia.",
+      "MealGenie będzie dobierać tempo, techniki i poziom szczegółowości instrukcji.",
+  },
+  {
+    label: "Sprzęt",
+    emoji: "🍳",
+    title: "Zaznacz, co masz pod ręką",
+    description:
+      "Dzięki temu przepisy będą realne do zrobienia w Twojej kuchni.",
   },
   {
     label: "Budżet i ostrość",
@@ -143,6 +390,37 @@ const slideVariants: Variants = {
 type SectionOptions = {
   showHeading?: boolean;
 };
+type SectionHeaderAlign = "left" | "center";
+
+function PreferenceSectionHeader({
+  eyebrow,
+  title,
+  description,
+  align = "left",
+}: {
+  eyebrow?: string;
+  title: string;
+  description: string;
+  align?: SectionHeaderAlign;
+}) {
+  return (
+    <div
+      className={`max-w-2xl space-y-1.5 ${
+        align === "center" ? "mx-auto text-center" : ""
+      }`}
+    >
+      {eyebrow ? (
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
+          {eyebrow}
+        </p>
+      ) : null}
+      <h4 className="font-brand text-xl font-semibold leading-tight text-ink">
+        {title}
+      </h4>
+      <p className="text-sm leading-6 text-ink-soft">{description}</p>
+    </div>
+  );
+}
 
 function isEnumValue<T extends Record<string, string>>(
   enumObject: T,
@@ -196,66 +474,161 @@ function normalizePreferences(
   };
 }
 
-function getEquipmentIcon(label: string): LucideIcon {
-  const normalizedLabel = label.toLowerCase();
+function ChoiceCard<TValue extends string>({
+  option,
+  isSelected,
+  onSelect,
+}: {
+  option: ChoiceCardOption<TValue>;
+  isSelected: boolean;
+  onSelect: (value: TValue) => void;
+}) {
+  const Icon = option.Icon;
+  const tone = option.tone ?? "neutral";
+  const toneClasses = choiceToneClasses[tone];
 
-  if (
-    normalizedLabel.includes("piekarnik") ||
-    normalizedLabel.includes("kuchenka") ||
-    normalizedLabel.includes("grill")
-  ) {
-    return Flame;
-  }
-
-  if (normalizedLabel.includes("mikrof")) {
-    return Microwave;
-  }
-
-  if (
-    normalizedLabel.includes("frytkownica") ||
-    normalizedLabel.includes("air")
-  ) {
-    return Wind;
-  }
-
-  if (normalizedLabel.includes("parowar")) {
-    return Droplets;
-  }
-
-  if (normalizedLabel.includes("sous")) {
-    return Thermometer;
-  }
-
-  if (
-    normalizedLabel.includes("blender") ||
-    normalizedLabel.includes("miks")
-  ) {
-    return Coffee;
-  }
-
-  return Utensils;
+  return (
+    <button
+      type="button"
+      aria-pressed={isSelected}
+      onClick={() => onSelect(option.value)}
+      className={`group relative flex min-h-36 cursor-pointer flex-col items-start gap-3 rounded-xl border p-4 text-left shadow-xs transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+        isSelected
+          ? `${toneClasses.selected} shadow-sm`
+          : "border-border bg-bg-sunken text-ink-soft hover:border-border-strong hover:bg-bg-elevated hover:text-ink"
+      }`}
+    >
+      <span
+        className={`flex h-10 w-10 items-center justify-center rounded-lg transition duration-fast ease-out ${
+          isSelected ? "bg-bg-elevated/75" : toneClasses.icon
+        }`}
+        aria-hidden="true"
+      >
+        <Icon
+          className={`h-5 w-5 transition-transform ${
+            isSelected ? "scale-110" : "group-hover:scale-110"
+          }`}
+        />
+      </span>
+      <span className="space-y-1.5">
+        <span className="block text-base font-semibold leading-6 text-ink">
+          {option.label}
+        </span>
+        <span className="block text-sm leading-6 text-ink-soft">
+          {option.description}
+        </span>
+      </span>
+      {isSelected ? (
+        <CheckCircle2
+          className="absolute right-3 top-3 h-4 w-4 text-accent"
+          aria-hidden="true"
+        />
+      ) : null}
+    </button>
+  );
 }
 
-function SummaryRow({
+function ChoiceCardGroup<TValue extends string>({
+  legend,
+  description,
+  eyebrow,
+  headerAlign = "left",
+  options,
+  value,
+  onChange,
+  gridClassName = "grid-cols-1 sm:grid-cols-2",
+}: {
+  legend: string;
+  description: string;
+  eyebrow?: string;
+  headerAlign?: SectionHeaderAlign;
+  options: Array<ChoiceCardOption<TValue>>;
+  value: TValue;
+  onChange: (value: TValue) => void;
+  gridClassName?: string;
+}) {
+  return (
+    <fieldset className="space-y-4">
+      <legend className="sr-only">{legend}</legend>
+      <PreferenceSectionHeader
+        eyebrow={eyebrow}
+        title={legend}
+        description={description}
+        align={headerAlign}
+      />
+      <div className={`grid gap-3 ${gridClassName}`}>
+        {options.map((option) => (
+          <ChoiceCard
+            key={option.value}
+            option={option}
+            isSelected={value === option.value}
+            onSelect={onChange}
+          />
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function SummaryBadgeList({ values }: { values: string[] }) {
+  if (values.length === 0) {
+    return <span className="text-sm font-medium text-ink-muted">Brak</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {values.map((value) => (
+        <Badge key={value} variant="neutral" className="text-[0.8rem]">
+          {value}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+function SummaryItem({
   label,
   value,
 }: {
   label: string;
   value: string | string[];
 }) {
-  const displayValue = Array.isArray(value)
-    ? value.length > 0
-      ? value.join(", ")
-      : "Brak"
-    : value;
-
   return (
-    <div className="flex flex-col gap-1.5 border-b border-border-dotted pb-3 last:border-0 last:pb-0">
-      <span className="text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
+    <div className="space-y-1.5">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
         {label}
-      </span>
-      <span className="font-medium leading-6 text-ink">{displayValue}</span>
+      </p>
+      {Array.isArray(value) ? (
+        <SummaryBadgeList values={value} />
+      ) : (
+        <p className="text-sm font-semibold leading-6 text-ink">{value}</p>
+      )}
     </div>
+  );
+}
+
+function SummaryCategory({
+  title,
+  Icon,
+  children,
+}: {
+  title: string;
+  Icon: TablerIcon;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-border bg-bg-elevated p-4 shadow-xs">
+      <div className="mb-4 flex items-center gap-3">
+        <span
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-soft text-accent-deep"
+          aria-hidden="true"
+        >
+          <Icon className="h-5 w-5" />
+        </span>
+        <h4 className="font-brand text-lg font-semibold text-ink">{title}</h4>
+      </div>
+      <div className="grid gap-4">{children}</div>
+    </section>
   );
 }
 
@@ -265,7 +638,9 @@ export function OnboardingForm({
 }: OnboardingFormProps) {
   const [step, setStep] = useState(1);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const navigationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const spiceLevelInputId = useId();
+  const wizardStepTopRef = useRef<HTMLDivElement | null>(null);
+  const hasMountedWizardRef = useRef(false);
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const updateOnboardingStatus = useAuthStore(
@@ -280,23 +655,30 @@ export function OnboardingForm({
     control,
     register,
     handleSubmit,
-    watch,
     formState: { isSubmitting },
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: formDefaultValues,
   });
 
-  const spiceLevel = watch("spiceLevel") ?? defaultValues.spiceLevel;
+  const currentValues = useWatch({ control }) as PreferencesFormData;
+  const spiceLevel = currentValues.spiceLevel ?? defaultValues.spiceLevel;
 
-  useEffect(
-    () => () => {
-      if (navigationTimerRef.current) {
-        clearTimeout(navigationTimerRef.current);
-      }
-    },
-    [],
-  );
+  useEffect(() => {
+    if (isEditing) {
+      return;
+    }
+
+    if (!hasMountedWizardRef.current) {
+      hasMountedWizardRef.current = true;
+      return;
+    }
+
+    wizardStepTopRef.current?.scrollIntoView({
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [isEditing, shouldReduceMotion, step]);
 
   const onSubmit = async (values: PreferencesFormData) => {
     setErrorMsg(null);
@@ -304,7 +686,7 @@ export function OnboardingForm({
       await savePreferences(values);
       if (isEditing) {
         notify.success("Zapisano zmiany!", "Sukces");
-        navigationTimerRef.current = setTimeout(() => {
+        window.setTimeout(() => {
           navigate("/dashboard");
         }, 800);
       } else {
@@ -322,12 +704,6 @@ export function OnboardingForm({
     }
   };
 
-  const equipmentOptions: Array<{ value: EquipmentValue; label: string }> =
-    Object.values(Equipment).map((equipment) => ({
-      value: equipment,
-      label: EQUIPMENT_LABELS[equipment],
-    }));
-
   const nextStep = (event?: MouseEvent<HTMLButtonElement>) => {
     event?.preventDefault();
     event?.stopPropagation();
@@ -338,6 +714,8 @@ export function OnboardingForm({
     setStep((currentStep) => Math.max(currentStep - 1, 1));
   };
 
+  const sectionHeaderAlign: SectionHeaderAlign = isEditing ? "left" : "center";
+
   const renderSection1 = ({ showHeading = true }: SectionOptions = {}) => (
     <div className="space-y-6">
       {showHeading ? (
@@ -345,18 +723,22 @@ export function OnboardingForm({
           Jak jesz?
         </h3>
       ) : null}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div>
-          <label className={labelStyles}>Dieta</label>
-          <select className={selectStyles} {...register("diet")}>
-            {Object.values(Diet).map((value) => (
-              <option key={value} value={value}>
-                {DIET_LABELS[value]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <Controller
+        control={control}
+        name="diet"
+        render={({ field }) => (
+          <ChoiceCardGroup
+            legend="Dieta"
+            eyebrow="Wybór główny"
+            description="Wybierz styl jedzenia, który ma prowadzić propozycje MealGenie."
+            headerAlign={sectionHeaderAlign}
+            options={dietOptions}
+            value={field.value}
+            onChange={field.onChange}
+            gridClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          />
+        )}
+      />
     </div>
   );
 
@@ -371,12 +753,21 @@ export function OnboardingForm({
         control={control}
         name="allergies"
         render={({ field }) => (
-          <TagInput
-            label="Alergie i nietolerancje"
-            placeholder="np. orzechy, laktoza"
-            value={field.value}
-            onChange={field.onChange}
-          />
+          <div className="space-y-4">
+            <PreferenceSectionHeader
+              eyebrow="Bezpieczeństwo"
+              title="Alergie i nietolerancje"
+              description="Dodaj rzeczy, których MealGenie ma zawsze unikać w przepisach."
+              align={sectionHeaderAlign}
+            />
+            <TagInput
+              label="Alergie i nietolerancje"
+              labelHidden
+              placeholder="np. orzechy, laktoza"
+              value={field.value}
+              onChange={field.onChange}
+            />
+          </div>
         )}
       />
 
@@ -385,24 +776,42 @@ export function OnboardingForm({
           control={control}
           name="dislikedIngredients"
           render={({ field }) => (
-            <TagInput
-              label="Nielubiane składniki"
-              placeholder="np. brukselka"
-              value={field.value}
-              onChange={field.onChange}
-            />
+            <div className="space-y-4">
+              <PreferenceSectionHeader
+                eyebrow="Smak"
+                title="Nielubiane składniki"
+                description="Składniki, które możesz jeść, ale nie chcesz ich w propozycjach."
+                align={sectionHeaderAlign}
+              />
+              <TagInput
+                label="Nielubiane składniki"
+                labelHidden
+                placeholder="np. brukselka"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            </div>
           )}
         />
         <Controller
           control={control}
           name="favCuisines"
           render={({ field }) => (
-            <TagInput
-              label="Ulubione kuchnie"
-              placeholder="np. włoska, tajska"
-              value={field.value}
-              onChange={field.onChange}
-            />
+            <div className="space-y-4">
+              <PreferenceSectionHeader
+                eyebrow="Inspiracje"
+                title="Ulubione kuchnie"
+                description="Kierunki smakowe, do których warto częściej wracać."
+                align={sectionHeaderAlign}
+              />
+              <TagInput
+                label="Ulubione kuchnie"
+                labelHidden
+                placeholder="np. włoska, tajska"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            </div>
           )}
         />
       </div>
@@ -413,68 +822,23 @@ export function OnboardingForm({
     <div className="space-y-6">
       {showHeading ? (
         <h3 className="font-brand text-xl font-semibold text-ink">
-          Jak gotujesz?
+          Poziom umiejętności
         </h3>
       ) : null}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div>
-          <label className={labelStyles}>Poziom umiejętności</label>
-          <select className={selectStyles} {...register("cookingSkill")}>
-            {Object.values(CookingSkill).map((value) => (
-              <option key={value} value={value}>
-                {SKILL_LABELS[value]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <Controller
         control={control}
-        name="kitchenEquipment"
+        name="cookingSkill"
         render={({ field }) => (
-          <div className="space-y-3">
-            <label className={labelStyles}>Twój sprzęt kuchenny</label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {equipmentOptions.map((option) => {
-                const isSelected = field.value.includes(option.value);
-                const Icon = getEquipmentIcon(option.label);
-                const nextValue = isSelected
-                  ? field.value.filter((value) => value !== option.value)
-                  : [...field.value, option.value];
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => field.onChange(nextValue)}
-                    className={`group relative flex min-h-32 flex-col items-center justify-center gap-2.5 rounded-xl border p-4 text-center transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-                      isSelected
-                        ? "border-accent bg-accent-soft text-accent-deep shadow-xs dark:bg-accent/20 dark:text-accent"
-                        : "border-border bg-bg-sunken text-ink-soft shadow-xs hover:border-border-strong hover:bg-bg-elevated hover:text-ink"
-                    }`}
-                  >
-                    <Icon
-                      className={`h-6 w-6 transition-transform ${
-                        isSelected ? "scale-110" : "group-hover:scale-110"
-                      }`}
-                      aria-hidden="true"
-                    />
-                    <span className="text-sm font-semibold leading-5">
-                      {option.label}
-                    </span>
-                    {isSelected ? (
-                      <CheckCircle2
-                        className="absolute right-2 top-2 h-4 w-4 text-accent"
-                        aria-hidden="true"
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <ChoiceCardGroup
+            legend="Jak pewnie czujesz się w kuchni?"
+            eyebrow="Poziom trudności"
+            description="Wybierz poziom, który najlepiej opisuje Twoje tempo i komfort gotowania."
+            headerAlign={sectionHeaderAlign}
+            options={skillOptions}
+            value={field.value}
+            onChange={field.onChange}
+            gridClassName="grid-cols-1 md:grid-cols-3"
+          />
         )}
       />
     </div>
@@ -484,29 +848,130 @@ export function OnboardingForm({
     <div className="space-y-6">
       {showHeading ? (
         <h3 className="font-brand text-xl font-semibold text-ink">
+          Sprzęt kuchenny
+        </h3>
+      ) : null}
+      <Controller
+        control={control}
+        name="kitchenEquipment"
+        render={({ field }) => (
+          <div className="space-y-5">
+            <PreferenceSectionHeader
+              eyebrow="Możliwości kuchni"
+              title="Twój sprzęt kuchenny"
+              description="Zaznacz urządzenia, które realnie masz dostępne podczas gotowania."
+              align={sectionHeaderAlign}
+            />
+            <div className="space-y-7">
+              {equipmentCategories.map((category) => (
+                <div
+                  key={category.id}
+                  className="space-y-4"
+                  role="group"
+                  aria-labelledby={`equipment-category-${category.id}`}
+                >
+                  <div className="flex justify-center">
+                    <h4
+                      id={`equipment-category-${category.id}`}
+                      className="text-center font-brand text-base font-semibold text-ink"
+                    >
+                      {category.title}
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {category.options.map((option) => {
+                      const isSelected = field.value.includes(option.value);
+                      const Icon = option.Icon;
+                      const nextValue = isSelected
+                        ? field.value.filter((value) => value !== option.value)
+                        : [...field.value, option.value];
+
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => field.onChange(nextValue)}
+                          className={`group relative flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2.5 rounded-xl border p-4 text-center transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                            isSelected
+                              ? "border-accent bg-accent-soft text-accent-deep shadow-xs dark:bg-accent/20 dark:text-accent"
+                              : "border-border bg-bg-sunken text-ink-soft shadow-xs hover:border-border-strong hover:bg-bg-elevated hover:text-ink"
+                          }`}
+                        >
+                          <Icon
+                            className={`h-6 w-6 transition-transform ${
+                              isSelected ? "scale-110" : "group-hover:scale-110"
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span className="text-sm font-semibold leading-5">
+                            {option.label}
+                          </span>
+                          {isSelected ? (
+                            <CheckCircle2
+                              className="absolute right-2 top-2 h-4 w-4 text-accent"
+                              aria-hidden="true"
+                            />
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      />
+    </div>
+  );
+
+  const renderSection5 = ({ showHeading = true }: SectionOptions = {}) => (
+    <div className="space-y-6">
+      {showHeading ? (
+        <h3 className="font-brand text-xl font-semibold text-ink">
           Budżet i ostrość
         </h3>
       ) : null}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div>
-          <label className={labelStyles}>Budżet</label>
-          <select className={selectStyles} {...register("budget")}>
-            {Object.values(Budget).map((value) => (
-              <option key={value} value={value}>
-                {BUDGET_LABELS[value]}
-              </option>
-            ))}
-          </select>
-        </div>
+      <Controller
+        control={control}
+        name="budget"
+        render={({ field }) => (
+          <ChoiceCardGroup
+            legend="Budżet"
+            eyebrow="Koszt składników"
+            description="Ustal, jak bardzo MealGenie ma pilnować ceny zakupów."
+            headerAlign={sectionHeaderAlign}
+            options={budgetOptions}
+            value={field.value}
+            onChange={field.onChange}
+            gridClassName="grid-cols-1 sm:grid-cols-2"
+          />
+        )}
+      />
 
-        <div className="space-y-3">
+      <div className="rounded-xl border border-border bg-bg-sunken p-4 shadow-xs sm:p-5">
+        <div className="space-y-4">
+          <PreferenceSectionHeader
+            eyebrow="Charakter dań"
+            title="Poziom ostrości"
+            description="Ustaw, jak pikantne mogą być domyślne propozycje posiłków."
+            align={sectionHeaderAlign}
+          />
           <div className="flex items-center justify-between gap-4">
-            <label className={inlineLabelStyles}>Poziom ostrości</label>
-            <span className="rounded-pill bg-bg-sunken px-2.5 py-1 text-xs font-bold text-ink-soft">
+            <label
+              htmlFor={spiceLevelInputId}
+              className="sr-only"
+            >
+              Poziom ostrości
+            </label>
+            <span className="inline-flex items-center gap-2 rounded-pill bg-bg-elevated px-2.5 py-1 text-xs font-bold text-ink-soft">
+              <IconPepper className="h-4 w-4 text-accent" aria-hidden="true" />
               {spiceLevelLabels[spiceLevel] ?? "Umiarkowany"}
             </span>
           </div>
           <input
+            id={spiceLevelInputId}
             type="range"
             min="1"
             max="5"
@@ -530,8 +995,10 @@ export function OnboardingForm({
     </div>
   );
 
-  const renderSection5 = ({ showHeading = true }: SectionOptions = {}) => {
-    const currentValues = watch();
+  const renderSection6 = ({ showHeading = true }: SectionOptions = {}) => {
+    const selectedEquipment = currentValues.kitchenEquipment.map(
+      (equipment) => EQUIPMENT_LABELS[equipment] ?? equipment,
+    );
 
     return (
       <div className="space-y-6">
@@ -540,40 +1007,41 @@ export function OnboardingForm({
             Podsumowanie
           </h3>
         ) : null}
-        <div className="rounded-2xl border border-border bg-bg-sunken p-5 shadow-xs sm:p-6">
-          <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
-            <SummaryRow
+        <div className="grid gap-4 md:grid-cols-2">
+          <SummaryCategory title="Jedzenie" Icon={IconListCheck}>
+            <SummaryItem
               label="Dieta"
               value={DIET_LABELS[currentValues.diet] ?? "Brak"}
             />
-            <SummaryRow
+            <SummaryItem label="Ulubione kuchnie" value={currentValues.favCuisines} />
+          </SummaryCategory>
+
+          <SummaryCategory title="Ograniczenia" Icon={IconHeart}>
+            <SummaryItem label="Alergie" value={currentValues.allergies} />
+            <SummaryItem
+              label="Nielubiane składniki"
+              value={currentValues.dislikedIngredients}
+            />
+          </SummaryCategory>
+
+          <SummaryCategory title="Kuchnia" Icon={IconToolsKitchen}>
+            <SummaryItem
               label="Umiejętności"
               value={SKILL_LABELS[currentValues.cookingSkill] ?? "Brak"}
             />
-            <SummaryRow
+            <SummaryItem label="Sprzęt" value={selectedEquipment} />
+          </SummaryCategory>
+
+          <SummaryCategory title="Preferencje" Icon={IconGauge}>
+            <SummaryItem
               label="Budżet"
               value={BUDGET_LABELS[currentValues.budget] ?? "Brak"}
             />
-            <SummaryRow
+            <SummaryItem
               label="Ostrość"
               value={spiceLevelLabels[currentValues.spiceLevel] ?? "Brak"}
             />
-            <SummaryRow label="Alergie" value={currentValues.allergies} />
-            <SummaryRow
-              label="Nielubiane"
-              value={currentValues.dislikedIngredients}
-            />
-            <SummaryRow
-              label="Ulubione kuchnie"
-              value={currentValues.favCuisines}
-            />
-            <SummaryRow
-              label="Sprzęt"
-              value={currentValues.kitchenEquipment.map(
-                (equipment) => EQUIPMENT_LABELS[equipment] ?? equipment,
-              )}
-            />
-          </div>
+          </SummaryCategory>
         </div>
       </div>
     );
@@ -591,6 +1059,8 @@ export function OnboardingForm({
         return renderSection4({ showHeading: false });
       case 5:
         return renderSection5({ showHeading: false });
+      case 6:
+        return renderSection6({ showHeading: false });
       default:
         return renderSection1({ showHeading: false });
     }
@@ -601,7 +1071,7 @@ export function OnboardingForm({
 
   return (
     <motion.form
-      layout={!shouldReduceMotion}
+      layout={!isEditing && !shouldReduceMotion}
       transition={{ layout: { duration: 0.28, ease: "easeInOut" } }}
       onSubmit={handleSubmit(onSubmit)}
       className={
@@ -628,11 +1098,19 @@ export function OnboardingForm({
             aria-hidden="true"
           />
           {renderSection4()}
+          <div
+            className="w-full border-t border-dotted border-border-dotted"
+            aria-hidden="true"
+          />
+          {renderSection5()}
         </>
       ) : (
         <>
           <motion.div layout={!shouldReduceMotion} className="mb-8 space-y-5">
-            <div className="flex items-center justify-between gap-4">
+            <div
+              ref={wizardStepTopRef}
+              className="flex scroll-mt-24 items-center justify-between gap-4"
+            >
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink-muted">
                 Krok {step} z {WIZARD_STEP_COUNT}
               </p>

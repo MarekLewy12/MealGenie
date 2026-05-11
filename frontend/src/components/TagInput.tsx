@@ -6,6 +6,7 @@ type TagInputProps = {
   onChange: (tags: string[]) => void;
   label: string;
   placeholder?: string;
+  labelHidden?: boolean;
 };
 
 export function TagInput({
@@ -13,6 +14,7 @@ export function TagInput({
   onChange,
   label,
   placeholder,
+  labelHidden = false,
 }: TagInputProps) {
   const generatedId = useId();
   const inputId = `${generatedId}-tag-input`;
@@ -45,7 +47,9 @@ export function TagInput({
     <div className="space-y-2">
       <label
         htmlFor={inputId}
-        className={label ? "text-sm font-semibold text-ink" : "sr-only"}
+        className={
+          label && !labelHidden ? "text-sm font-semibold text-ink" : "sr-only"
+        }
       >
         {accessibleLabel}
       </label>

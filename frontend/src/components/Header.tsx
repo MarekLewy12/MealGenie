@@ -73,8 +73,7 @@ export function Header() {
     >
       <div
         className={cn(
-          "mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 transition-[min-height,padding] duration-base ease-out xs:px-4 sm:gap-4 sm:px-6",
-          isScrolled ? "min-h-16 py-2" : "min-h-[4.5rem] py-3",
+          "mx-auto flex min-h-[4.5rem] max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 xs:px-4 sm:gap-4 sm:px-6",
         )}
       >
         <Link
