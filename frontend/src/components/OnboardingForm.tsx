@@ -102,9 +102,16 @@ type EquipmentCategory = {
   options: EquipmentOption[];
 };
 
+export type SettingsCategoryId =
+  | "food"
+  | "limits"
+  | "kitchen"
+  | "preferences";
+
 type OnboardingFormProps = {
   initialValues?: Partial<SavePreferencesPayload>;
   isEditing?: boolean;
+  activeCategory?: SettingsCategoryId;
 };
 
 const defaultValues: PreferencesFormData = {
@@ -635,6 +642,7 @@ function SummaryCategory({
 export function OnboardingForm({
   initialValues,
   isEditing = false,
+  activeCategory = "food",
 }: OnboardingFormProps) {
   const [step, setStep] = useState(1);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -659,6 +667,7 @@ export function OnboardingForm({
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: formDefaultValues,
+    shouldUnregister: false,
   });
 
   const currentValues = useWatch({ control }) as PreferencesFormData;
@@ -686,14 +695,12 @@ export function OnboardingForm({
       await savePreferences(values);
       if (isEditing) {
         notify.success("Zapisano zmiany!", "Sukces");
-        window.setTimeout(() => {
-          navigate("/dashboard");
-        }, 800);
-      } else {
-        updateOnboardingStatus(true);
-        notify.success("Preferencje zapisane!", "Witaj");
-        navigate("/dashboard");
+        return;
       }
+
+      updateOnboardingStatus(true);
+      notify.success("Preferencje zapisane!", "Witaj");
+      navigate("/dashboard");
     } catch (error: unknown) {
       console.error(error);
       setErrorMsg("Coś poszło nie tak przy zapisywaniu. Spróbuj ponownie.");
@@ -742,78 +749,91 @@ export function OnboardingForm({
     </div>
   );
 
+  const renderAllergiesField = () => (
+    <Controller
+      control={control}
+      name="allergies"
+      render={({ field }) => (
+        <div className="space-y-4">
+          <PreferenceSectionHeader
+            eyebrow="Bezpieczeństwo"
+            title="Alergie i nietolerancje"
+            description="Wpisz składniki, których MealGenie powinien bezwzględnie unikać."
+            align={sectionHeaderAlign}
+          />
+          <TagInput
+            label="Alergie i nietolerancje"
+            labelHidden
+            placeholder="np. orzechy, laktoza, gluten"
+            value={field.value}
+            onChange={field.onChange}
+          />
+        </div>
+      )}
+    />
+  );
+
+  const renderDislikedIngredientsField = () => (
+    <Controller
+      control={control}
+      name="dislikedIngredients"
+      render={({ field }) => (
+        <div className="space-y-4">
+          <PreferenceSectionHeader
+            eyebrow="Smaki na nie"
+            title="Nielubiane składniki"
+            description="Dodaj składniki, których po prostu nie chcesz widzieć w propozycjach."
+            align={sectionHeaderAlign}
+          />
+          <TagInput
+            label="Nielubiane składniki"
+            labelHidden
+            placeholder="np. kolendra, oliwki"
+            value={field.value}
+            onChange={field.onChange}
+          />
+        </div>
+      )}
+    />
+  );
+
+  const renderFavoriteCuisinesField = () => (
+    <Controller
+      control={control}
+      name="favCuisines"
+      render={({ field }) => (
+        <div className="space-y-4">
+          <PreferenceSectionHeader
+            eyebrow="Smaki na tak"
+            title="Ulubione kuchnie"
+            description="Podpowiedz MealGenie, jakie kierunki smakowe lubisz najbardziej."
+            align={sectionHeaderAlign}
+          />
+          <TagInput
+            label="Ulubione kuchnie"
+            labelHidden
+            placeholder="np. włoska, tajska, polska"
+            value={field.value}
+            onChange={field.onChange}
+          />
+        </div>
+      )}
+    />
+  );
+
   const renderSection2 = ({ showHeading = true }: SectionOptions = {}) => (
     <div className="space-y-6">
       {showHeading ? (
         <h3 className="font-brand text-xl font-semibold text-ink">
-          Czego unikać?
+          Ograniczenia i preferencje składników
         </h3>
       ) : null}
-      <Controller
-        control={control}
-        name="allergies"
-        render={({ field }) => (
-          <div className="space-y-4">
-            <PreferenceSectionHeader
-              eyebrow="Bezpieczeństwo"
-              title="Alergie i nietolerancje"
-              description="Dodaj rzeczy, których MealGenie ma zawsze unikać w przepisach."
-              align={sectionHeaderAlign}
-            />
-            <TagInput
-              label="Alergie i nietolerancje"
-              labelHidden
-              placeholder="np. orzechy, laktoza"
-              value={field.value}
-              onChange={field.onChange}
-            />
-          </div>
-        )}
-      />
+
+      {renderAllergiesField()}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Controller
-          control={control}
-          name="dislikedIngredients"
-          render={({ field }) => (
-            <div className="space-y-4">
-              <PreferenceSectionHeader
-                eyebrow="Smak"
-                title="Nielubiane składniki"
-                description="Składniki, które możesz jeść, ale nie chcesz ich w propozycjach."
-                align={sectionHeaderAlign}
-              />
-              <TagInput
-                label="Nielubiane składniki"
-                labelHidden
-                placeholder="np. brukselka"
-                value={field.value}
-                onChange={field.onChange}
-              />
-            </div>
-          )}
-        />
-        <Controller
-          control={control}
-          name="favCuisines"
-          render={({ field }) => (
-            <div className="space-y-4">
-              <PreferenceSectionHeader
-                eyebrow="Inspiracje"
-                title="Ulubione kuchnie"
-                description="Kierunki smakowe, do których warto częściej wracać."
-                align={sectionHeaderAlign}
-              />
-              <TagInput
-                label="Ulubione kuchnie"
-                labelHidden
-                placeholder="np. włoska, tajska"
-                value={field.value}
-                onChange={field.onChange}
-              />
-            </div>
-          )}
-        />
+        {renderDislikedIngredientsField()}
+        {renderFavoriteCuisinesField()}
       </div>
     </div>
   );
@@ -1066,13 +1086,65 @@ export function OnboardingForm({
     }
   };
 
+  const renderActiveSettingsCategory = () => {
+    switch (activeCategory) {
+      case "food":
+        return (
+          <div className="space-y-8">
+            {renderSection1({ showHeading: false })}
+
+            <div
+              className="w-full border-t border-dotted border-border-dotted"
+              aria-hidden="true"
+            />
+
+            {renderFavoriteCuisinesField()}
+          </div>
+        );
+
+      case "limits":
+        return (
+          <div className="space-y-8">
+            {renderAllergiesField()}
+
+            <div
+              className="w-full border-t border-dotted border-border-dotted"
+              aria-hidden="true"
+            />
+
+            {renderDislikedIngredientsField()}
+          </div>
+        );
+
+      case "kitchen":
+        return (
+          <div className="space-y-8">
+            {renderSection3({ showHeading: false })}
+
+            <div
+              className="w-full border-t border-dotted border-border-dotted"
+              aria-hidden="true"
+            />
+
+            {renderSection4({ showHeading: false })}
+          </div>
+        );
+
+      case "preferences":
+        return renderSection5({ showHeading: false });
+
+      default:
+        return renderSection1({ showHeading: false });
+    }
+  };
+
   const currentStepDetails = stepDetails[step - 1];
   const isLastWizardStep = step === WIZARD_STEP_COUNT;
 
   return (
     <motion.form
-      layout={!isEditing && !shouldReduceMotion}
-      transition={{ layout: { duration: 0.28, ease: "easeInOut" } }}
+      layout={!shouldReduceMotion}
+      transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
       onSubmit={handleSubmit(onSubmit)}
       className={
         isEditing
@@ -1081,29 +1153,25 @@ export function OnboardingForm({
       }
     >
       {isEditing ? (
-        <>
-          {renderSection1()}
-          <div
-            className="w-full border-t border-dotted border-border-dotted"
-            aria-hidden="true"
-          />
-          {renderSection2()}
-          <div
-            className="w-full border-t border-dotted border-border-dotted"
-            aria-hidden="true"
-          />
-          {renderSection3()}
-          <div
-            className="w-full border-t border-dotted border-border-dotted"
-            aria-hidden="true"
-          />
-          {renderSection4()}
-          <div
-            className="w-full border-t border-dotted border-border-dotted"
-            aria-hidden="true"
-          />
-          {renderSection5()}
-        </>
+        <motion.div layout={!shouldReduceMotion} className="relative">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={activeCategory}
+              layout={!shouldReduceMotion}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+              animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+              transition={
+                shouldReduceMotion
+                  ? undefined
+                  : { duration: 0.14, ease: "easeOut" }
+              }
+              className="w-full space-y-8"
+            >
+              {renderActiveSettingsCategory()}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       ) : (
         <>
           <motion.div layout={!shouldReduceMotion} className="mb-8 space-y-5">
@@ -1189,7 +1257,9 @@ export function OnboardingForm({
 
       <div
         className={`mt-8 flex flex-col gap-3 sm:flex-row sm:items-center ${
-          isEditing ? "sm:justify-start" : "sm:justify-between"
+          isEditing
+            ? "border-t border-border bg-bg-elevated/95 pt-5 pb-3 sm:justify-center lg:sticky lg:bottom-0 lg:z-10"
+            : "sm:justify-between"
         }`}
       >
         {!isEditing && step > 1 ? (
@@ -1221,7 +1291,7 @@ export function OnboardingForm({
             variant="primary"
             disabled={isSubmitting}
             className={`min-h-14 w-full sm:w-auto ${
-              isEditing ? "" : "sm:ml-auto sm:min-w-40"
+              isEditing ? "sm:min-w-48" : "sm:ml-auto sm:min-w-40"
             }`}
             rightIcon={
               isSubmitting ? (
