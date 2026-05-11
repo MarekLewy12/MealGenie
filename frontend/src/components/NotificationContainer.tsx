@@ -31,32 +31,32 @@ const styles: Record<
   }
 > = {
   success: {
-    bg: "bg-emerald-50 dark:bg-emerald-500/10",
-    border: "border-emerald-200 dark:border-emerald-500/30",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    title: "text-emerald-800 dark:text-emerald-200",
-    progressBar: "bg-emerald-500",
+    bg: "bg-basil-soft",
+    border: "border-basil/30",
+    icon: "text-basil",
+    title: "text-basil",
+    progressBar: "bg-basil",
   },
   error: {
-    bg: "bg-red-50 dark:bg-red-500/10",
-    border: "border-red-200 dark:border-red-500/30",
-    icon: "text-red-600 dark:text-red-400",
-    title: "text-red-800 dark:text-red-200",
-    progressBar: "bg-red-500",
+    bg: "bg-accent-soft",
+    border: "border-bordeaux/30",
+    icon: "text-bordeaux",
+    title: "text-bordeaux",
+    progressBar: "bg-bordeaux",
   },
   warning: {
-    bg: "bg-amber-50 dark:bg-amber-500/10",
-    border: "border-amber-200 dark:border-amber-500/30",
-    icon: "text-amber-600 dark:text-amber-400",
-    title: "text-amber-800 dark:text-amber-200",
-    progressBar: "bg-amber-500",
+    bg: "bg-saffron-soft",
+    border: "border-saffron/40",
+    icon: "text-ink",
+    title: "text-ink",
+    progressBar: "bg-saffron",
   },
   info: {
-    bg: "bg-blue-50 dark:bg-blue-500/10",
-    border: "border-blue-200 dark:border-blue-500/30",
-    icon: "text-blue-600 dark:text-blue-400",
-    title: "text-blue-800 dark:text-blue-200",
-    progressBar: "bg-blue-500",
+    bg: "bg-accent-soft",
+    border: "border-accent/30",
+    icon: "text-accent",
+    title: "text-accent-deep",
+    progressBar: "bg-accent",
   },
 };
 
@@ -72,7 +72,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: 100, scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className={`relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-xl border p-4 shadow-lg backdrop-blur-sm ${style.bg} ${style.border}`}
+      className={`relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-lg border p-4 text-ink shadow-md backdrop-blur-sm ${style.bg} ${style.border}`}
     >
       <div className={`mt-0.5 flex-shrink-0 ${style.icon}`}>
         <Icon className="h-5 w-5" />
@@ -84,15 +84,17 @@ function NotificationItem({ notification }: { notification: Notification }) {
             {notification.title}
           </p>
         )}
-        <p className="text-sm text-slate-700 dark:text-slate-300">
+        <p className="text-sm text-ink-soft">
           {notification.message}
         </p>
       </div>
 
       {notification.dismissible && (
         <button
+          type="button"
           onClick={() => removeNotification(notification.id)}
-          className="flex-shrink-0 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-200/50 hover:text-slate-600 dark:hover:bg-slate-700/50 dark:hover:text-slate-200"
+          className="flex-shrink-0 rounded-md p-1 text-ink-muted transition-colors hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          aria-label="Zamknij powiadomienie"
         >
           <X className="h-4 w-4" />
         </button>
