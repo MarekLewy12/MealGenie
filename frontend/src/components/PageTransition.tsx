@@ -39,7 +39,7 @@ export function PageTransition({
       initial={skipInitialAnimation ? false : "initial"}
       animate="animate"
       exit="exit"
-      className={`w-full ${className}`}
+      className={`flex min-h-0 w-full flex-1 flex-col ${className}`}
     >
       {children}
     </motion.div>

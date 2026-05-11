@@ -46,11 +46,11 @@ function App() {
         <div className="absolute inset-0 opacity-[0.22] [background-image:radial-gradient(var(--border)_0.75px,transparent_0.75px)] [background-size:18px_18px] dark:opacity-0" />
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex h-dvh flex-col">
         {!isSharedPage && <Header />}
 
-        <div>
-          <main id="main-content" className="relative" tabIndex={-1}>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <main id="main-content" className="relative flex min-h-0 flex-1 flex-col" tabIndex={-1}>
             <AnimatePresence mode="wait">
               <Routes location={location} key={location.pathname}>
                 <Route
