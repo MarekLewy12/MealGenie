@@ -15,7 +15,7 @@ const variantClassNames: Record<LandingCtaVariant, string> = {
   primary:
     "group border-accent bg-accent text-ink-inverse shadow-accent hover:-translate-y-1 hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_20px_46px_-28px_rgba(232,111,69,0.85)] active:border-accent-pressed active:bg-accent-pressed",
   secondary:
-    "border-border-strong bg-bg-elevated text-accent shadow-xs hover:-translate-y-1 hover:border-accent hover:bg-accent-soft hover:text-accent-deep hover:shadow-[0_18px_42px_-34px_rgba(32,37,31,0.76)] active:bg-bg-sunken",
+    "border-border-strong bg-transparent text-accent hover:-translate-y-0.5 hover:border-accent hover:text-accent-deep active:bg-bg-sunken",
 };
 
 export function LandingCtaLink({
