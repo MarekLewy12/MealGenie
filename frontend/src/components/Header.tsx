@@ -10,7 +10,7 @@ import { Logo } from "./Logo";
 import { cn } from "../utils/cn";
 
 export function Header() {
-  const { token, logout, user } = useAuthStore();
+  const { token, logout, user, hasCompletedOnboarding } = useAuthStore();
   const openGlobalChat = useChatStore((state) => state.openGlobalChat);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -21,8 +21,16 @@ export function Header() {
     notify.info("Wylogowano pomyślnie.");
   };
 
-  const homeLink = token ? "/dashboard" : "/";
-  const homeLabel = token ? "Dashboard" : "Strona główna";
+  const homeLink = token
+    ? hasCompletedOnboarding
+      ? "/dashboard"
+      : "/onboarding"
+    : "/";
+  const homeLabel = token
+    ? hasCompletedOnboarding
+      ? "Dashboard"
+      : "Konfiguracja"
+    : "Strona główna";
   const logoutTitle = user?.name ? `Wyloguj ${user.name}` : "Wyloguj";
   const mobileMenuId = "mobile-navigation";
 
@@ -65,8 +73,7 @@ export function Header() {
     >
       <div
         className={cn(
-          "mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 transition-[min-height,padding] duration-base ease-out xs:px-4 sm:gap-4 sm:px-6",
-          isScrolled ? "min-h-16 py-2" : "min-h-[4.5rem] py-3",
+          "mx-auto flex min-h-[4.5rem] max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 xs:px-4 sm:gap-4 sm:px-6",
         )}
       >
         <Link
@@ -95,7 +102,7 @@ export function Header() {
             {homeLabel}
           </Link>
 
-          {token && (
+          {token && hasCompletedOnboarding && (
             <>
               <Link to="/settings" className={linkBaseClasses}>
                 Ustawienia
@@ -106,7 +113,7 @@ export function Header() {
             </>
           )}
 
-          {token && (
+          {token && hasCompletedOnboarding && (
             <button
               onClick={openGlobalChat}
               className="group inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-pill border border-basil bg-basil-soft px-4 py-2 text-sm font-semibold text-basil transition duration-fast ease-out hover:bg-bg-elevated"
@@ -118,16 +125,18 @@ export function Header() {
             </button>
           )}
 
-          <Link
-            to="/mobile"
-            className={cn(linkBaseClasses, "inline-flex items-center gap-2")}
-          >
-            <Smartphone className="h-4 w-4" aria-hidden="true" />
-            Mobile
-            <span className="rounded-pill border border-saffron/35 bg-saffron-soft px-1.5 py-0.5 text-[0.6rem] font-bold uppercase leading-none tracking-[0.08em] text-ink">
-              plan
-            </span>
-          </Link>
+          {!token && (
+            <Link
+              to="/mobile"
+              className={cn(linkBaseClasses, "inline-flex items-center gap-2")}
+            >
+              <Smartphone className="h-4 w-4" aria-hidden="true" />
+              Mobile
+              <span className="rounded-pill border border-saffron/35 bg-saffron-soft px-1.5 py-0.5 text-[0.6rem] font-bold uppercase leading-none tracking-[0.08em] text-ink">
+                plan
+              </span>
+            </Link>
+          )}
 
           {!token ? (
             <>
@@ -158,7 +167,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1.5 xs:gap-2 lg:hidden">
-          {token && (
+          {token && hasCompletedOnboarding && (
             <button
               onClick={openGlobalChat}
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-basil bg-basil-soft p-2.5 text-basil transition duration-fast ease-out hover:bg-bg-elevated"
@@ -196,7 +205,7 @@ export function Header() {
                 {homeLabel}
               </Link>
 
-              {token && (
+              {token && hasCompletedOnboarding && (
                 <>
                   <Link to="/settings" className={mobileLinkClasses} onClick={closeMenu}>
                     Ustawienia
@@ -207,17 +216,19 @@ export function Header() {
                 </>
               )}
 
-              <Link
-                to="/mobile"
-                className={cn(mobileLinkClasses, "gap-3")}
-                onClick={closeMenu}
-              >
-                <Smartphone className="h-5 w-5 shrink-0" aria-hidden="true" />
-                <span className="min-w-0 flex-1">Aplikacja mobilna</span>
-                <span className="shrink-0 rounded-pill border border-saffron/35 bg-saffron-soft px-2 py-1 text-[0.65rem] font-bold uppercase leading-none tracking-[0.08em] text-ink">
-                  w planach
-                </span>
-              </Link>
+              {!token && (
+                <Link
+                  to="/mobile"
+                  className={cn(mobileLinkClasses, "gap-3")}
+                  onClick={closeMenu}
+                >
+                  <Smartphone className="h-5 w-5 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0 flex-1">Aplikacja mobilna</span>
+                  <span className="shrink-0 rounded-pill border border-saffron/35 bg-saffron-soft px-2 py-1 text-[0.65rem] font-bold uppercase leading-none tracking-[0.08em] text-ink">
+                    w planach
+                  </span>
+                </Link>
+              )}
 
               {!token ? (
                 <>

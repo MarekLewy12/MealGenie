@@ -4,6 +4,7 @@ import type { MealHistoryDetail } from "./history.service.js";
 import type { PreferencesResponse } from "./preferences.service.js";
 
 const openai = new OpenAI();
+const CHAT_MODEL = process.env.OPENAI_CHAT_MODEL?.trim() || "gpt-4.1";
 
 function buildPreferencesBlock(prefs: PreferencesResponse | null): string {
   if (!prefs) {
@@ -163,7 +164,7 @@ export async function generateAssistantReply(args: {
   });
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: CHAT_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       ...args.messages.map((message) => ({
