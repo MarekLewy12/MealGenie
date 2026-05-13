@@ -21,7 +21,7 @@ redesign/direction-a
 Aktualny branch roboczy:
 
 ```text
-feat/auth-direction-a
+feat/onboarding-settings-direction-a
 ```
 
 Zrobione:
@@ -36,12 +36,14 @@ Zrobione:
 | Chat drawer | Gotowe | UI Direction A + focus trap, ESC, return focus. |
 | Landing | Gotowe / merged | PR #22: `feat/ui-redesign-landing-page` -> `redesign/direction-a`. |
 | Mobile roadmap | Gotowe / decyzja utrzymana | Mobile jako roadmap item, nie gotowa apka; `/mobile` i linki w UI zostaja zgodnie z decyzja Marka. |
-| Auth redesign | Gotowe do review | Branch `feat/auth-direction-a`; `/login` i `/login?mode=register` w Direction A, bez zmian kontraktow API. |
+| Auth redesign | Gotowe / base dla PR 4 | Branch `feat/auth-direction-a`; `/login` i `/login?mode=register` w Direction A, bez zmian kontraktow API. |
+| Onboarding + Settings | Gotowe do PR | Branch `feat/onboarding-settings-direction-a`; onboarding wizard i settings categories w Direction A. |
+| Notifications | Czesciowo zrobione w PR 4 | `NotificationContainer` ma juz mapowanie na palete Direction A; `App.css` cleanup zostaje osobno. |
 
-Nastepny duzy etap po auth:
+Nastepny duzy etap po Onboarding + Settings:
 
 ```text
-Onboarding + Settings redesign
+Final QA + cleanup przed merge Direction A
 ```
 
 ## 2. Decyzje produktowe
@@ -163,18 +165,19 @@ Auth zostal przebudowany w `feat/auth-direction-a`.
 - konto opisane uczciwie bez fikcyjnych linkow do regulaminu/polityki prywatnosci,
 - globalny scroll model dostal pierwszy polish: `App`/`PageTransition` uzywaja flex shell, a `/login` nie scrolluje dokumentu.
 
-Po rejestracji uzytkownik trafia dalej do onboardingu, wiec po auth nastepny zgrzyt to:
+Po auth zostal przebudowany etap Onboarding + Settings w
+`feat/onboarding-settings-direction-a`:
 
-- `OnboardingPage`
-- `OnboardingForm`
-- `SettingsPage`
-- `MultiSelectPills`
-
-`OnboardingForm` jest szczegolnie wazny, bo zasila onboarding i settings.
+- `OnboardingPage` ma Direction A shell, hero i spokojne copy.
+- `OnboardingForm` jest wspolnym formularzem dla onboardingu i settings.
+- Onboarding dziala jako wieloetapowy wizard z podsumowaniem.
+- Settings uzywa kategorii bocznych: jedzenie, ograniczenia, kuchnia, preferencje.
+- Stary `MultiSelectPills` zostal usuniety; wybor sprzetu jest wbudowany w nowy formularz.
+- Dodano nowe wartosci sprzetu: `SLOW_COOKER`, `RICE_COOKER`, `FOOD_PROCESSOR`.
 
 Globalne resztki:
 
-- `NotificationContainer` jest jeszcze w starszym stylu.
+- `NotificationContainer` jest juz w palecie Direction A.
 - `App.css` wyglada jak Vite boilerplate i powinno zostac sprawdzone pozniej.
 
 ## 4. Kolejka PR-ow
@@ -183,9 +186,9 @@ Globalne resztki:
 | --- | --- | --- | --- | --- |
 | 1 | Landing redesign | `feat/ui-redesign-landing-page` | Merged | Pelny landing Direction A. |
 | 2 | Mobile roadmap page | `feat/pause-mobile-page` | Done / decision kept | Mobile jako roadmap/web-first, bez APK/QR w UI; footer link zostaje swiadomie. |
-| 3 | Auth redesign | `feat/auth-direction-a` | Done / ready for review | `/login` i `/login?mode=register` w Direction A. |
-| 4 | Onboarding + Settings | TBD | Next | Wspolny refaktor preferencji i formularzy. |
-| 5 | Notifications + cleanup | TBD | Planned | Global polish i sprzatanie. |
+| 3 | Auth redesign | `feat/auth-direction-a` | Done | `/login` i `/login?mode=register` w Direction A. |
+| 4 | Onboarding + Settings | `feat/onboarding-settings-direction-a` | Done / ready for PR | Wspolny refaktor preferencji i formularzy. |
+| 5 | Cleanup + App.css | TBD | Planned | Sprzatanie globalnych resztek po QA. |
 | 6 | Final QA + release candidate | TBD | Planned | Pelny flow guest/auth/public/mobile/dark. |
 | 7 | Merge Direction A do master | TBD | Later | Dopiero po QA. |
 | 8 | Mobile comeback | TBD | Future | Osobny temat, jesli Marek zdecyduje sie budowac mobile. |
@@ -292,6 +295,12 @@ Acceptance:
 
 ## 7. PR 4 - Onboarding + Settings
 
+Aktualny branch:
+
+```text
+feat/onboarding-settings-direction-a
+```
+
 Cel:
 
 ```text
@@ -302,30 +311,40 @@ Pliki glowne:
 
 - `OnboardingPage.tsx`
 - `OnboardingForm.tsx`
-- `MultiSelectPills.tsx`
 - `SettingsPage.tsx`
+- `TagInput.tsx`
+- `NotificationContainer.tsx`
+- `backend/prisma/schema.prisma`
 
-Kierunek:
+Zakres zrobiony:
 
 - `OnboardingPage`:
-  - usunac indigo glow,
-  - uzyc `bg-bg`, `Card`, `Badge`, `HandwrittenKicker`,
-  - headline w `font-brand`,
-  - teksty w `text-ink-soft`.
+  - Direction A shell i hero,
+  - usuniete stare indigo/slate tony,
+  - copy ustawione pod spokojny start po rejestracji.
 - `OnboardingForm`:
-  - usunac lokalne `inputStyles`/`labelStyles` oparte o indigo,
-  - uzyc `Input`, `Textarea`, `PillGroup`, `Button`, `Card`,
-  - podzielic formularz na spokojne sekcje:
-    - `Jak jesz?`
-    - `Czego unikać?`
-    - `Jak gotujesz?`
-    - `Budżet i ostrość`
-- `MultiSelectPills`:
-  - przepiac na `PillGroup` albo przestylowac na tokeny Direction A.
+  - wspolny komponent dla onboardingu i settings,
+  - onboarding jako wizard: styl jedzenia, ograniczenia, umiejetnosci, sprzet, budzet/ostrosc, podsumowanie,
+  - settings jako tryb edycji wybranej kategorii,
+  - normalizacja `initialValues` przed ustawieniem formularza,
+  - zachowany zapis przez `savePreferences` i aktualizacja onboarding statusu.
 - `SettingsPage`:
-  - usunac stary sidebar slate/indigo,
-  - zrobic spokojna karte `Profil kulinarny`,
-  - usunac albo wyraznie oznaczyc disabled `Dane logowania`.
+  - nowy uklad `Profil kulinarny`,
+  - kategorie: `Jedzenie`, `Ograniczenia`, `Kuchnia`, `Preferencje`,
+  - usuniety stary disabled kafel `Dane logowania`.
+- `MultiSelectPills`:
+  - usuniety, bo wybor sprzetu nie korzysta juz z tego komponentu.
+- Equipment:
+  - dodane `SLOW_COOKER`, `RICE_COOKER`, `FOOD_PROCESSOR`,
+  - dodana migracja Prisma dla enuma,
+  - dodane tlumaczenia frontendowe.
+- Notifications:
+  - `NotificationContainer` dostal palete Direction A: `basil`, `bordeaux`, `saffron`, `accent`,
+  - usuniete stare `blue`/`emerald`/`red`/`amber`/`slate` z tego komponentu.
+- Dodatkowo:
+  - dodany `favicon.svg`,
+  - `OPENAI_CHAT_MODEL` dodany do `.env.example`,
+  - `chat.service.ts` czyta model z env z fallbackiem.
 
 Acceptance:
 
@@ -334,28 +353,33 @@ Acceptance:
 - Po zapisie redirect do dashboardu dziala.
 - `/settings` pobiera i zapisuje preferencje.
 - `TagInput` nadal dziala.
-- Multi selecty maja focus i touch targety.
+- Wybor sprzetu ma focus i touch targety.
 - Mobile 320/375 bez overflow.
+- Nowe wartosci sprzetu sa spojne frontend/backend/Prisma.
+- Notyfikacje nie uzywaja obcych kolorow typu blue/indigo.
 
-## 8. PR 5 - Notifications + cleanup
+Wazne do PR:
+
+- PR dodaje nowa zaleznosc frontendowa: `@tabler/icons-react`.
+- PR dodaje migracje bazy dla nowych wartosci enum `Equipment`.
+- To jest swiadomy wyjatek od pierwotnej reguly "redesign nie rusza backendu", bo UI settings pokazuje nowe typy sprzetu i backend musi je zaakceptowac.
+
+## 8. PR 5 - Cleanup + App.css
 
 Cel:
 
 ```text
-Wyczyscic globalne elementy, ktore pojawiaja sie wszedzie.
+Wyczyscic globalne resztki po PR 4 i zrobic finalny polish przed QA.
 ```
 
 Zakres:
 
-- `NotificationContainer`:
-  - `bg-bg-elevated`,
-  - `border-border`,
-  - `text-ink`,
-  - mapowanie typow na `basil`, `bordeaux`, `saffron`, `accent`,
-  - `aria-live`/`role`.
 - `App.css`:
   - sprawdzic czy jest importowany,
   - usunac albo wyczyscic Vite boilerplate, jesli nic nie wnosi.
+- `NotificationContainer`:
+  - sprawdzic manualnie w light/dark,
+  - ewentualnie dodac `role`/`aria-live`, jesli QA pokaze problem czytnikow.
 - Stare home komponenty:
   - nie usuwac pochopnie,
   - mozna usunac pozniej, jesli build/importy sa czyste.
