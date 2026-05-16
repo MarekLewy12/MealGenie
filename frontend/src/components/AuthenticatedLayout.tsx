@@ -10,6 +10,18 @@ import { TopContextBar } from "./TopContextBar";
 export function AuthenticatedLayout() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
+  // Blokuje globalny scrollbar (html) - zalogowany layout uzywa wewnetrznego
+  // scrolla w content area. Bez tego pojawiaja sie dwa aktywne scrollbary
+  // (html + AuthenticatedLayout content area)
+  useEffect(() => {
+    const docEl = document.documentElement;
+    const prevOverflow = docEl.style.overflow;
+    docEl.style.overflow = "hidden";
+    return () => {
+      docEl.style.overflow = prevOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     if (!isMobileNavOpen) return;
 

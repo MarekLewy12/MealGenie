@@ -468,6 +468,10 @@ button:disabled,
   .marquee-track,
   .marquee-track-reverse {
     animation: none;
+    transform: none;
+  }
+  .marquee-fade-mask {
+    overflow-x: auto;
   }
 }
 

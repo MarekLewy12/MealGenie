@@ -4,19 +4,14 @@ import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
-  ChefHat,
   Clock3,
-  Coffee,
   Heart,
   Loader2,
   MessageSquare,
-  Moon,
   Plus,
   ShoppingCart,
   Sparkles,
-  Timer,
   Utensils,
-  Wand2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -36,14 +31,13 @@ import {
   type ShoppingItem,
 } from "../store/shoppingListStore";
 import type { MealHistoryItem } from "../types/meal";
-
-type QuickStartItem = {
-  to: string;
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  tone: string;
-};
+import {
+  DashboardEmptyState,
+  DashboardHowItWorks,
+  DashboardInspirationMarquee,
+  QuickStartCard,
+  quickStarts,
+} from "../components/dashboard";
 
 type ShoppingListCardProps = {
   items: ShoppingItem[];
@@ -60,51 +54,6 @@ type DashboardMetricProps = {
   to?: string;
   href?: string;
 };
-
-const quickStarts: QuickStartItem[] = [
-  {
-    to: "/generator?mealType=SNACK&prepTime=15",
-    icon: Timer,
-    title: "Mam 15 minut",
-    description: "Szybki posiłek bez kombinowania",
-    tone: "bg-accent-soft text-accent",
-  },
-  {
-    to: "/generator?mealType=LUNCH&prepTime=30",
-    icon: Utensils,
-    title: "Obiad po pracy",
-    description: "Porządnie, ale bez spiny",
-    tone: "bg-basil-soft text-basil",
-  },
-  {
-    to: "/generator?mealType=DINNER&prepTime=25",
-    icon: Moon,
-    title: "Lekka kolacja",
-    description: "Konkretnie i spokojnie",
-    tone: "bg-bordeaux/10 text-bordeaux",
-  },
-  {
-    to: "/generator?mealType=BREAKFAST&prepTime=20",
-    icon: Coffee,
-    title: "Spokojne śniadanie",
-    description: "Dobry start bez pośpiechu",
-    tone: "bg-saffron-soft text-ink",
-  },
-  {
-    to: "/generator?mealType=DESSERT&prepTime=30",
-    icon: Sparkles,
-    title: "Coś słodkiego",
-    description: "Mała przyjemność",
-    tone: "bg-accent-soft text-accent-deep",
-  },
-  {
-    to: "/generator?mealType=ANY&prepTime=60",
-    icon: ChefHat,
-    title: "Wielkie gotowanie",
-    description: "Na spokojnie, dla relaksu",
-    tone: "bg-saffron-soft text-saffron",
-  },
-];
 
 const assistantPrompts = [
   "Co z resztek?",
@@ -127,6 +76,14 @@ const formatMealDate = (createdAt: string) =>
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Nie udało się pobrać danych.";
 
+const getTimeGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 6) return "Dobranoc";
+  if (hour < 12) return "Dzień dobry";
+  if (hour < 18) return "Cześć";
+  return "Dobry wieczór";
+};
+
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const openGlobalChat = useChatStore((state) => state.openGlobalChat);
@@ -135,6 +92,7 @@ export function DashboardPage() {
   const clearShoppingList = useShoppingListStore((state) => state.clearAll);
 
   const greetingName = user?.name || "Kucharzu";
+  const timeGreeting = getTimeGreeting();
 
   const {
     data: historyData,
@@ -157,6 +115,7 @@ export function DashboardPage() {
   });
 
   const recentMeals = (historyData?.items ?? []).slice(0, 3);
+  const isOnboarding = recentMeals.length === 0 && !isHistoryLoading;
   const favoriteMeals = favoritesData?.items ?? [];
   const totalRecipes = historyData?.total ?? 0;
   const totalFavorites = favoritesData?.total ?? favoriteMeals.length;
@@ -212,84 +171,111 @@ export function DashboardPage() {
 
   return (
     <section
-      className="min-h-full bg-bg px-4 py-5 text-ink sm:px-6 lg:px-8 lg:py-6"
+      className="min-h-full bg-bg text-ink"
       aria-labelledby="mealgenie-dashboard-title"
     >
-      <div className="mx-auto flex max-w-[1760px] flex-col gap-6">
-        <DashboardWelcomePanel
-          greetingName={greetingName}
-          metrics={dashboardMetrics}
-        />
+      <DashboardHeader
+        greetingName={greetingName}
+        timeGreeting={timeGreeting}
+        metrics={dashboardMetrics}
+      />
 
-        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="min-w-0 space-y-6">
-            <MainActionBanner onOpenAssistant={openGlobalChat} />
+      <div className="mx-auto max-w-[1760px] px-4 py-8 sm:px-6 lg:px-8">
+        <div className={`grid min-w-0 gap-6 ${isOnboarding ? "" : "xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem]"}`}>
+          <div className="min-w-0 space-y-8">
+            {isOnboarding ? (
+              <div className="space-y-12 lg:space-y-16">
+                <DashboardEmptyState />
+                <DashboardHowItWorks />
+                <DashboardInspirationMarquee />
+              </div>
+            ) : (
+              <>
+                <RecentRecipesSection
+                  meals={recentMeals}
+                  isLoading={isHistoryLoading}
+                  isError={isHistoryError}
+                  errorMessage={getErrorMessage(historyError)}
+                />
 
-            <QuickStartsSection />
+                <QuickStartsSection />
 
-            <RecentRecipesSection
-              meals={recentMeals}
-              isLoading={isHistoryLoading}
-              isError={isHistoryError}
-              errorMessage={getErrorMessage(historyError)}
-            />
+                <DashboardDivider />
 
-            <FavoriteRecipesSection
-              meals={favoriteMeals}
-              totalRecipes={totalRecipes}
-              isLoading={isFavoritesLoading}
-              isError={isFavoritesError}
-              errorMessage={getErrorMessage(favoritesError)}
-            />
+                <FavoriteRecipesSection
+                  meals={favoriteMeals}
+                  totalRecipes={totalRecipes}
+                  isLoading={isFavoritesLoading}
+                  isError={isFavoritesError}
+                  errorMessage={getErrorMessage(favoritesError)}
+                />
+              </>
+            )}
           </div>
 
-          <aside className="flex flex-col gap-6">
-            <ShoppingListCard
-              items={shoppingItems}
-              onToggleObtained={toggleObtained}
-              onClear={clearShoppingList}
-              onExport={handleExportShoppingList}
-            />
+          {!isOnboarding && (
+            <aside className="flex flex-col gap-6">
+              <ShoppingListCard
+                items={shoppingItems}
+                onToggleObtained={toggleObtained}
+                onClear={clearShoppingList}
+                onExport={handleExportShoppingList}
+              />
 
-            <AssistantCard onOpen={openGlobalChat} />
-          </aside>
+              <AssistantCard onOpen={openGlobalChat} />
+            </aside>
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-function DashboardWelcomePanel({
+function DashboardHeader({
   greetingName,
+  timeGreeting,
   metrics,
 }: {
   greetingName: string;
+  timeGreeting: string;
   metrics: DashboardMetricProps[];
 }) {
   return (
-    <header className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
-      <div className="grid gap-6 p-5 sm:p-7 lg:p-8 2xl:grid-cols-[minmax(0,1fr)_minmax(25rem,0.48fr)] 2xl:items-end">
-        <div className="max-w-4xl">
-          <HandwrittenKicker>dobrze, że jesteś</HandwrittenKicker>
+    <header className="relative overflow-hidden border-b border-border">
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-br from-saffron-soft/30 via-transparent to-accent-soft/15 dark:from-saffron/6 dark:via-transparent dark:to-accent/4" />
+        <div className="absolute -left-[10%] -top-[40%] h-[20rem] w-[20rem] rounded-full bg-saffron/20 blur-[100px] dark:bg-saffron/8" />
+        <div className="absolute -right-[5%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-accent/15 blur-[80px] dark:bg-accent/6" />
+      </div>
 
-          <h1
-            id="mealgenie-dashboard-title"
-            className="mt-3 max-w-4xl font-serif text-4xl font-medium leading-[1.05] text-ink sm:text-5xl lg:text-6xl"
-          >
-            Cześć, {greetingName}.{" "}
-            <span className="text-accent">Co dziś ugotujemy?</span>
-          </h1>
+      <div className="relative mx-auto max-w-[1760px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <HandwrittenKicker>
+              {timeGreeting === "Cześć"
+                ? "dobrze, że jesteś"
+                : timeGreeting.toLowerCase()}
+            </HandwrittenKicker>
 
-          <p className="mt-4 max-w-2xl text-base leading-7 text-ink-soft sm:text-lg sm:leading-8">
-            Zacznij od pomysłu, wróć do ostatniego przepisu albo dokończ listę
-            zakupów. MealGenie ma zdjąć z Ciebie decyzję, nie dorzucić kolejną.
-          </p>
-        </div>
+            <h1
+              id="mealgenie-dashboard-title"
+              className="mt-2 font-serif text-3xl font-medium leading-[1.1] text-ink sm:text-4xl lg:text-[2.75rem]"
+            >
+              {timeGreeting},{" "}
+              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                {greetingName}
+              </span>
+              .
+              <br className="hidden min-[480px]:inline" />
+              <span className="text-ink-soft"> Co dziś ugotujemy?</span>
+            </h1>
+          </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 2xl:grid-cols-1">
-          {metrics.map((metric) => (
-            <DashboardMetricCard key={metric.label} {...metric} />
-          ))}
+          <div className="flex flex-wrap gap-3">
+            {metrics.map((metric) => (
+              <DashboardMetricCard key={metric.label} {...metric} />
+            ))}
+          </div>
         </div>
       </div>
     </header>
@@ -306,15 +292,14 @@ function DashboardMetricCard({
 }: DashboardMetricProps) {
   const content = (
     <>
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border-strong bg-bg-elevated text-accent shadow-xs">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent dark:bg-accent/15">
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
-
       <span className="min-w-0">
         <span className="block font-brand text-2xl font-semibold leading-none text-ink">
           {value}
         </span>
-        <span className="mt-1 block text-[0.7rem] font-bold uppercase tracking-[0.16em] text-ink-muted">
+        <span className="mt-1 block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-ink-muted">
           {label} · {helper}
         </span>
       </span>
@@ -322,122 +307,40 @@ function DashboardMetricCard({
   );
 
   const className =
-    "flex min-h-16 items-center gap-3 rounded-lg border border-border bg-bg-sunken px-4 py-3 text-left transition duration-fast hover:border-accent/45 hover:bg-accent-soft/55 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent";
+    "flex items-center gap-3 rounded-xl border border-border/40 bg-bg-sunken/50 px-4 py-3.5 backdrop-blur-md transition duration-fast hover:border-accent/30 hover:bg-bg-elevated hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-accent/30 dark:hover:bg-white/[0.1]";
 
-  if (to) {
-    return (
-      <Link to={to} className={className}>
-        {content}
-      </Link>
-    );
-  }
-
-  if (href) {
-    return (
-      <a href={href} className={className}>
-        {content}
-      </a>
-    );
-  }
-
+  if (to) return <Link to={to} className={className}>{content}</Link>;
+  if (href) return <a href={href} className={className}>{content}</a>;
   return <div className={className}>{content}</div>;
 }
 
-function MainActionBanner({
-  onOpenAssistant,
-}: {
-  onOpenAssistant: () => void;
-}) {
-  return (
-    <section className="relative overflow-hidden rounded-xl border border-accent/30 bg-bg-elevated shadow-sm">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-16 -top-16 -z-10 h-64 w-64 rounded-full bg-saffron/15 blur-3xl"
-      />
-
-      <div className="flex flex-col gap-6 p-5 sm:p-7 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent shadow-xs">
-            <Wand2 className="h-6 w-6" aria-hidden="true" />
-          </span>
-
-          <div className="min-w-0">
-            <Eyebrow tone="accent">Pomysł na dziś</Eyebrow>
-            <h2 className="mt-1 font-brand text-2xl font-semibold leading-tight text-ink sm:text-3xl">
-              Nie wiesz, co zjeść?
-            </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-ink-soft">
-              Opisz dzień, składniki albo nastrój, a MealGenie dobierze kilka
-              sensownych propozycji. Bez przekopywania internetu.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex shrink-0 flex-col gap-3 sm:flex-row md:flex-col lg:flex-row">
-          <Link
-            to="/generator"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-          >
-            Dobierz pomysł
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-
-          <button
-            type="button"
-            onClick={onOpenAssistant}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold text-ink shadow-sm transition duration-fast hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-          >
-            <MessageSquare className="h-4 w-4 text-accent" aria-hidden="true" />
-            Zapytaj o resztki
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function QuickStartsSection() {
   return (
-    <section className="pt-2">
-      <div className="mb-4">
-        <Eyebrow tone="muted">Szybki start</Eyebrow>
-        <h2 className="mt-1 font-brand text-2xl font-semibold text-ink sm:text-3xl">
-          Wybierz sytuację
-        </h2>
+    <section aria-labelledby="dashboard-quick-start-title">
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-basil" aria-hidden="true" />
+        <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-ink-muted">
+          Szybki start
+        </p>
       </div>
+      <h2
+        id="dashboard-quick-start-title"
+        className="mt-2 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl"
+      >
+        Nie wiesz, co zjeść?{" "}
+        <span className="text-ink-soft">Wybierz sytuację.</span>
+      </h2>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"
+        role="list"
+      >
         {quickStarts.map((item) => (
           <QuickStartCard key={item.title} item={item} />
         ))}
       </div>
     </section>
-  );
-}
-
-function QuickStartCard({ item }: { item: QuickStartItem }) {
-  const Icon = item.icon;
-
-  return (
-    <Link
-      to={item.to}
-      className="group flex min-h-24 items-center gap-4 rounded-lg border border-border bg-bg-elevated p-4 shadow-xs transition duration-fast hover:-translate-y-0.5 hover:border-accent/50 hover:bg-bg-sunken hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-    >
-      <span
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${item.tone}`}
-      >
-        <Icon className="h-5 w-5" aria-hidden="true" />
-      </span>
-
-      <span className="min-w-0">
-        <span className="block font-brand text-lg font-semibold leading-tight text-ink">
-          {item.title}
-        </span>
-        <span className="mt-1 block text-sm leading-5 text-ink-soft">
-          {item.description}
-        </span>
-      </span>
-    </Link>
   );
 }
 
@@ -452,30 +355,41 @@ function RecentRecipesSection({
   isError: boolean;
   errorMessage: string;
 }) {
+  if (!isLoading && !isError && meals.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="pt-4"
       aria-labelledby="recent-recipes-heading"
     >
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <Eyebrow tone="muted">Ostatnio w kuchni</Eyebrow>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />
+            <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-ink-muted">
+              Ostatnio w kuchni
+            </p>
+          </div>
           <h2
             id="recent-recipes-heading"
-            className="mt-1 flex items-center gap-2 font-brand text-2xl font-semibold text-ink sm:text-3xl"
+            className="mt-2 flex items-center gap-3 font-brand text-xl font-semibold leading-tight text-ink sm:text-2xl"
           >
-            <Clock3 className="h-6 w-6 text-accent" aria-hidden="true" />
+            <Clock3 className="h-5 w-5 text-accent" aria-hidden="true" />
             Ostatnie przepisy
           </h2>
         </div>
 
-        <Link
-          to="/recipes"
-          className="inline-flex min-h-10 items-center gap-2 rounded-pill px-1 text-sm font-semibold text-accent transition hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-        >
-          Zobacz bibliotekę
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
+        {meals.length > 0 && (
+          <Link
+            to="/recipes"
+            className="inline-flex min-h-10 items-center gap-2 rounded-pill px-1 text-sm font-semibold text-accent transition hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+          >
+            Zobacz bibliotekę
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        )}
       </div>
 
       {isLoading ? (
@@ -488,19 +402,38 @@ function RecentRecipesSection({
           compact
         />
       ) : meals.length === 0 ? (
-        <EmptyPanel
-          title="Pierwszy przepis dopiero czeka"
-          description="Wybierz pomysł na dziś, a gdy przejdziesz do przepisu, wróci tutaj jako część Twojej kuchennej historii."
-          action={
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-bg-elevated via-bg-elevated to-accent-soft/15 px-6 py-10 text-center dark:to-accent/[0.04] sm:px-10 sm:py-14">
+          <div
+            className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-accent/10 blur-[60px] dark:bg-accent/5"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-saffron/8 blur-[50px] dark:bg-saffron/4"
+            aria-hidden="true"
+          />
+
+          <div className="relative">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft/60 text-accent dark:bg-accent/15">
+              <Utensils className="h-7 w-7" aria-hidden="true" />
+            </div>
+
+            <h3 className="font-brand text-xl font-semibold text-ink sm:text-2xl">
+              Pierwszy przepis dopiero czeka
+            </h3>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-soft">
+              Wybierz pomysł na dziś, a gdy przejdziesz do przepisu, wróci tutaj
+              jako część Twojej kuchennej historii.
+            </p>
+
             <Link
               to="/generator"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-accent transition hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-6 py-2.5 text-sm font-semibold text-ink-inverse shadow-[0_0_20px_-6px_rgba(232,111,69,0.35)] transition duration-fast hover:border-accent-hover hover:bg-accent-hover hover:shadow-[0_0_28px_-6px_rgba(232,111,69,0.45)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
             >
               Stwórz pierwszy przepis
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-          }
-        />
+          </div>
+        </div>
       ) : (
         <div className="space-y-4">
           <HeroMealCard meal={meals[0]} />
@@ -602,19 +535,22 @@ function ShoppingListCard({
   return (
     <section
       id="shopping-list"
-      className="flex flex-1 flex-col rounded-xl border border-border bg-bg-elevated p-5 text-ink shadow-sm"
+      className="flex flex-1 flex-col rounded-xl border border-border/60 bg-bg-elevated p-6 text-ink"
       aria-labelledby="shopping-list-heading"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <Eyebrow tone="saffron">Do koszyka</Eyebrow>
+          <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">
+            Do koszyka
+          </p>
           <h2
             id="shopping-list-heading"
-            className="mt-2 flex items-center gap-2 font-brand text-2xl font-semibold leading-tight text-ink"
+            className="mt-1 flex items-center gap-2 font-brand text-lg font-semibold text-ink"
           >
-            <ShoppingCart className="h-5 w-5 text-accent" aria-hidden="true" />
+            <ShoppingCart className="h-4.5 w-4.5 text-basil" aria-hidden="true" />
             Lista zakupów
           </h2>
+          <div className="mt-2 h-px bg-gradient-to-r from-basil/30 via-basil/10 to-transparent" />
         </div>
 
         <Badge variant={pendingCount > 0 ? "accent" : "neutral"}>
@@ -748,18 +684,16 @@ function ShoppingListCard({
 
 function AssistantCard({ onOpen }: { onOpen: () => void }) {
   return (
-    <section className="rounded-xl border border-border bg-bg-elevated p-5 text-ink shadow-sm">
-      <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-basil/30 bg-basil-soft text-basil">
-          <MessageSquare className="h-5 w-5" aria-hidden="true" />
-        </span>
-
-        <div className="min-w-0">
-          <Eyebrow tone="basil">Asystent kuchenny</Eyebrow>
-          <h2 className="mt-2 font-brand text-2xl font-semibold leading-tight text-ink">
-            Zapytaj przy blacie
-          </h2>
-        </div>
+    <section className="rounded-xl border border-border/60 bg-bg-elevated p-6 text-ink">
+      <div className="mb-4">
+        <p className="font-brand text-xs font-bold uppercase tracking-[0.16em] text-accent">
+          Asystent kuchenny
+        </p>
+        <h2 className="mt-1 flex items-center gap-2 font-brand text-lg font-semibold text-ink">
+          <MessageSquare className="h-4.5 w-4.5 text-accent" aria-hidden="true" />
+          Zapytaj przy blacie
+        </h2>
+        <div className="mt-2 h-px bg-gradient-to-r from-accent/30 via-accent/10 to-transparent" />
       </div>
 
       <p className="text-sm leading-6 text-ink-soft">
@@ -767,13 +701,13 @@ function AssistantCard({ onOpen }: { onOpen: () => void }) {
         wychodzenia z flow.
       </p>
 
-      <div className="mt-5 grid grid-cols-2 gap-2">
+      <div className="mt-5 flex flex-wrap gap-2.5">
         {assistantPrompts.map((prompt) => (
           <button
             key={prompt}
             type="button"
             onClick={onOpen}
-            className="flex min-h-10 items-center justify-center rounded-lg bg-bg-sunken px-2 text-center text-xs font-semibold leading-tight text-ink-soft transition hover:bg-basil-soft hover:text-basil focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+            className="rounded-lg border border-border-strong bg-bg-sunken px-3.5 py-2 text-sm font-semibold text-ink-soft transition hover:bg-basil-soft hover:text-basil focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
             {prompt}
           </button>
@@ -801,79 +735,87 @@ function HeroMealCard({ meal }: { meal: MealHistoryItem }) {
   return (
     <Link
       to={`/recipe/${meal.id}`}
-      className="group block min-w-0 overflow-hidden rounded-xl border border-border-strong bg-bg-elevated text-ink shadow-md transition duration-base hover:-translate-y-0.5 hover:border-accent/60 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+      className="group relative block min-h-72 overflow-hidden rounded-2xl text-ink shadow-lg transition duration-base hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:min-h-80"
     >
-      <div className="grid min-w-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div className="relative min-h-56 overflow-hidden bg-bg-sunken">
-          {imageUrl ? (
-            <>
-              <img
-                src={imageUrl}
-                alt={`Zdjęcie dania: ${meal.name}`}
-                className="h-full min-h-56 w-full object-cover brightness-[0.94] contrast-[1.03] saturate-[1.03] transition duration-slow group-hover:scale-[1.03]"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-accent/5 to-transparent" />
-            </>
-          ) : (
-            <div className="flex h-full min-h-56 w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,var(--accent-soft),transparent_45%),var(--bg-sunken)]">
-              <MealEmoji size="lg" fallback="MG" className="text-accent" />
-            </div>
-          )}
-
-          <Badge
-            variant="accent"
-            className="absolute left-4 top-4 gap-1.5 bg-bg-elevated/95 shadow-xs"
-          >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            Ostatnio gotowane
-          </Badge>
-
-          {meal.isFavorite && (
-            <span className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-bg-elevated/95 text-bordeaux shadow-xs">
-              <Heart className="h-5 w-5 fill-current" aria-hidden="true" />
-              <span className="sr-only">Ulubiony przepis</span>
-            </span>
-          )}
+      {/* Image */}
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={`Zdjęcie dania: ${meal.name}`}
+          className="absolute inset-0 h-full w-full object-cover brightness-[0.92] contrast-[1.04] saturate-[1.04] transition duration-slow group-hover:scale-[1.03]"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--accent-soft),transparent_45%),var(--bg-sunken)]">
+          <div className="flex h-full w-full items-center justify-center">
+            <MealEmoji size="lg" fallback="MG" className="text-accent" />
+          </div>
         </div>
+      )}
 
-        <div className="flex min-w-0 flex-col justify-between p-5 sm:p-6">
-          <div className="min-w-0">
-            <Eyebrow tone="muted">Najnowsza karta</Eyebrow>
+      {/* Gradient overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-            <h3 className="mt-3 break-words font-brand text-2xl font-semibold leading-tight text-ink sm:text-3xl">
-              {meal.name}
-            </h3>
+      {/* Top badges */}
+      <div className="absolute left-4 right-4 top-4 flex items-center justify-between">
+        <Badge
+          variant="accent"
+          className="gap-1.5 bg-bg-elevated/90 shadow-sm backdrop-blur-sm"
+        >
+          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          Ostatnio gotowane
+        </Badge>
 
-            {meal.description ? (
-              <p className="mt-3 line-clamp-3 break-words text-sm leading-6 text-ink-soft sm:text-base">
-                {meal.description}
-              </p>
+        {meal.isFavorite && (
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-bg-elevated/90 text-bordeaux shadow-sm backdrop-blur-sm">
+            <Heart className="h-5 w-5 fill-current" aria-hidden="true" />
+            <span className="sr-only">Ulubiony przepis</span>
+          </span>
+        )}
+      </div>
+
+      {/* Bottom content - on image */}
+      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+        <h3 className="break-words font-brand text-2xl font-semibold leading-tight text-white sm:text-3xl lg:text-4xl">
+          {meal.name}
+        </h3>
+
+        {meal.description ? (
+          <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-white/75 sm:text-base">
+            {meal.description}
+          </p>
+        ) : null}
+
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {meal.estimatedTime ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                {meal.estimatedTime} min
+              </span>
             ) : null}
-          </div>
-
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
-              {meal.estimatedTime ? (
-                <Badge variant="neutral" className="gap-1.5">
-                  <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-                  {meal.estimatedTime} min
-                </Badge>
-              ) : null}
-
-              <Badge variant="saffron">{formatMealDate(meal.createdAt)}</Badge>
-            </div>
-
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-accent">
-              Zobacz przepis
-              <ArrowRight
-                className="h-4 w-4 transition duration-fast group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+              {formatMealDate(meal.createdAt)}
             </span>
           </div>
+
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+            Zobacz przepis
+            <ArrowRight
+              className="h-4 w-4 transition duration-fast group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </span>
         </div>
       </div>
     </Link>
+  );
+}
+
+function DashboardDivider() {
+  return (
+    <div aria-hidden="true" className="relative h-px">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-border-strong/60 to-transparent" />
+    </div>
   );
 }
 
@@ -911,8 +853,10 @@ function EmptyPanel({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-transparent px-5 text-center ${
-        compact ? "min-h-40 py-8" : "min-h-64 py-12"
+      className={`flex flex-col items-center justify-center rounded-xl px-5 text-center ${
+        compact
+          ? "min-h-40 border border-dashed border-border-strong bg-transparent py-8"
+          : "min-h-64 overflow-hidden border border-border bg-gradient-to-br from-bg-elevated via-bg-elevated to-accent-soft/10 py-12 dark:to-accent/[0.04]"
       }`}
     >
       <div className="flex h-14 w-14 items-center justify-center rounded-pill bg-bg-elevated text-accent shadow-xs">
