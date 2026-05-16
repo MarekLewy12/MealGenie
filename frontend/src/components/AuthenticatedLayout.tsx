@@ -25,7 +25,7 @@ export function AuthenticatedLayout() {
 
   return (
     <div className="relative flex min-h-0 flex-1 bg-bg text-ink">
-      <aside className="hidden w-60 shrink-0 border-r border-border bg-bg-elevated/78 shadow-xs backdrop-blur-xl lg:flex">
+      <aside className="hidden w-56 shrink-0 border-r border-border bg-bg-elevated/78 shadow-xs backdrop-blur-xl lg:flex">
         <AppSidebar />
       </aside>
 

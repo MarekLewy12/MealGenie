@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Moon,
   Plus,
-  Settings,
   ShoppingCart,
   Sparkles,
   Timer,
@@ -82,7 +81,7 @@ const quickStarts: QuickStartItem[] = [
     icon: Moon,
     title: "Lekka kolacja",
     description: "Konkretnie i spokojnie",
-    tone: "bg-bg-sunken text-ink-soft",
+    tone: "bg-bordeaux/10 text-bordeaux",
   },
   {
     to: "/generator?mealType=BREAKFAST&prepTime=20",
@@ -97,6 +96,13 @@ const quickStarts: QuickStartItem[] = [
     title: "Coś słodkiego",
     description: "Mała przyjemność",
     tone: "bg-accent-soft text-accent-deep",
+  },
+  {
+    to: "/generator?mealType=ANY&prepTime=60",
+    icon: ChefHat,
+    title: "Wielkie gotowanie",
+    description: "Na spokojnie, dla relaksu",
+    tone: "bg-saffron-soft text-saffron",
   },
 ];
 
@@ -217,7 +223,9 @@ export function DashboardPage() {
 
         <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="min-w-0 space-y-6">
-            <DecisionZone onOpenAssistant={openGlobalChat} />
+            <MainActionBanner onOpenAssistant={openGlobalChat} />
+
+            <QuickStartsSection />
 
             <RecentRecipesSection
               meals={recentMeals}
@@ -235,7 +243,7 @@ export function DashboardPage() {
             />
           </div>
 
-          <aside className="space-y-4 xl:sticky xl:top-6 xl:self-start">
+          <aside className="flex flex-col gap-6">
             <ShoppingListCard
               items={shoppingItems}
               onToggleObtained={toggleObtained}
@@ -244,8 +252,6 @@ export function DashboardPage() {
             />
 
             <AssistantCard onOpen={openGlobalChat} />
-
-            <CulinaryProfileCard />
           </aside>
         </div>
       </div>
@@ -337,75 +343,73 @@ function DashboardMetricCard({
   return <div className={className}>{content}</div>;
 }
 
-function DecisionZone({ onOpenAssistant }: { onOpenAssistant: () => void }) {
+function MainActionBanner({
+  onOpenAssistant,
+}: {
+  onOpenAssistant: () => void;
+}) {
   return (
-    <section className="overflow-hidden rounded-xl border border-accent/20 bg-bg-elevated shadow-md">
-      <div className="grid lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <div className="relative isolate min-w-0 overflow-hidden border-b border-border bg-[radial-gradient(circle_at_12%_10%,rgba(232,111,69,0.12),transparent_36%),radial-gradient(circle_at_84%_8%,rgba(47,138,95,0.1),transparent_34%),var(--bg-elevated)] p-5 sm:p-7 lg:border-b-0 lg:border-r lg:p-8">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-24 -left-16 -z-10 h-64 w-64 rounded-full bg-saffron/15 blur-3xl"
-          />
+    <section className="relative overflow-hidden rounded-xl border border-accent/30 bg-bg-elevated shadow-sm">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 -z-10 h-64 w-64 rounded-full bg-saffron/15 blur-3xl"
+      />
 
-          <Eyebrow tone="accent">Pomysł na dziś</Eyebrow>
+      <div className="flex flex-col gap-6 p-5 sm:p-7 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent shadow-xs">
+            <Wand2 className="h-6 w-6" aria-hidden="true" />
+          </span>
 
-          <div className="mt-5 flex items-start gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-accent/25 bg-accent-soft text-accent shadow-xs">
-              <Wand2 className="h-6 w-6" aria-hidden="true" />
-            </span>
-
-            <div className="min-w-0">
-              <h2 className="font-brand text-3xl font-semibold leading-tight text-ink sm:text-4xl">
-                Nie wiesz, co zjeść?
-              </h2>
-              <p className="mt-3 max-w-xl text-base leading-7 text-ink-soft">
-                Opisz dzień, składniki albo nastrój, a MealGenie dobierze kilka
-                sensownych propozycji. Bez przekopywania internetu po pracy.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/generator"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-5 py-3 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:min-w-52"
-            >
-              Dobierz pomysł na dziś
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-
-            <button
-              type="button"
-              onClick={onOpenAssistant}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border-strong bg-bg-elevated px-5 py-3 text-sm font-semibold text-ink shadow-sm transition duration-fast hover:border-basil hover:bg-basil-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:min-w-48"
-            >
-              Zapytaj o resztki
-              <MessageSquare className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
-
-          <p className="mt-5 max-w-lg text-sm leading-6 text-ink-muted">
-            Najlepszy start, gdy masz mało energii, trochę składników i żadnej
-            ochoty na kolejne „coś się wymyśli”.
-          </p>
-        </div>
-
-        <div className="min-w-0 p-5 sm:p-7 lg:p-8">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <Eyebrow tone="muted">Szybki start</Eyebrow>
-              <h3 className="mt-2 font-brand text-2xl font-semibold text-ink">
-                Wybierz sytuację
-              </h3>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {quickStarts.map((item) => (
-              <QuickStartCard key={item.title} item={item} />
-            ))}
+          <div className="min-w-0">
+            <Eyebrow tone="accent">Pomysł na dziś</Eyebrow>
+            <h2 className="mt-1 font-brand text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+              Nie wiesz, co zjeść?
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-ink-soft">
+              Opisz dzień, składniki albo nastrój, a MealGenie dobierze kilka
+              sensownych propozycji. Bez przekopywania internetu.
+            </p>
           </div>
         </div>
+
+        <div className="flex shrink-0 flex-col gap-3 sm:flex-row md:flex-col lg:flex-row">
+          <Link
+            to="/generator"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+          >
+            Dobierz pomysł
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+
+          <button
+            type="button"
+            onClick={onOpenAssistant}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold text-ink shadow-sm transition duration-fast hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+          >
+            <MessageSquare className="h-4 w-4 text-accent" aria-hidden="true" />
+            Zapytaj o resztki
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuickStartsSection() {
+  return (
+    <section className="pt-2">
+      <div className="mb-4">
+        <Eyebrow tone="muted">Szybki start</Eyebrow>
+        <h2 className="mt-1 font-brand text-2xl font-semibold text-ink sm:text-3xl">
+          Wybierz sytuację
+        </h2>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {quickStarts.map((item) => (
+          <QuickStartCard key={item.title} item={item} />
+        ))}
       </div>
     </section>
   );
@@ -450,17 +454,17 @@ function RecentRecipesSection({
 }) {
   return (
     <section
-      className="rounded-xl border border-border bg-bg-elevated p-5 shadow-sm sm:p-7"
+      className="pt-4"
       aria-labelledby="recent-recipes-heading"
     >
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Eyebrow tone="muted">Ostatnio w kuchni</Eyebrow>
           <h2
             id="recent-recipes-heading"
-            className="mt-2 flex items-center gap-2 font-brand text-2xl font-semibold text-ink sm:text-3xl"
+            className="mt-1 flex items-center gap-2 font-brand text-2xl font-semibold text-ink sm:text-3xl"
           >
-            <Clock3 className="h-5 w-5 text-accent" aria-hidden="true" />
+            <Clock3 className="h-6 w-6 text-accent" aria-hidden="true" />
             Ostatnie przepisy
           </h2>
         </div>
@@ -533,17 +537,17 @@ function FavoriteRecipesSection({
 
   return (
     <section
-      className="rounded-xl border border-border bg-bg-elevated p-5 shadow-sm sm:p-7"
+      className="pt-4 pb-8"
       aria-labelledby="favorite-recipes-heading"
     >
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Eyebrow tone="accent">Do powtórzenia</Eyebrow>
           <h2
             id="favorite-recipes-heading"
-            className="mt-2 flex items-center gap-2 font-brand text-2xl font-semibold text-ink sm:text-3xl"
+            className="mt-1 flex items-center gap-2 font-brand text-2xl font-semibold text-ink sm:text-3xl"
           >
-            <Heart className="h-5 w-5 text-bordeaux" aria-hidden="true" />
+            <Heart className="h-6 w-6 text-bordeaux" aria-hidden="true" />
             Ulubione przepisy
           </h2>
         </div>
@@ -598,7 +602,7 @@ function ShoppingListCard({
   return (
     <section
       id="shopping-list"
-      className="rounded-xl border border-border bg-bg-elevated p-5 text-ink shadow-sm"
+      className="flex flex-1 flex-col rounded-xl border border-border bg-bg-elevated p-5 text-ink shadow-sm"
       aria-labelledby="shopping-list-heading"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -618,121 +622,125 @@ function ShoppingListCard({
         </Badge>
       </div>
 
-      {items.length > 0 ? (
-        <>
-          <div className="mb-4 rounded-lg border border-border bg-bg-sunken p-3">
-            <div className="mb-2 flex items-center justify-between text-xs font-semibold text-ink-muted">
-              <span>Odhaczone</span>
-              <span>
-                {obtainedCount}/{items.length}
-              </span>
+      <div className="flex-1">
+        {items.length > 0 ? (
+          <>
+            <div className="mb-4 rounded-lg border border-border bg-bg-sunken p-3">
+              <div className="mb-2 flex items-center justify-between text-xs font-semibold text-ink-muted">
+                <span>Odhaczone</span>
+                <span>
+                  {obtainedCount}/{items.length}
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-pill bg-bg-elevated">
+                <div
+                  className="h-full rounded-pill bg-basil transition-all duration-base"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
-            <div className="h-2 overflow-hidden rounded-pill bg-bg-elevated">
-              <div
-                className="h-full rounded-pill bg-basil transition-all duration-base"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
 
-          <ul role="list" className="space-y-2">
-            {visibleItems.map((item) => {
-              const label = getShoppingLabel(item);
+            <ul role="list" className="space-y-2">
+              {visibleItems.map((item) => {
+                const label = getShoppingLabel(item);
 
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() => onToggleObtained(item.id)}
-                    className="group flex min-h-12 w-full items-start gap-3 rounded-lg border border-transparent px-2 py-2 text-left transition duration-fast hover:border-border hover:bg-bg-sunken focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-                    aria-label={
-                      item.obtained
-                        ? `Oznacz jako do kupienia: ${label}`
-                        : `Oznacz jako kupione: ${label}`
-                    }
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-pill border transition ${
+                return (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => onToggleObtained(item.id)}
+                      className="group flex min-h-12 w-full items-start gap-3 rounded-lg border border-transparent px-2 py-2 text-left transition duration-fast hover:border-border hover:bg-bg-sunken focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                      aria-label={
                         item.obtained
-                          ? "border-basil bg-basil text-ink-inverse"
-                          : "border-border-strong bg-bg-elevated text-transparent group-hover:border-basil"
-                      }`}
+                          ? `Oznacz jako do kupienia: ${label}`
+                          : `Oznacz jako kupione: ${label}`
+                      }
                     >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </span>
-
-                    <span className="min-w-0 flex-1">
                       <span
-                        className={`block text-sm font-semibold leading-5 ${
+                        aria-hidden="true"
+                        className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-pill border transition ${
                           item.obtained
-                            ? "text-ink-muted line-through"
-                            : "text-ink"
+                            ? "border-basil bg-basil text-ink-inverse"
+                            : "border-border-strong bg-bg-elevated text-transparent group-hover:border-basil"
                         }`}
                       >
-                        {label}
+                        <CheckCircle2 className="h-4 w-4" />
                       </span>
 
-                      {item.notes ? (
-                        <span className="mt-0.5 block text-xs leading-5 text-ink-muted">
-                          {item.notes}
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block text-sm font-semibold leading-5 ${
+                            item.obtained
+                              ? "text-ink-muted line-through"
+                              : "text-ink"
+                          }`}
+                        >
+                          {label}
                         </span>
-                      ) : null}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
 
-          {hiddenCount > 0 ? (
-            <p className="mt-3 rounded-lg bg-bg-sunken px-3 py-2 text-center text-xs font-semibold text-ink-muted">
-              I jeszcze {hiddenCount} na liście.
+                        {item.notes ? (
+                          <span className="mt-0.5 block text-xs leading-5 text-ink-muted">
+                            {item.notes}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {hiddenCount > 0 ? (
+              <p className="mt-3 rounded-lg bg-bg-sunken px-3 py-2 text-center text-xs font-semibold text-ink-muted">
+                I jeszcze {hiddenCount} na liście.
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <div className="rounded-xl border border-dashed border-border-strong bg-bg-sunken px-4 py-8 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-bg-elevated text-accent shadow-xs">
+              <Plus className="h-6 w-6" aria-hidden="true" />
+            </div>
+
+            <h3 className="mt-4 font-brand text-lg font-semibold text-ink">
+              Lista czeka na składniki
+            </h3>
+            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-ink-soft">
+              Wybierz przepis, a brakujące produkty pojawią się tutaj do
+              odhaczenia.
             </p>
-          ) : null}
-        </>
-      ) : (
-        <div className="rounded-xl border border-dashed border-border-strong bg-bg-sunken px-4 py-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-bg-elevated text-accent shadow-xs">
-            <Plus className="h-6 w-6" aria-hidden="true" />
+
+            <Link
+              to="/generator"
+              className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-border-strong bg-bg-elevated px-4 py-2 text-sm font-semibold text-accent shadow-xs transition hover:border-accent/45 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+            >
+              Wygeneruj przepis
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </div>
+        )}
+      </div>
 
-          <h3 className="mt-4 font-brand text-lg font-semibold text-ink">
-            Lista czeka na składniki
-          </h3>
-          <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-ink-soft">
-            Wybierz przepis, a brakujące produkty pojawią się tutaj do
-            odhaczenia.
-          </p>
-
-          <Link
-            to="/generator"
-            className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-border-strong bg-bg-elevated px-4 py-2 text-sm font-semibold text-accent shadow-xs transition hover:border-accent/45 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+      <div className="mt-auto pt-5">
+        <div className="grid grid-cols-2 gap-2 border-t border-border pt-4">
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={items.length === 0}
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border bg-bg-sunken px-3 py-2 text-sm font-semibold text-ink-soft transition hover:border-bordeaux/40 hover:bg-accent-soft hover:text-bordeaux disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-border disabled:hover:bg-bg-sunken disabled:hover:text-ink-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
-            Wygeneruj przepis
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+            Wyczyść
+          </button>
+
+          <button
+            type="button"
+            onClick={onExport}
+            disabled={items.length === 0}
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border bg-bg-sunken px-3 py-2 text-sm font-semibold text-ink-soft transition hover:border-accent/45 hover:bg-accent-soft hover:text-accent disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-border disabled:hover:bg-bg-sunken disabled:hover:text-ink-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+          >
+            Eksport
+          </button>
         </div>
-      )}
-
-      <div className="mt-5 grid grid-cols-2 gap-2 border-t border-border pt-4">
-        <button
-          type="button"
-          onClick={onClear}
-          disabled={items.length === 0}
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border bg-bg-sunken px-3 py-2 text-sm font-semibold text-ink-soft transition hover:border-bordeaux/40 hover:bg-accent-soft hover:text-bordeaux disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-border disabled:hover:bg-bg-sunken disabled:hover:text-ink-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-        >
-          Wyczyść
-        </button>
-
-        <button
-          type="button"
-          onClick={onExport}
-          disabled={items.length === 0}
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border bg-bg-sunken px-3 py-2 text-sm font-semibold text-ink-soft transition hover:border-accent/45 hover:bg-accent-soft hover:text-accent disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-border disabled:hover:bg-bg-sunken disabled:hover:text-ink-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-        >
-          Eksport
-        </button>
       </div>
     </section>
   );
@@ -759,13 +767,13 @@ function AssistantCard({ onOpen }: { onOpen: () => void }) {
         wychodzenia z flow.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-5 grid grid-cols-2 gap-2">
         {assistantPrompts.map((prompt) => (
           <button
             key={prompt}
             type="button"
             onClick={onOpen}
-            className="rounded-pill bg-bg-sunken px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:bg-basil-soft hover:text-basil focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+            className="flex min-h-10 items-center justify-center rounded-lg bg-bg-sunken px-2 text-center text-xs font-semibold leading-tight text-ink-soft transition hover:bg-basil-soft hover:text-basil focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
             {prompt}
           </button>
@@ -780,38 +788,6 @@ function AssistantCard({ onOpen }: { onOpen: () => void }) {
         Otwórz asystenta
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </button>
-    </section>
-  );
-}
-
-function CulinaryProfileCard() {
-  return (
-    <section className="rounded-xl border border-border bg-bg-elevated p-5 text-ink shadow-sm">
-      <div className="flex items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-accent/25 bg-accent-soft text-accent">
-          <ChefHat className="h-5 w-5" aria-hidden="true" />
-        </span>
-
-        <div className="min-w-0">
-          <Eyebrow tone="accent">Profil kulinarny</Eyebrow>
-          <h2 className="mt-2 font-brand text-xl font-semibold leading-tight text-ink">
-            Preferencje wpływają na każdy pomysł
-          </h2>
-        </div>
-      </div>
-
-      <p className="mt-4 text-sm leading-6 text-ink-soft">
-        Dieta, alergie, sprzęt i budżet pomagają AI nie proponować rzeczy z
-        kosmosu.
-      </p>
-
-      <Link
-        to="/settings"
-        className="mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-border-strong bg-bg-sunken px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent/45 hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-      >
-        Dopasuj preferencje
-        <Settings className="h-4 w-4" aria-hidden="true" />
-      </Link>
     </section>
   );
 }
@@ -935,7 +911,7 @@ function EmptyPanel({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-bg-sunken px-5 text-center ${
+      className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-transparent px-5 text-center ${
         compact ? "min-h-40 py-8" : "min-h-64 py-12"
       }`}
     >
