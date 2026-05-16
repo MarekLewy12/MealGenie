@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/id_rsa)",
+      "Read(**/id_ed25519)",
+      "Read(**/id_droplet)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git reset*)",
+      "Bash(npm install*)",
+      "Bash(npm update*)",
+      "Bash(yarn add*)",
+      "Bash(pnpm install*)",
+      "Bash(rm -rf*)",
+      "Bash(sudo *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(rsync *)",
+      "Bash(docker compose -f docker-compose.prod.yml*)",
+      "Bash(npx prisma migrate reset*)",
+      "Bash(npx prisma migrate deploy*)"
+    ]
+  }
+}
