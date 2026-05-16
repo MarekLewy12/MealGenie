@@ -2,13 +2,11 @@ import { Link } from "react-router-dom";
 
 import { Logo } from "../components/Logo";
 import {
-  LandingBenefitsSection,
   LandingFinalCtaSection,
   LandingHeroSection,
-  LandingHowItWorksSection,
-  LandingPainReliefSection,
-  LandingProductShowcaseSection,
-  LandingSolutionSection,
+  LandingMarqueeStrip,
+  LandingProblemSolutionSection,
+  LandingShowcaseSection,
   LandingTrustSection,
 } from "../components/home/landing";
 
@@ -23,17 +21,16 @@ export function HomePage() {
     <div className="relative isolate overflow-x-hidden bg-bg text-ink">
       <LandingHeroSection />
 
-      <LandingPainReliefSection />
-      <LandingSolutionSection />
-      <LandingHowItWorksSection />
-      <LandingBenefitsSection />
+      <LandingMarqueeStrip />
+      <LandingProblemSolutionSection />
 
-      <LandingProductShowcaseSection />
+      <LandingShowcaseSection />
+
       <LandingTrustSection />
 
       <LandingFinalCtaSection />
 
-      <footer className="bg-bg pb-8 pt-4 text-ink">
+      <footer className="border-t border-border bg-bg-sunken pb-8 pt-6 text-ink">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="max-w-sm">
             <Logo />

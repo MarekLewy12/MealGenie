@@ -1,9 +1,7 @@
-export { LandingBenefitsSection } from "./LandingBenefitsSection";
 export { LandingFinalCtaSection } from "./LandingFinalCtaSection";
 export { LandingHeroSection } from "./LandingHeroSection";
-export { LandingHowItWorksSection } from "./LandingHowItWorksSection";
-export { LandingPainReliefSection } from "./LandingPainReliefSection";
-export { LandingProductShowcaseSection } from "./LandingProductShowcaseSection";
+export { LandingMarqueeStrip } from "./LandingMarqueeStrip";
+export { LandingProblemSolutionSection } from "./LandingProblemSolutionSection";
 export { LandingSectionDivider } from "./LandingSectionDivider";
-export { LandingSolutionSection } from "./LandingSolutionSection";
+export { LandingShowcaseSection } from "./LandingShowcaseSection";
 export { LandingTrustSection } from "./LandingTrustSection";
