@@ -14,7 +14,7 @@ import { SharedRecipePage } from "./pages/SharedRecipePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { RecipesPage } from "./pages/RecipesPage";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
-import { Header } from "./components/Header";
+import { PublicHeader } from "./components/PublicHeader";
 import { PageTransition } from "./components/PageTransition";
 import { useAuthStore } from "./store/authStore";
 import { AuthenticatedLayout } from "./components/AuthenticatedLayout";
@@ -24,7 +24,9 @@ function App() {
   const token = useAuthStore((state) => state.token);
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
   const location = useLocation();
-  const isSharedPage = location.pathname.startsWith("/shared");
+  const shouldShowPublicHeader = ["/", "/try", "/login", "/mobile"].includes(
+    location.pathname,
+  );
   const shouldSkipInitialPageTransition = useRef(true);
   const pageTransitionProps = {
     skipInitialAnimation: shouldSkipInitialPageTransition.current,
@@ -57,7 +59,7 @@ function App() {
       </div>
 
       <div className="relative z-10 flex h-dvh flex-col">
-        {!isSharedPage && <Header />}
+        {shouldShowPublicHeader && <PublicHeader />}
 
         <div className="flex min-h-0 flex-1 flex-col">
           <main id="main-content" className="relative flex min-h-0 flex-1 flex-col" tabIndex={-1}>

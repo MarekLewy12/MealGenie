@@ -10,3 +10,7 @@ output/playwright/
 # Generated meal images for local/dev usage.
 backend/public/meal-images/*
 !backend/public/meal-images/.gitkeep
+
+# Claude Code - lokalne ustawienia, nie commitować
+.claude/settings.local.json
+CLAUDE.local.md
