@@ -251,6 +251,8 @@ Backend:
 - `cd backend && npm test`
 - `cd backend && npm run build`
 
+- Nie używaj Playwrighta ani automatyzacji przeglądarki, chyba że użytkownik wyraźnie o to poprosi.
+
 Nie uruchamiaj komend wymagających sieci, produkcji, SSH, Docker volume'ów lub sekretów bez zgody.
 
 Jeśli nie możesz uruchomić testów/builda, napisz to jasno i podaj checklistę ręczną.
@@ -294,6 +296,65 @@ Dla deploymentu sprawdź, jeśli dotyczy:
 - volumes,
 - migracje,
 - smoke test po wdrożeniu.
+
+## PR descriptions
+
+Gdy użytkownik prosi o opis PR, przygotuj go po angielsku, w Markdown, w tym stylu:
+
+```markdown
+## What
+
+One or two concise sentences describing the main purpose of the PR.
+
+## Changes
+
+### Frontend
+
+- Concrete frontend change.
+- Concrete frontend change.
+
+### Backend
+
+- Concrete backend change, if applicable.
+
+### Docs
+
+- Concrete docs change, if applicable.
+
+## What this does NOT change
+
+- Does not change routing contracts.
+- Does not change API contracts.
+- Does not change auth flow.
+- Does not change deployment, Docker, Caddy, nginx, or `VITE_API_URL`.
+
+## New dependencies
+
+None, or list new dependencies.
+
+## Database migration
+
+None, or describe migration path and file.
+
+## Testing
+
+Verified:
+
+- `command that was run`
+- `command that was run`
+
+Manual smoke recommended:
+
+- Scenario to check manually.
+- Scenario to check manually.
+```
+
+Zasady:
+- Usuń sekcje, które ewidentnie nie pasują, ale zachowaj kolejność pozostałych.
+- Jeśli nie ma nowych zależności albo migracji, napisz `None`.
+- W sekcji "What this does NOT change" wymień tylko istotne kontrakty i obszary ryzyka dla danego PR.
+- W "Testing" oddziel komendy faktycznie uruchomione od ręcznych scenariuszy rekomendowanych.
+- Nie dopisuj twierdzeń o testach, których faktycznie nie uruchomiono.
 
 ## Branching i duże refaktory
 

@@ -598,10 +598,7 @@ export function MealGeneratorWizard({
         )}
 
         {view === "success" && data?.meals && (
-          <div
-            key="wizard-success"
-            className="mx-auto max-w-[1760px] px-4 py-12 sm:px-6 lg:px-8"
-          >
+          <div key="wizard-success">
             <SuccessView
               meals={data.meals}
               isGuestMode={isGuestMode}
@@ -701,8 +698,8 @@ function WizardHeader({
             <span className="hidden sm:inline">
               To jest finalna kontrola.
               <br />
-              Możesz wrócić do pojedynczych ustawień albo od razu wygenerować
-              propozycje.
+              Możesz wrócić do pojedynczych ustawień albo wygenerować 3
+              propozycje do wyboru.
             </span>
           </>
         ) : isGuestMode ? (
