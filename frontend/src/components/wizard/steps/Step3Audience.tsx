@@ -1,4 +1,5 @@
-import { Check, ChefHat, Scale, Users } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Check, ChefHat, Minus, Plus, Scale, Users } from "lucide-react";
 
 import { Eyebrow } from "../../ui";
 import { hungerLevelOptions } from "../mealOptions";
@@ -44,116 +45,183 @@ export function Step3Audience({
   isThermomixMode,
   onThermomixToggle,
 }: Step3AudienceProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div className="space-y-8">
       <header className="space-y-3">
         <Eyebrow tone="saffron">Krok 3 z 4 · Personalizacja</Eyebrow>
         <h2 className="font-serif text-3xl font-medium leading-[1.08] text-ink sm:text-4xl lg:text-[2.5rem]">
-          Dla kogo gotujesz?{" "}
-          <span className="text-ink-soft">Dopasujemy porcje.</span>
+          Jaką porcję przygotować?{" "}
+          <span className="text-ink-soft">MealGenie dopasuje ilość.</span>
         </h2>
-        <p className="max-w-xl text-base leading-7 text-ink-soft">
-          Możesz przejść dalej - mamy sensowne wartości domyślne (2 osoby, standardowy apetyt).
+        <p className="max-w-3xl text-base leading-7 text-ink-soft">
+          Wybierz liczbę osób albo docelową gramaturę. Domyślnie ustawione są 2 osoby i standardowy apetyt.
         </p>
       </header>
 
       <div className="grid gap-5 md:grid-cols-2">
         {/* Tryb porcji */}
-        <fieldset className="rounded-xl border border-border/60 bg-bg-sunken/40 p-5">
+        <fieldset className="flex flex-col rounded-xl border border-border/60 bg-bg-sunken/40 p-5">
           <legend className="mb-3 font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
             Tryb porcji
           </legend>
-          <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Tryb porcji">
+          <div
+            className="grid min-h-[5.5rem] flex-1 grid-cols-2 gap-3"
+            role="radiogroup"
+            aria-label="Tryb porcji"
+          >
             <button
               type="button"
               role="radio"
               aria-checked={portionMode === "servings"}
               onClick={() => onPortionModeChange("servings")}
-              className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`flex h-full min-h-[5.5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-3 py-4 text-center transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                 portionMode === "servings"
                   ? "border-accent bg-accent text-ink-inverse shadow-accent"
                   : "border-border-strong bg-bg-elevated text-ink-soft hover:border-accent hover:bg-accent-soft hover:text-ink"
               }`}
             >
-              <Users className="h-4 w-4" aria-hidden="true" />
-              Osoby
+              <Users className="h-6 w-6" aria-hidden="true" />
+              <span className="font-brand text-lg font-semibold leading-tight">
+                Osoby
+              </span>
+              <span className="text-sm font-semibold leading-5 opacity-80">
+                Liczba porcji
+              </span>
             </button>
             <button
               type="button"
               role="radio"
               aria-checked={portionMode === "weight"}
               onClick={() => onPortionModeChange("weight")}
-              className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`flex h-full min-h-[5.5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-3 py-4 text-center transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                 portionMode === "weight"
                   ? "border-accent bg-accent text-ink-inverse shadow-accent"
                   : "border-border-strong bg-bg-elevated text-ink-soft hover:border-accent hover:bg-accent-soft hover:text-ink"
               }`}
             >
-              <Scale className="h-4 w-4" aria-hidden="true" />
-              Gramy
+              <Scale className="h-6 w-6" aria-hidden="true" />
+              <span className="font-brand text-lg font-semibold leading-tight">
+                Gramy
+              </span>
+              <span className="text-sm font-semibold leading-5 opacity-80">
+                Waga porcji
+              </span>
             </button>
           </div>
         </fieldset>
 
         {/* Liczba osób LUB Docelowa waga */}
         <fieldset className="rounded-xl border border-border/60 bg-bg-sunken/40 p-5">
-          {portionMode === "servings" ? (
-            <>
-              <legend className="mb-3 font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
-                Liczba osób: {servingSize}
-              </legend>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => onServingSizeChange(Math.max(1, servingSize - 1))}
-                  className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border border-border-strong bg-bg-elevated text-lg font-semibold text-ink transition hover:border-accent hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                  aria-label="Zmniejsz liczbę osób"
-                >
-                  -
-                </button>
-                <span className="w-12 text-center font-mono text-xl font-semibold text-ink">
-                  {servingSize}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onServingSizeChange(Math.min(10, servingSize + 1))}
-                  className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border border-border-strong bg-bg-elevated text-lg font-semibold text-ink transition hover:border-accent hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                  aria-label="Zwiększ liczbę osób"
-                >
-                  +
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <legend className="mb-3 font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
-                Docelowa waga
-              </legend>
-              <div className="flex items-center gap-3">
-                <input
-                  id="target-weight-input"
-                  aria-label="Docelowa waga w gramach"
-                  type="number"
-                  min={MIN_TARGET_WEIGHT}
-                  max={MAX_TARGET_WEIGHT}
-                  step={50}
-                  value={targetWeight}
-                  onChange={(event) =>
-                    onTargetWeightChange(
-                      clampTargetWeight(Number(event.target.value)),
-                    )
-                  }
-                  className="min-h-11 w-28 rounded-md border border-border bg-bg-elevated px-3 py-2 text-center font-mono font-semibold text-ink shadow-xs focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
-                />
-                <span className="text-sm font-semibold text-ink-soft">
-                  gramów
-                </span>
-              </div>
-              <p className="mt-3 text-xs leading-5 text-ink-muted">
-                Idealne dla cukiernictwa i profesjonalnej gastronomii.
-              </p>
-            </>
-          )}
+          <legend className="mb-3 font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
+            {portionMode === "servings"
+              ? `Liczba osób: ${servingSize}`
+              : "Docelowa waga"}
+          </legend>
+          <AnimatePresence mode="wait" initial={false}>
+            {portionMode === "servings" ? (
+              <motion.div
+                key="servings"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                <div className="flex min-h-[5.5rem] items-center justify-center">
+                  <div className="grid w-full max-w-sm grid-cols-[3.25rem_minmax(0,1fr)_3.25rem] items-center rounded-2xl border border-border-strong bg-bg-elevated p-2 shadow-xs">
+                    <button
+                      type="button"
+                      disabled={servingSize <= 1}
+                      onClick={() =>
+                        onServingSizeChange(Math.max(1, servingSize - 1))
+                      }
+                      className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      aria-label="Zmniejsz liczbę osób"
+                    >
+                      <Minus className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    <div className="flex min-w-0 flex-col items-center justify-center px-2 text-center">
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.span
+                          key={servingSize}
+                          initial={
+                            prefersReducedMotion
+                              ? false
+                              : { opacity: 0, y: 6, scale: 0.96 }
+                          }
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={
+                            prefersReducedMotion
+                              ? undefined
+                              : { opacity: 0, y: -6, scale: 0.96 }
+                          }
+                          transition={{ duration: 0.16, ease: "easeOut" }}
+                          className="font-mono text-4xl font-semibold leading-none text-ink"
+                        >
+                          {servingSize}
+                        </motion.span>
+                      </AnimatePresence>
+                      <span className="mt-1 text-sm font-semibold leading-none text-ink-soft">
+                        {servingSize === 1 ? "osoba" : "osoby"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={servingSize >= 10}
+                      onClick={() =>
+                        onServingSizeChange(Math.min(10, servingSize + 1))
+                      }
+                      className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      aria-label="Zwiększ liczbę osób"
+                    >
+                      <Plus className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm leading-5 text-ink-muted">
+                  Wygodne do codziennego gotowania dla domowników i gości.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="weight"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                <div className="flex min-h-[5.5rem] items-center justify-center">
+                  <label
+                    htmlFor="target-weight-input"
+                    className="grid w-full max-w-md grid-cols-[minmax(0,1fr)_4.5rem] items-center rounded-2xl border border-border-strong bg-bg-elevated p-2 shadow-xs"
+                  >
+                    <input
+                      id="target-weight-input"
+                      aria-label="Docelowa waga w gramach"
+                      type="number"
+                      min={MIN_TARGET_WEIGHT}
+                      max={MAX_TARGET_WEIGHT}
+                      step={50}
+                      value={targetWeight}
+                      onChange={(event) =>
+                        onTargetWeightChange(
+                          clampTargetWeight(Number(event.target.value)),
+                        )
+                      }
+                      className="min-h-16 min-w-0 rounded-xl border border-transparent bg-transparent px-3 text-center font-mono text-5xl font-semibold leading-none text-ink outline-none transition focus:border-accent focus:bg-bg-sunken focus:ring-2 focus:ring-accent-soft focus-visible:!outline-none focus-visible:![box-shadow:none] sm:text-[3.35rem]"
+                    />
+                    <span className="flex min-h-16 items-center justify-center rounded-xl bg-bg-sunken px-3 text-xl font-bold text-ink-soft">
+                      g
+                    </span>
+                  </label>
+                </div>
+                <p className="mt-3 text-sm leading-5 text-ink-muted">
+                  Idealne dla cukiernictwa i profesjonalnej gastronomii.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </fieldset>
 
         {/* Poziom apetytu - 5 kart wyboru */}
@@ -192,10 +260,10 @@ export function Step3Audience({
                   <span className="text-3xl" aria-hidden="true">
                     {option.emoji}
                   </span>
-                  <span className="font-brand text-sm font-semibold leading-tight text-ink">
+                  <span className="font-brand text-lg font-semibold leading-tight text-ink">
                     {option.label}
                   </span>
-                  <span className="text-xs leading-4 text-ink-soft">
+                  <span className="text-base leading-6 text-ink-soft">
                     {option.hint}
                   </span>
                 </button>
@@ -237,14 +305,14 @@ export function Step3Audience({
             <ChefHat className="h-7 w-7" />
           </span>
 
-          <p className="font-brand text-base font-bold text-ink sm:text-lg">
+          <p className="font-brand text-lg font-bold text-ink sm:text-xl">
             Tryb Thermomix
           </p>
           <p
             id="thermomix-description"
-            className="max-w-md text-sm leading-6 text-ink-soft"
+            className="max-w-md text-base leading-7 text-ink-soft"
           >
-            AI dopasuje przepisy pod robota - czasy, obroty i kolejność kroków.
+            Przepisy uwzględnią robota - czasy, obroty i kolejność kroków.
           </p>
         </button>
       </div>

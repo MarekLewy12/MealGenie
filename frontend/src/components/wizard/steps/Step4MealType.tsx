@@ -29,7 +29,7 @@ export function Step4MealType({
           Co jesz dzisiaj?{" "}
           <span className="text-ink-soft">Wybierz typ posiłku.</span>
         </h2>
-        <p className="max-w-xl text-base leading-7 text-ink-soft">
+        <p className="max-w-3xl text-base leading-7 text-ink-soft">
           Ostatni wybór - potem MealGenie generuje przepis i obraz dania.
         </p>
       </header>
@@ -67,10 +67,10 @@ export function Step4MealType({
                 <span className="text-4xl" aria-hidden="true">
                   {option.emoji}
                 </span>
-                <span className="font-brand text-base font-semibold leading-tight text-ink">
+                <span className="font-brand text-lg font-semibold leading-tight text-ink">
                   {option.label}
                 </span>
-                <span className="text-xs leading-4 text-ink-soft">
+                <span className="text-sm leading-5 text-ink-soft">
                   {option.hint}
                 </span>
               </button>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -9,15 +9,10 @@ import {
   generateMealSuggestions,
   guestGenerateMealSuggestions,
 } from "../../services/api";
-import type {
-  MealSuggestion,
-  MealType,
-  PortionMode,
-} from "../../types/meal";
+import type { MealSuggestion } from "../../types/meal";
 import { notify } from "../../store/notificationStore";
 import { ErrorView } from "./ErrorView";
 import { LoadingView } from "./LoadingView";
-import { mealTypeValues } from "./mealOptions";
 import { Step1Prompt } from "./steps/Step1Prompt";
 import { Step2Time } from "./steps/Step2Time";
 import { Step3Audience } from "./steps/Step3Audience";
@@ -26,7 +21,12 @@ import { SuccessView } from "./SuccessView";
 import { WizardNavigation } from "./WizardNavigation";
 import { WizardPreviewPanel } from "./WizardPreviewPanel";
 import { WizardProgress } from "./WizardProgress";
-import { slideVariants, viewVariants } from "./wizardMotion";
+import {
+  slideVariants,
+  viewVariants,
+  wizardStepLayoutTransition,
+} from "./wizardMotion";
+import { useMealGeneratorState } from "./useMealGeneratorState";
 import { useWizardNavigation } from "./useWizardNavigation";
 
 // ============================================
@@ -46,38 +46,6 @@ type MealGeneratorWizardProps = {
   mode?: MealGeneratorMode;
 };
 
-function getInitialMealType(searchParams: URLSearchParams): MealType {
-  const mealTypeParam = searchParams.get("mealType");
-
-  if (mealTypeParam && mealTypeValues.has(mealTypeParam as MealType)) {
-    return mealTypeParam as MealType;
-  }
-
-  return "LUNCH";
-}
-
-function getBoundedSearchNumber(
-  searchParams: URLSearchParams,
-  key: string,
-  defaultValue: number,
-  min: number,
-  max: number,
-) {
-  const param = searchParams.get(key);
-
-  if (!param) {
-    return defaultValue;
-  }
-
-  const parsed = Number(param);
-
-  if (!Number.isFinite(parsed)) {
-    return defaultValue;
-  }
-
-  return Math.min(max, Math.max(min, parsed));
-}
-
 // ============================================
 // Glowny komponent wizarda - state, mutation, view state machine, shell
 // ============================================
@@ -87,34 +55,22 @@ export function MealGeneratorWizard({
 }: MealGeneratorWizardProps) {
   const isGuestMode = mode === "guest";
   const [searchParams] = useSearchParams();
-
-  // -------------------------------------------------------
-  // Stan generatora (1:1 z MealGenerator)
-  // -------------------------------------------------------
-  const [mealType, setMealType] = useState<MealType>(() =>
-    getInitialMealType(searchParams),
-  );
-  const [prepTime, setPrepTime] = useState(() =>
-    getBoundedSearchNumber(searchParams, "prepTime", 30, 15, 120),
-  );
-  const [servingSize, setServingSize] = useState(() =>
-    getBoundedSearchNumber(searchParams, "servingSize", 2, 1, 10),
-  );
-  const [userPrompt, setUserPrompt] = useState("");
-  const [ingredients, setIngredients] = useState<string[]>([]);
-  const [isThermomixMode, setIsThermomixMode] = useState(false);
   const [view, setView] = useState<GeneratorView>("form");
-  const [portionMode, setPortionMode] = useState<PortionMode>("servings");
-  const [targetWeight, setTargetWeight] = useState(250);
-  const [hungerLevel, setHungerLevel] = useState(3);
   const [guestRetryAfterSeconds, setGuestRetryAfterSeconds] = useState<
     number | null
   >(null);
-
   const [isPreviewExpandedMobile, setIsPreviewExpandedMobile] = useState(false);
 
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
+  const stepCardRef = useRef<HTMLDivElement | null>(null);
+  const hasMountedStepCardRef = useRef(false);
+  const {
+    state: generator,
+    actions: generatorActions,
+    buildAuthPayload,
+    buildGuestPayload,
+  } = useMealGeneratorState(searchParams);
   const {
     step,
     direction,
@@ -134,30 +90,11 @@ export function MealGeneratorWizard({
   // -------------------------------------------------------
   const { mutate, data, error } = useMutation({
     mutationFn: () => {
-      const normalizedPrompt = userPrompt.trim();
-
       if (isGuestMode) {
-        return guestGenerateMealSuggestions({
-          mealType,
-          prepTime,
-          userPrompt:
-            normalizedPrompt.length > 0
-              ? normalizedPrompt
-              : undefined,
-        });
+        return guestGenerateMealSuggestions(buildGuestPayload());
       }
 
-      return generateMealSuggestions({
-        mealType,
-        prepTime,
-        servingSize: portionMode === "servings" ? servingSize : undefined,
-        targetWeightGrams:
-          portionMode === "weight" ? targetWeight : undefined,
-        hungerLevel,
-        userPrompt: normalizedPrompt.length > 0 ? normalizedPrompt : undefined,
-        availableIngredients: ingredients,
-        useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
-      });
+      return generateMealSuggestions(buildAuthPayload());
     },
     onSuccess: () => {
       setGuestRetryAfterSeconds(null);
@@ -262,41 +199,41 @@ export function MealGeneratorWizard({
       case 1:
         return (
           <Step1Prompt
-            userPrompt={userPrompt}
-            onUserPromptChange={setUserPrompt}
-            ingredients={ingredients}
-            onIngredientsChange={setIngredients}
+            userPrompt={generator.userPrompt}
+            onUserPromptChange={generatorActions.setUserPrompt}
+            ingredients={generator.ingredients}
+            onIngredientsChange={generatorActions.setIngredients}
             isGuestMode={isGuestMode}
           />
         );
       case 2:
         return (
           <Step2Time
-            prepTime={prepTime}
-            onPrepTimeChange={setPrepTime}
+            prepTime={generator.prepTime}
+            onPrepTimeChange={generatorActions.setPrepTime}
             isGuestMode={isGuestMode}
           />
         );
       case 3:
         return (
           <Step3Audience
-            portionMode={portionMode}
-            onPortionModeChange={setPortionMode}
-            servingSize={servingSize}
-            onServingSizeChange={setServingSize}
-            targetWeight={targetWeight}
-            onTargetWeightChange={setTargetWeight}
-            hungerLevel={hungerLevel}
-            onHungerLevelChange={setHungerLevel}
-            isThermomixMode={isThermomixMode}
-            onThermomixToggle={setIsThermomixMode}
+            portionMode={generator.portionMode}
+            onPortionModeChange={generatorActions.setPortionMode}
+            servingSize={generator.servingSize}
+            onServingSizeChange={generatorActions.setServingSize}
+            targetWeight={generator.targetWeight}
+            onTargetWeightChange={generatorActions.setTargetWeight}
+            hungerLevel={generator.hungerLevel}
+            onHungerLevelChange={generatorActions.setHungerLevel}
+            isThermomixMode={generator.isThermomixMode}
+            onThermomixToggle={generatorActions.setThermomixMode}
           />
         );
       case 4:
         return (
           <Step4MealType
-            mealType={mealType}
-            onMealTypeChange={setMealType}
+            mealType={generator.mealType}
+            onMealTypeChange={generatorActions.setMealType}
             isGuestMode={isGuestMode}
           />
         );
@@ -321,6 +258,27 @@ export function MealGeneratorWizard({
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [handleGenerate, view]);
+
+  // -------------------------------------------------------
+  // Scroll przy zmianie kroku - bez ruszania scrolla przy edycji pól
+  // -------------------------------------------------------
+  useEffect(() => {
+    if (view !== "form") return;
+
+    if (!hasMountedStepCardRef.current) {
+      hasMountedStepCardRef.current = true;
+      return;
+    }
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      stepCardRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [prefersReducedMotion, step, view]);
 
   // -------------------------------------------------------
   // Render
@@ -349,24 +307,35 @@ export function MealGeneratorWizard({
                     onJumpTo={jumpToDisplayedStep}
                   />
 
-                  <div className="relative overflow-hidden rounded-2xl border border-border bg-bg-elevated p-6 shadow-md sm:p-8 lg:p-10">
+                  <motion.div
+                    ref={stepCardRef}
+                    layout={!prefersReducedMotion}
+                    transition={
+                      prefersReducedMotion
+                        ? undefined
+                        : wizardStepLayoutTransition
+                    }
+                    className="relative scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-bg-elevated p-6 shadow-md sm:p-8 lg:p-10"
+                  >
                     <AnimatePresence
-                      mode="wait"
+                      mode={prefersReducedMotion ? "wait" : "popLayout"}
                       custom={direction}
                       initial={false}
                     >
                       <motion.div
                         key={step}
+                        layout={!prefersReducedMotion}
                         custom={direction}
                         variants={slideVariants}
                         initial={prefersReducedMotion ? false : "hidden"}
                         animate="visible"
                         exit={prefersReducedMotion ? undefined : "exit"}
+                        className="w-full"
                       >
                         {renderActiveStep()}
                       </motion.div>
                     </AnimatePresence>
-                  </div>
+                  </motion.div>
 
                   <WizardNavigation
                     step={displayStep}
@@ -410,15 +379,15 @@ export function MealGeneratorWizard({
                         <WizardPreviewPanel
                           step={displayStep}
                           isGuestMode={isGuestMode}
-                          userPrompt={userPrompt}
-                          ingredients={ingredients}
-                          prepTime={prepTime}
-                          portionMode={portionMode}
-                          servingSize={servingSize}
-                          targetWeight={targetWeight}
-                          hungerLevel={hungerLevel}
-                          isThermomixMode={isThermomixMode}
-                          mealType={mealType}
+                          userPrompt={generator.userPrompt}
+                          ingredients={generator.ingredients}
+                          prepTime={generator.prepTime}
+                          portionMode={generator.portionMode}
+                          servingSize={generator.servingSize}
+                          targetWeight={generator.targetWeight}
+                          hungerLevel={generator.hungerLevel}
+                          isThermomixMode={generator.isThermomixMode}
+                          mealType={generator.mealType}
                         />
                       </div>
                     )}
@@ -429,15 +398,15 @@ export function MealGeneratorWizard({
                     <WizardPreviewPanel
                       step={displayStep}
                       isGuestMode={isGuestMode}
-                      userPrompt={userPrompt}
-                      ingredients={ingredients}
-                      prepTime={prepTime}
-                      portionMode={portionMode}
-                      servingSize={servingSize}
-                      targetWeight={targetWeight}
-                      hungerLevel={hungerLevel}
-                      isThermomixMode={isThermomixMode}
-                      mealType={mealType}
+                      userPrompt={generator.userPrompt}
+                      ingredients={generator.ingredients}
+                      prepTime={generator.prepTime}
+                      portionMode={generator.portionMode}
+                      servingSize={generator.servingSize}
+                      targetWeight={generator.targetWeight}
+                      hungerLevel={generator.hungerLevel}
+                      isThermomixMode={generator.isThermomixMode}
+                      mealType={generator.mealType}
                     />
                   </div>
                 </aside>

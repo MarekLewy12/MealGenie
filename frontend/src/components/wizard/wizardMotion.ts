@@ -22,6 +22,10 @@ export const slideVariants: Variants = {
   }),
 };
 
+export const wizardStepLayoutTransition = {
+  layout: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const },
+};
+
 // ============================================
 // Pop-in fade dla elementów preview panelu
 // (uzywany gdy user zmienia wartosc - akcent flash)

@@ -26,7 +26,7 @@ export function Step2Time({
           Ile masz czasu?{" "}
           <span className="text-ink-soft">Wybierz tempo gotowania.</span>
         </h2>
-        <p className="max-w-xl text-base leading-7 text-ink-soft">
+        <p className="max-w-3xl text-base leading-7 text-ink-soft">
           MealGenie dobierze przepisy mieszczące się w wybranym czasie - bez naciągania.
         </p>
       </header>
@@ -75,10 +75,10 @@ export function Step2Time({
                 >
                   <Icon className="h-6 w-6" />
                 </span>
-                <span className="font-brand text-lg font-semibold leading-tight text-ink">
+                <span className="font-brand text-xl font-semibold leading-tight text-ink">
                   {option.label}
                 </span>
-                <span className="text-sm leading-5 text-ink-soft">
+                <span className="text-base leading-6 text-ink-soft">
                   {option.hint}
                 </span>
               </button>
