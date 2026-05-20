@@ -15,6 +15,8 @@ const IMAGE_STEPS = 28;
 const IMAGE_GUIDANCE = 7;
 const IMAGE_WIDTH = 1344;
 const IMAGE_HEIGHT = 768;
+const IMAGE_REQUEST_SPACING_MS = 1500;
+const IMAGE_RATE_LIMIT_RETRY_DELAYS_MS = [2500, 5000];
 const IMAGE_NEGATIVE_PROMPT =
   "illustration, cartoon, drawing, painting, sketch, 3d render, " +
   "CGI, anime, wrong ingredients, inaccurate food, plastic looking, " +
@@ -27,6 +29,9 @@ const IMAGE_DIR = path.join(process.cwd(), "public", "meal-images");
 if (!fs.existsSync(IMAGE_DIR)) {
   fs.mkdirSync(IMAGE_DIR, { recursive: true });
 }
+
+let nextTogetherImageRequestAt = 0;
+let togetherImageSlotQueue: Promise<void> = Promise.resolve();
 
 type TogetherImageResponse = {
   id: string;
@@ -163,25 +168,25 @@ export async function generateMealImages(
     meals.map((m) => m.name),
   );
 
-  const promises = meals.map(async (meal) => {
+  const imageUrls: Array<string | null> = [];
+
+  for (const meal of meals) {
     try {
-      return await generateMealImage(meal);
+      imageUrls.push(await generateMealImage(meal));
     } catch (err) {
       console.error(`[IMAGE] Failed for "${meal.name}":`, err);
-      return null;
+      imageUrls.push(null);
     }
-  });
+  }
 
-  return Promise.allSettled(promises).then((results) =>
-    results.map((r) => (r.status === "fulfilled" ? r.value : null)),
-  );
+  return imageUrls;
 }
 
 async function generateMealImage(meal: MealImageInput): Promise<string | null> {
   console.log("[IMAGE] Generating image:", meal.name);
   const prompt = buildImagePrompt(meal);
 
-  const b64 = await togetherGenerateBase64Jpeg(prompt);
+  const b64 = await togetherGenerateBase64JpegWithRetry(prompt);
 
   if (!b64) {
     console.error("[IMAGE] No image data returned");
@@ -198,9 +203,44 @@ async function generateMealImage(meal: MealImageInput): Promise<string | null> {
   return `/meal-images/${fileName}`;
 }
 
+async function togetherGenerateBase64JpegWithRetry(
+  prompt: string,
+): Promise<string | null> {
+  let lastError: unknown;
+
+  for (
+    let attempt = 0;
+    attempt <= IMAGE_RATE_LIMIT_RETRY_DELAYS_MS.length;
+    attempt++
+  ) {
+    try {
+      return await togetherGenerateBase64Jpeg(prompt);
+    } catch (err) {
+      lastError = err;
+
+      if (
+        !isTogetherRateLimitError(err) ||
+        attempt >= IMAGE_RATE_LIMIT_RETRY_DELAYS_MS.length
+      ) {
+        throw err;
+      }
+
+      const retryDelayMs = IMAGE_RATE_LIMIT_RETRY_DELAYS_MS[attempt];
+      console.warn(
+        `[IMAGE] Together rate limit hit, retrying in ${retryDelayMs}ms`,
+      );
+      await sleep(retryDelayMs);
+    }
+  }
+
+  throw lastError;
+}
+
 async function togetherGenerateBase64Jpeg(
   prompt: string,
 ): Promise<string | null> {
+  await waitForTogetherImageSlot();
+
   const res = await fetch("https://api.together.xyz/v1/images/generations", {
     method: "POST",
     headers: {
@@ -231,6 +271,30 @@ async function togetherGenerateBase64Jpeg(
   const b64 = first?.b64_json;
 
   return typeof b64 === "string" ? b64 : null;
+}
+
+async function waitForTogetherImageSlot(): Promise<void> {
+  const reservedSlot = togetherImageSlotQueue.then(async () => {
+    const now = Date.now();
+    const waitMs = Math.max(0, nextTogetherImageRequestAt - now);
+
+    if (waitMs > 0) {
+      await sleep(waitMs);
+    }
+
+    nextTogetherImageRequestAt = Date.now() + IMAGE_REQUEST_SPACING_MS;
+  });
+
+  togetherImageSlotQueue = reservedSlot.catch(() => undefined);
+  await reservedSlot;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTogetherRateLimitError(err: unknown): boolean {
+  return err instanceof Error && err.message.includes("[TOGETHER] 429");
 }
 
 function buildImagePrompt(meal: MealImageInput): string {
