@@ -10,10 +10,13 @@ type WizardNavigationProps = {
   isOptional: boolean;
   canGoBack: boolean;
   isLastStep: boolean;
+  isBeforeSummaryStep: boolean;
+  isEditingFromSummary: boolean;
   isGuestMode: boolean;
   onBack: () => void;
   onSkip: () => void;
   onNext: () => void;
+  onReturnToSummary: () => void;
   onGenerate: () => void;
 };
 
@@ -23,10 +26,13 @@ export function WizardNavigation({
   isOptional,
   canGoBack,
   isLastStep,
+  isBeforeSummaryStep,
+  isEditingFromSummary,
   isGuestMode,
   onBack,
   onSkip,
   onNext,
+  onReturnToSummary,
   onGenerate,
 }: WizardNavigationProps) {
   return (
@@ -64,10 +70,14 @@ export function WizardNavigation({
         ) : (
           <button
             type="button"
-            onClick={onNext}
+            onClick={isEditingFromSummary ? onReturnToSummary : onNext}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-6 py-2.5 text-sm font-semibold text-ink-inverse shadow-[0_0_18px_-6px_rgba(232,111,69,0.4)] transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
-            Dalej
+            {isEditingFromSummary
+              ? "Wróć do podsumowania"
+              : isBeforeSummaryStep
+                ? "Sprawdź podsumowanie"
+                : "Dalej"}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         )}

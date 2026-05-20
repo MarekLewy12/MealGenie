@@ -7,18 +7,23 @@ type UseWizardNavigationOptions = {
 export function useWizardNavigation({
   isGuestMode,
 }: UseWizardNavigationOptions) {
-  const totalSteps = isGuestMode ? 3 : 4;
+  const totalSteps = isGuestMode ? 4 : 5;
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [maxReachedStep, setMaxReachedStep] = useState(1);
 
   const displayStep = useMemo(() => {
     if (isGuestMode && step === 4) return 3;
+    if (isGuestMode && step === 5) return 4;
     return step;
   }, [isGuestMode, step]);
 
-  const maxReachedDisplayStep =
-    isGuestMode && maxReachedStep === 4 ? 3 : maxReachedStep;
+  const maxReachedDisplayStep = useMemo(() => {
+    if (!isGuestMode) return maxReachedStep;
+    if (maxReachedStep === 4) return 3;
+    if (maxReachedStep === 5) return 4;
+    return maxReachedStep;
+  }, [isGuestMode, maxReachedStep]);
 
   const goToNextStep = useCallback(() => {
     setDirection(1);
@@ -28,7 +33,7 @@ export function useWizardNavigation({
         return 4;
       }
 
-      const next = Math.min(current + 1, 4);
+      const next = Math.min(current + 1, 5);
       setMaxReachedStep((max) => Math.max(max, next));
       return next;
     });
@@ -37,6 +42,10 @@ export function useWizardNavigation({
   const goToPrevStep = useCallback(() => {
     setDirection(-1);
     setStep((current) => {
+      if (isGuestMode && current === 5) {
+        return 4;
+      }
+
       if (isGuestMode && current === 4) {
         return 2;
       }
@@ -57,7 +66,16 @@ export function useWizardNavigation({
 
   const jumpToDisplayedStep = useCallback(
     (displayedStep: number) => {
-      const target = isGuestMode && displayedStep === 3 ? 4 : displayedStep;
+      let target = displayedStep;
+
+      if (isGuestMode && displayedStep === 3) {
+        target = 4;
+      }
+
+      if (isGuestMode && displayedStep === 4) {
+        target = 5;
+      }
+
       jumpToStep(target);
     },
     [isGuestMode, jumpToStep],
@@ -70,10 +88,13 @@ export function useWizardNavigation({
     totalSteps,
     maxReachedDisplayStep,
     isOptionalStep: step === 1 || step === 3,
-    isLastStep: step === 4,
+    isSummaryStep: step === 5,
+    isBeforeSummaryStep: step === 4,
+    isLastStep: step === 5,
     canGoBack: step > 1,
     goToNextStep,
     goToPrevStep,
+    jumpToStep,
     jumpToDisplayedStep,
   };
 }

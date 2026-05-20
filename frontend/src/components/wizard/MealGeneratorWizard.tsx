@@ -21,6 +21,7 @@ import { SuccessView } from "./SuccessView";
 import { WizardNavigation } from "./WizardNavigation";
 import { WizardPreviewPanel } from "./WizardPreviewPanel";
 import { WizardProgress } from "./WizardProgress";
+import { WizardSummaryCard } from "./WizardSummaryCard";
 import {
   slideVariants,
   viewVariants,
@@ -28,6 +29,7 @@ import {
 } from "./wizardMotion";
 import { useMealGeneratorState } from "./useMealGeneratorState";
 import { useWizardNavigation } from "./useWizardNavigation";
+import { cn } from "../../utils/cn";
 
 // ============================================
 // Typy
@@ -60,6 +62,7 @@ export function MealGeneratorWizard({
     number | null
   >(null);
   const [isPreviewExpandedMobile, setIsPreviewExpandedMobile] = useState(false);
+  const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
 
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
@@ -78,10 +81,13 @@ export function MealGeneratorWizard({
     totalSteps,
     maxReachedDisplayStep,
     isOptionalStep,
+    isSummaryStep,
+    isBeforeSummaryStep,
     isLastStep,
     canGoBack,
     goToNextStep,
     goToPrevStep,
+    jumpToStep,
     jumpToDisplayedStep,
   } = useWizardNavigation({ isGuestMode });
 
@@ -161,6 +167,19 @@ export function MealGeneratorWizard({
     setView("form");
   }, []);
 
+  const handleEditSummaryStep = useCallback(
+    (targetStep: number) => {
+      setIsEditingFromSummary(true);
+      jumpToStep(targetStep);
+    },
+    [jumpToStep],
+  );
+
+  const handleReturnToSummary = useCallback(() => {
+    setIsEditingFromSummary(false);
+    jumpToStep(5);
+  }, [jumpToStep]);
+
   const handleSelectMeal = useCallback(
     (selectedMeal: MealSuggestion, allMeals: MealSuggestion[]) => {
       if (isGuestMode) {
@@ -237,13 +256,31 @@ export function MealGeneratorWizard({
             isGuestMode={isGuestMode}
           />
         );
+      case 5:
+        return (
+          <WizardSummaryCard
+            step={step}
+            isGuestMode={isGuestMode}
+            userPrompt={generator.userPrompt}
+            ingredients={generator.ingredients}
+            prepTime={generator.prepTime}
+            portionMode={generator.portionMode}
+            servingSize={generator.servingSize}
+            targetWeight={generator.targetWeight}
+            hungerLevel={generator.hungerLevel}
+            isThermomixMode={generator.isThermomixMode}
+            mealType={generator.mealType}
+            variant="summary"
+            onEditStep={handleEditSummaryStep}
+          />
+        );
       default:
         return null;
     }
   };
 
   // -------------------------------------------------------
-  // Keyboard shortcuts - Cmd/Ctrl+Enter = generuj natychmiast
+  // Keyboard shortcuts - Cmd/Ctrl+Enter = nastepny krok / generuj
   // -------------------------------------------------------
   useEffect(() => {
     if (view !== "form") return;
@@ -251,13 +288,18 @@ export function MealGeneratorWizard({
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
-        handleGenerate();
+        if (isSummaryStep) {
+          handleGenerate();
+          return;
+        }
+
+        goToNextStep();
       }
     };
 
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [handleGenerate, view]);
+  }, [goToNextStep, handleGenerate, isSummaryStep, view]);
 
   // -------------------------------------------------------
   // Scroll przy zmianie kroku - bez ruszania scrolla przy edycji pól
@@ -294,10 +336,21 @@ export function MealGeneratorWizard({
             animate="animate"
             exit="exit"
           >
-            <WizardHeader isGuestMode={isGuestMode} totalSteps={totalSteps} />
+            <WizardHeader
+              isGuestMode={isGuestMode}
+              isSummaryStep={isSummaryStep}
+              totalSteps={totalSteps}
+            />
 
             <div className="mx-auto max-w-[1760px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 lg:px-8 lg:pb-20 lg:pt-8">
-              <div className="grid min-w-0 gap-6 lg:gap-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
+              <div
+                className={cn(
+                  "grid min-w-0 gap-6 lg:gap-8",
+                  isSummaryStep
+                    ? "mx-auto max-w-5xl"
+                    : "lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]",
+                )}
+              >
                 {/* Lewa: progress + krok + nawigacja */}
                 <div className="min-w-0 space-y-8">
                   <WizardProgress
@@ -315,7 +368,12 @@ export function MealGeneratorWizard({
                         ? undefined
                         : wizardStepLayoutTransition
                     }
-                    className="relative scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-bg-elevated p-6 shadow-md sm:p-8 lg:p-10"
+                    className={cn(
+                      "relative scroll-mt-24 overflow-hidden rounded-2xl",
+                      isSummaryStep
+                        ? "bg-transparent"
+                        : "border border-border bg-bg-elevated p-6 shadow-md sm:p-8 lg:p-10",
+                    )}
                   >
                     <AnimatePresence
                       mode={prefersReducedMotion ? "wait" : "popLayout"}
@@ -343,73 +401,80 @@ export function MealGeneratorWizard({
                     isOptional={isOptionalStep}
                     canGoBack={canGoBack}
                     isLastStep={isLastStep}
+                    isBeforeSummaryStep={isBeforeSummaryStep}
+                    isEditingFromSummary={
+                      isEditingFromSummary && !isSummaryStep
+                    }
                     isGuestMode={isGuestMode}
                     onBack={goToPrevStep}
                     onSkip={goToNextStep}
                     onNext={goToNextStep}
+                    onReturnToSummary={handleReturnToSummary}
                     onGenerate={handleGenerate}
                   />
                 </div>
 
                 {/* Prawa: sticky preview (desktop) / collapsible bottomsheet (mobile) */}
-                <aside className="lg:flex lg:flex-col lg:gap-6">
-                  {/* Mobile: collapsible chip-summary */}
-                  <div className="lg:hidden">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setIsPreviewExpandedMobile((open) => !open)
-                      }
-                      aria-expanded={isPreviewExpandedMobile}
-                      aria-controls="wizard-preview-mobile"
-                      className="flex w-full items-center justify-between rounded-xl border border-border bg-bg-elevated px-4 py-3 text-left shadow-xs transition hover:border-accent/40"
-                    >
-                      <span className="font-brand text-sm font-semibold text-ink">
-                        Twój przepis
-                      </span>
-                      <ChevronDown
-                        className={`h-4 w-4 text-ink-soft transition-transform ${
-                          isPreviewExpandedMobile ? "rotate-180" : ""
-                        }`}
-                        aria-hidden="true"
-                      />
-                    </button>
-                    {isPreviewExpandedMobile && (
-                      <div id="wizard-preview-mobile" className="mt-3">
-                        <WizardPreviewPanel
-                          step={displayStep}
-                          isGuestMode={isGuestMode}
-                          userPrompt={generator.userPrompt}
-                          ingredients={generator.ingredients}
-                          prepTime={generator.prepTime}
-                          portionMode={generator.portionMode}
-                          servingSize={generator.servingSize}
-                          targetWeight={generator.targetWeight}
-                          hungerLevel={generator.hungerLevel}
-                          isThermomixMode={generator.isThermomixMode}
-                          mealType={generator.mealType}
+                {!isSummaryStep && (
+                  <aside className="lg:flex lg:flex-col lg:gap-6">
+                    {/* Mobile: collapsible chip-summary */}
+                    <div className="lg:hidden">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setIsPreviewExpandedMobile((open) => !open)
+                        }
+                        aria-expanded={isPreviewExpandedMobile}
+                        aria-controls="wizard-preview-mobile"
+                        className="flex w-full items-center justify-between rounded-xl border border-border bg-bg-elevated px-4 py-3 text-left shadow-xs transition hover:border-accent/40"
+                      >
+                        <span className="font-brand text-sm font-semibold text-ink">
+                          Twój przepis
+                        </span>
+                        <ChevronDown
+                          className={`h-4 w-4 text-ink-soft transition-transform ${
+                            isPreviewExpandedMobile ? "rotate-180" : ""
+                          }`}
+                          aria-hidden="true"
                         />
-                      </div>
-                    )}
-                  </div>
+                      </button>
+                      {isPreviewExpandedMobile && (
+                        <div id="wizard-preview-mobile" className="mt-3">
+                          <WizardPreviewPanel
+                            step={step}
+                            isGuestMode={isGuestMode}
+                            userPrompt={generator.userPrompt}
+                            ingredients={generator.ingredients}
+                            prepTime={generator.prepTime}
+                            portionMode={generator.portionMode}
+                            servingSize={generator.servingSize}
+                            targetWeight={generator.targetWeight}
+                            hungerLevel={generator.hungerLevel}
+                            isThermomixMode={generator.isThermomixMode}
+                            mealType={generator.mealType}
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Desktop: sticky panel */}
-                  <div className="hidden lg:sticky lg:top-24 lg:block">
-                    <WizardPreviewPanel
-                      step={displayStep}
-                      isGuestMode={isGuestMode}
-                      userPrompt={generator.userPrompt}
-                      ingredients={generator.ingredients}
-                      prepTime={generator.prepTime}
-                      portionMode={generator.portionMode}
-                      servingSize={generator.servingSize}
-                      targetWeight={generator.targetWeight}
-                      hungerLevel={generator.hungerLevel}
-                      isThermomixMode={generator.isThermomixMode}
-                      mealType={generator.mealType}
-                    />
-                  </div>
-                </aside>
+                    {/* Desktop: sticky panel */}
+                    <div className="hidden lg:sticky lg:top-24 lg:block">
+                      <WizardPreviewPanel
+                        step={step}
+                        isGuestMode={isGuestMode}
+                        userPrompt={generator.userPrompt}
+                        ingredients={generator.ingredients}
+                        prepTime={generator.prepTime}
+                        portionMode={generator.portionMode}
+                        servingSize={generator.servingSize}
+                        targetWeight={generator.targetWeight}
+                        hungerLevel={generator.hungerLevel}
+                        isThermomixMode={generator.isThermomixMode}
+                        mealType={generator.mealType}
+                      />
+                    </div>
+                  </aside>
+                )}
               </div>
             </div>
           </motion.div>
@@ -467,11 +532,15 @@ export function MealGeneratorWizard({
 
 function WizardHeader({
   isGuestMode,
+  isSummaryStep,
   totalSteps,
 }: {
   isGuestMode: boolean;
+  isSummaryStep: boolean;
   totalSteps: number;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <header className="relative overflow-hidden border-b border-border">
       {/* Dekoracyjne gradienty w tle - jak DashboardHeader */}
@@ -482,26 +551,69 @@ function WizardHeader({
       </div>
 
       <div className="relative mx-auto max-w-[1760px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex flex-col gap-3">
+        <motion.div
+          layout={!prefersReducedMotion}
+          transition={
+            prefersReducedMotion ? undefined : wizardStepLayoutTransition
+          }
+          className={cn(
+            "flex flex-col gap-6",
+            isSummaryStep
+              ? "items-center text-center"
+              : "lg:flex-row lg:items-end lg:justify-between",
+          )}
+        >
+          <motion.div
+            layout={!prefersReducedMotion}
+            transition={
+              prefersReducedMotion ? undefined : wizardStepLayoutTransition
+            }
+            className={cn(
+              "flex flex-col gap-3",
+              isSummaryStep && "items-center",
+            )}
+          >
             <p className="font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
-              {isGuestMode ? "Podgląd generatora" : "Generator posiłków"}
+              {isSummaryStep
+                ? "Ostatni krok"
+                : isGuestMode
+                  ? "Podgląd generatora"
+                  : "Generator posiłków"}
             </p>
             <h1 className="font-serif text-3xl font-medium leading-[1.05] text-ink sm:text-4xl lg:text-[2.75rem]">
-              Zaprojektuj{" "}
-              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                swój przepis
-              </span>
-              <span className="text-ink-soft"> w {totalSteps} krokach.</span>
+              {isSummaryStep ? (
+                <>
+                  Sprawdź{" "}
+                  <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                    swoje wybory
+                  </span>
+                  <span className="text-ink-soft"> przed generowaniem.</span>
+                </>
+              ) : (
+                <>
+                  Zaprojektuj{" "}
+                  <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                    swój przepis
+                  </span>
+                  <span className="text-ink-soft"> w {totalSteps} krokach.</span>
+                </>
+              )}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-ink-soft sm:text-base">
-              {isGuestMode
-                ? "Wersja pokazowa: 3 darmowe propozycje. Każdy wybór buduje podsumowanie po prawej."
-                : "Każdy wybór buduje podsumowanie po prawej. Możesz pomijać kroki - sensowne wartości domyślne są już ustawione."}
+            <p
+              className={cn(
+                "max-w-2xl text-sm leading-6 text-ink-soft sm:text-base",
+                isSummaryStep && "mx-auto",
+              )}
+            >
+              {isSummaryStep
+                ? "To jest finalna kontrola. Możesz wrócić do pojedynczych ustawień albo od razu wygenerować propozycje."
+                : isGuestMode
+                  ? "Wersja pokazowa: 3 darmowe propozycje. Każdy wybór buduje podsumowanie po prawej."
+                  : "Każdy wybór buduje podsumowanie po prawej. Możesz pomijać kroki - sensowne wartości domyślne są już ustawione."}
             </p>
-          </div>
+          </motion.div>
 
-          {!isGuestMode && (
+          {!isGuestMode && !isSummaryStep && (
             <Link
               to="/settings"
               className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-pill border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold leading-none text-accent shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent lg:self-end"
@@ -509,7 +621,7 @@ function WizardHeader({
               Edytuj preferencje
             </Link>
           )}
-        </div>
+        </motion.div>
       </div>
     </header>
   );

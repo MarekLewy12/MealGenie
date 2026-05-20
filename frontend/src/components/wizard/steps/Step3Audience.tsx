@@ -16,6 +16,16 @@ function clampTargetWeight(value: number) {
   return Math.min(MAX_TARGET_WEIGHT, Math.max(MIN_TARGET_WEIGHT, value));
 }
 
+function parseTargetWeightInput(value: string) {
+  const digitsOnly = value.replace(/\D/g, "");
+
+  if (digitsOnly.length === 0) {
+    return MIN_TARGET_WEIGHT;
+  }
+
+  return clampTargetWeight(Number(digitsOnly));
+}
+
 // ============================================
 // Krok 3: Dla kogo? (porcje + glod + Thermomix)
 // ============================================
@@ -192,29 +202,74 @@ export function Step3Audience({
                 transition={{ duration: 0.18, ease: "easeOut" }}
               >
                 <div className="flex min-h-[5.5rem] items-center justify-center">
-                  <label
-                    htmlFor="target-weight-input"
-                    className="grid w-full max-w-md grid-cols-[minmax(0,1fr)_4.5rem] items-center rounded-2xl border border-border-strong bg-bg-elevated p-2 shadow-xs"
-                  >
-                    <input
-                      id="target-weight-input"
-                      aria-label="Docelowa waga w gramach"
-                      type="number"
-                      min={MIN_TARGET_WEIGHT}
-                      max={MAX_TARGET_WEIGHT}
-                      step={50}
-                      value={targetWeight}
-                      onChange={(event) =>
+                  <div className="grid w-full grid-cols-[3.5rem_minmax(0,1fr)_3.5rem] items-center rounded-2xl border border-border-strong bg-bg-elevated p-2 shadow-xs">
+                    <button
+                      type="button"
+                      disabled={targetWeight <= MIN_TARGET_WEIGHT}
+                      onClick={() =>
                         onTargetWeightChange(
-                          clampTargetWeight(Number(event.target.value)),
+                          clampTargetWeight(targetWeight - 50),
                         )
                       }
-                      className="min-h-16 min-w-0 rounded-xl border border-transparent bg-transparent px-3 text-center font-mono text-5xl font-semibold leading-none text-ink outline-none transition focus:border-accent focus:bg-bg-sunken focus:ring-2 focus:ring-accent-soft focus-visible:!outline-none focus-visible:![box-shadow:none] sm:text-[3.35rem]"
-                    />
-                    <span className="flex min-h-16 items-center justify-center rounded-xl bg-bg-sunken px-3 text-xl font-bold text-ink-soft">
-                      g
-                    </span>
-                  </label>
+                      className="inline-flex min-h-14 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      aria-label="Zmniejsz wagę o 50 gramów"
+                    >
+                      <Minus className="h-5 w-5" aria-hidden="true" />
+                    </button>
+
+                    <div className="flex min-w-0 flex-col items-center justify-center px-2 text-center">
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.div
+                          key={targetWeight}
+                          initial={
+                            prefersReducedMotion
+                              ? false
+                              : { opacity: 0, y: 6, scale: 0.96 }
+                          }
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={
+                            prefersReducedMotion
+                              ? undefined
+                              : { opacity: 0, y: -6, scale: 0.96 }
+                          }
+                          transition={{ duration: 0.16, ease: "easeOut" }}
+                          className="flex min-w-0 items-baseline justify-center gap-1.5"
+                        >
+                          <input
+                            id="target-weight-input"
+                            aria-label="Docelowa waga w gramach"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={targetWeight}
+                            onChange={(event) =>
+                              onTargetWeightChange(
+                                parseTargetWeightInput(event.target.value),
+                              )
+                            }
+                            className="min-w-0 max-w-[9rem] bg-transparent text-center font-mono text-6xl font-semibold leading-none text-ink outline-none transition focus:text-accent-deep focus-visible:!outline-none focus-visible:![box-shadow:none]"
+                          />
+                          <span className="font-mono text-2xl font-semibold leading-none text-ink-soft">
+                            g
+                          </span>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={targetWeight >= MAX_TARGET_WEIGHT}
+                      onClick={() =>
+                        onTargetWeightChange(
+                          clampTargetWeight(targetWeight + 50),
+                        )
+                      }
+                      className="inline-flex min-h-14 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      aria-label="Zwiększ wagę o 50 gramów"
+                    >
+                      <Plus className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-3 text-sm leading-5 text-ink-muted">
                   Idealne dla cukiernictwa i profesjonalnej gastronomii.
