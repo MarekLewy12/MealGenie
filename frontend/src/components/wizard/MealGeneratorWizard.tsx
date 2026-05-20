@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -27,6 +27,7 @@ import { WizardNavigation } from "./WizardNavigation";
 import { WizardPreviewPanel } from "./WizardPreviewPanel";
 import { WizardProgress } from "./WizardProgress";
 import { slideVariants, viewVariants } from "./wizardMotion";
+import { useWizardNavigation } from "./useWizardNavigation";
 
 // ============================================
 // Typy
@@ -85,7 +86,6 @@ export function MealGeneratorWizard({
   mode = "auth",
 }: MealGeneratorWizardProps) {
   const isGuestMode = mode === "guest";
-  const totalSteps = isGuestMode ? 3 : 4;
   const [searchParams] = useSearchParams();
 
   // -------------------------------------------------------
@@ -111,16 +111,23 @@ export function MealGeneratorWizard({
     number | null
   >(null);
 
-  // -------------------------------------------------------
-  // Stan UI wizarda (lokalny, nie wplywa na payload)
-  // -------------------------------------------------------
-  const [step, setStep] = useState(1);
-  const [direction, setDirection] = useState(1);
-  const [maxReachedStep, setMaxReachedStep] = useState(1);
   const [isPreviewExpandedMobile, setIsPreviewExpandedMobile] = useState(false);
 
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
+  const {
+    step,
+    direction,
+    displayStep,
+    totalSteps,
+    maxReachedDisplayStep,
+    isOptionalStep,
+    isLastStep,
+    canGoBack,
+    goToNextStep,
+    goToPrevStep,
+    jumpToDisplayedStep,
+  } = useWizardNavigation({ isGuestMode });
 
   // -------------------------------------------------------
   // Mutation - 1:1 z MealGenerator
@@ -248,46 +255,6 @@ export function MealGeneratorWizard({
   }, [navigate]);
 
   // -------------------------------------------------------
-  // Nawigacja wizardowa
-  // -------------------------------------------------------
-
-  // Mapowanie kroku UI (1-4) na "logiczny krok" - guest mode pomija krok 3
-  // Step 3 (Audience) jest ukrywany w guest mode, wiec idziemy 1 -> 2 -> 4 (renderujac jako "3 z 3")
-  const goToNextStep = useCallback(() => {
-    setDirection(1);
-    setStep((current) => {
-      // Guest mode: po kroku 2 skok do kroku 4
-      if (isGuestMode && current === 2) {
-        setMaxReachedStep((max) => Math.max(max, 4));
-        return 4;
-      }
-      const next = Math.min(current + 1, 4);
-      setMaxReachedStep((max) => Math.max(max, next));
-      return next;
-    });
-  }, [isGuestMode]);
-
-  const goToPrevStep = useCallback(() => {
-    setDirection(-1);
-    setStep((current) => {
-      // Guest mode: wracając z kroku 4 idziemy do 2 (nie 3, bo 3 ukryty)
-      if (isGuestMode && current === 4) {
-        return 2;
-      }
-      return Math.max(current - 1, 1);
-    });
-  }, [isGuestMode]);
-
-  const handleJumpToStep = useCallback(
-    (target: number) => {
-      if (target > maxReachedStep) return;
-      setDirection(target > step ? 1 : -1);
-      setStep(target);
-    },
-    [maxReachedStep, step],
-  );
-
-  // -------------------------------------------------------
   // Render aktywnego kroku
   // -------------------------------------------------------
   const renderActiveStep = () => {
@@ -338,16 +305,6 @@ export function MealGeneratorWizard({
     }
   };
 
-  // Aktualny krok mapowany na "wyswietlany krok" - guest mode renderuje 4 jako "3 z 3"
-  const displayStep = useMemo(() => {
-    if (isGuestMode && step === 4) return 3;
-    return step;
-  }, [isGuestMode, step]);
-
-  const isOptionalStep = step === 1 || step === 3;
-  const isLastStep = step === 4;
-  const canGoBack = step > 1;
-
   // -------------------------------------------------------
   // Keyboard shortcuts - Cmd/Ctrl+Enter = generuj natychmiast
   // -------------------------------------------------------
@@ -388,17 +345,8 @@ export function MealGeneratorWizard({
                   <WizardProgress
                     current={displayStep}
                     total={totalSteps}
-                    maxReached={
-                      isGuestMode && maxReachedStep === 4
-                        ? 3
-                        : maxReachedStep
-                    }
-                    onJumpTo={(displayed) => {
-                      // Mapowanie display -> rzeczywisty step (guest mode)
-                      const target =
-                        isGuestMode && displayed === 3 ? 4 : displayed;
-                      handleJumpToStep(target);
-                    }}
+                    maxReached={maxReachedDisplayStep}
+                    onJumpTo={jumpToDisplayedStep}
                   />
 
                   <div className="relative overflow-hidden rounded-2xl border border-border bg-bg-elevated p-6 shadow-md sm:p-8 lg:p-10">
