@@ -4,6 +4,17 @@ import { Eyebrow } from "../../ui";
 import { hungerLevelOptions } from "../mealOptions";
 import type { PortionMode } from "../../../types/meal";
 
+const MIN_TARGET_WEIGHT = 50;
+const MAX_TARGET_WEIGHT = 5000;
+
+function clampTargetWeight(value: number) {
+  if (!Number.isFinite(value)) {
+    return MIN_TARGET_WEIGHT;
+  }
+
+  return Math.min(MAX_TARGET_WEIGHT, Math.max(MIN_TARGET_WEIGHT, value));
+}
+
 // ============================================
 // Krok 3: Dla kogo? (porcje + glod + Thermomix)
 // ============================================
@@ -123,12 +134,14 @@ export function Step3Audience({
                   id="target-weight-input"
                   aria-label="Docelowa waga w gramach"
                   type="number"
-                  min={50}
-                  max={5000}
+                  min={MIN_TARGET_WEIGHT}
+                  max={MAX_TARGET_WEIGHT}
                   step={50}
                   value={targetWeight}
                   onChange={(event) =>
-                    onTargetWeightChange(Number(event.target.value))
+                    onTargetWeightChange(
+                      clampTargetWeight(Number(event.target.value)),
+                    )
                   }
                   className="min-h-11 w-28 rounded-md border border-border bg-bg-elevated px-3 py-2 text-center font-mono font-semibold text-ink shadow-xs focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
                 />

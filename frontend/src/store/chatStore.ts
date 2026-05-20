@@ -27,6 +27,13 @@ interface ChatState {
   getCurrentRecipeId: () => string | undefined;
 }
 
+type PersistedChatState = Pick<
+  ChatState,
+  "sessions" | "activeSessionKey"
+> & {
+  messages?: ChatMessage[];
+};
+
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
@@ -125,16 +132,19 @@ export const useChatStore = create<ChatState>()(
         sessions: state.sessions,
         activeSessionKey: state.activeSessionKey,
       }),
-      migrate: (persistedState: any, version) => {
+      migrate: (persistedState: unknown, version) => {
+        const state = persistedState as Partial<PersistedChatState>;
+
         if (version === 1) {
           return {
             sessions: {
-              global: persistedState.messages || [],
+              global: state.messages || [],
             },
             activeSessionKey: "global",
           };
         }
-        return persistedState;
+
+        return state;
       },
     },
   ),

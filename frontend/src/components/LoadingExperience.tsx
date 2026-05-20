@@ -52,13 +52,10 @@ export function LoadingExperience({
     return () => clearInterval(interval);
   }, [factsToShow.length]);
 
-  useEffect(() => {
-    setCurrentFactIndex(0);
-  }, [factsToShow.length]);
-
   const containerClassName = `flex min-h-[600px] flex-col items-center justify-center gap-12 px-6 py-16 ${
     className ?? ""
   }`;
+  const visibleFactIndex = currentFactIndex % factsToShow.length;
 
   return (
     <div className={containerClassName}>
@@ -95,7 +92,7 @@ export function LoadingExperience({
       <div className="relative h-24 w-full max-w-xl">
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentFactIndex}
+            key={visibleFactIndex}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -103,7 +100,7 @@ export function LoadingExperience({
             className="absolute inset-0 flex items-center justify-center text-center"
           >
             <p className="font-serif text-xl font-medium text-ink">
-              {factsToShow[currentFactIndex]}
+              {factsToShow[visibleFactIndex]}
             </p>
           </motion.div>
         </AnimatePresence>

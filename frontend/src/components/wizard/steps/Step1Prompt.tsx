@@ -1,6 +1,9 @@
 import { Eyebrow, Textarea } from "../../ui";
 import { TagInput } from "../../TagInput";
 
+const AUTH_PROMPT_MAX_LENGTH = 500;
+const GUEST_PROMPT_MAX_LENGTH = 240;
+
 // ============================================
 // Krok 1: Co masz na mysli? (prompt + skladniki)
 // ============================================
@@ -43,6 +46,7 @@ export function Step1Prompt({
         }
         value={userPrompt}
         onChange={(event) => onUserPromptChange(event.target.value)}
+        maxLength={isGuestMode ? GUEST_PROMPT_MAX_LENGTH : AUTH_PROMPT_MAX_LENGTH}
         placeholder={
           isGuestMode
             ? "np. coś lekkiego, bez mięsa, kuchnia włoska..."

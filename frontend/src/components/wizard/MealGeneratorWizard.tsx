@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -45,6 +45,38 @@ type MealGeneratorWizardProps = {
   mode?: MealGeneratorMode;
 };
 
+function getInitialMealType(searchParams: URLSearchParams): MealType {
+  const mealTypeParam = searchParams.get("mealType");
+
+  if (mealTypeParam && mealTypeValues.has(mealTypeParam as MealType)) {
+    return mealTypeParam as MealType;
+  }
+
+  return "LUNCH";
+}
+
+function getBoundedSearchNumber(
+  searchParams: URLSearchParams,
+  key: string,
+  defaultValue: number,
+  min: number,
+  max: number,
+) {
+  const param = searchParams.get(key);
+
+  if (!param) {
+    return defaultValue;
+  }
+
+  const parsed = Number(param);
+
+  if (!Number.isFinite(parsed)) {
+    return defaultValue;
+  }
+
+  return Math.min(max, Math.max(min, parsed));
+}
+
 // ============================================
 // Glowny komponent wizarda - state, mutation, view state machine, shell
 // ============================================
@@ -54,13 +86,20 @@ export function MealGeneratorWizard({
 }: MealGeneratorWizardProps) {
   const isGuestMode = mode === "guest";
   const totalSteps = isGuestMode ? 3 : 4;
+  const [searchParams] = useSearchParams();
 
   // -------------------------------------------------------
   // Stan generatora (1:1 z MealGenerator)
   // -------------------------------------------------------
-  const [mealType, setMealType] = useState<MealType>("LUNCH");
-  const [prepTime, setPrepTime] = useState(30);
-  const [servingSize, setServingSize] = useState(2);
+  const [mealType, setMealType] = useState<MealType>(() =>
+    getInitialMealType(searchParams),
+  );
+  const [prepTime, setPrepTime] = useState(() =>
+    getBoundedSearchNumber(searchParams, "prepTime", 30, 15, 120),
+  );
+  const [servingSize, setServingSize] = useState(() =>
+    getBoundedSearchNumber(searchParams, "servingSize", 2, 1, 10),
+  );
   const [userPrompt, setUserPrompt] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [isThermomixMode, setIsThermomixMode] = useState(false);
@@ -80,7 +119,6 @@ export function MealGeneratorWizard({
   const [maxReachedStep, setMaxReachedStep] = useState(1);
   const [isPreviewExpandedMobile, setIsPreviewExpandedMobile] = useState(false);
 
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
 
@@ -89,14 +127,15 @@ export function MealGeneratorWizard({
   // -------------------------------------------------------
   const { mutate, data, error } = useMutation({
     mutationFn: () => {
+      const normalizedPrompt = userPrompt.trim();
+
       if (isGuestMode) {
-        const normalizedGuestPrompt = userPrompt.trim();
         return guestGenerateMealSuggestions({
           mealType,
           prepTime,
           userPrompt:
-            normalizedGuestPrompt.length > 0
-              ? normalizedGuestPrompt
+            normalizedPrompt.length > 0
+              ? normalizedPrompt
               : undefined,
         });
       }
@@ -108,7 +147,7 @@ export function MealGeneratorWizard({
         targetWeightGrams:
           portionMode === "weight" ? targetWeight : undefined,
         hungerLevel,
-        userPrompt: userPrompt.length > 0 ? userPrompt : undefined,
+        userPrompt: normalizedPrompt.length > 0 ? normalizedPrompt : undefined,
         availableIngredients: ingredients,
         useEquipment: isThermomixMode ? ["THERMOMIX"] : [],
       });
@@ -207,31 +246,6 @@ export function MealGeneratorWizard({
   const handleGuestCta = useCallback(() => {
     navigate("/login?mode=register");
   }, [navigate]);
-
-  // -------------------------------------------------------
-  // Query params -> state (1:1 logika z MealGenerator)
-  // -------------------------------------------------------
-  useEffect(() => {
-    const mealTypeParam = searchParams.get("mealType");
-    const prepTimeParam = searchParams.get("prepTime");
-    const servingSizeParam = searchParams.get("servingSize");
-
-    if (mealTypeParam && mealTypeValues.has(mealTypeParam as MealType)) {
-      setMealType(mealTypeParam as MealType);
-    }
-    if (prepTimeParam) {
-      const parsedPrepTime = Number(prepTimeParam);
-      if (Number.isFinite(parsedPrepTime)) {
-        setPrepTime(Math.min(120, Math.max(15, parsedPrepTime)));
-      }
-    }
-    if (servingSizeParam) {
-      const parsedServingSize = Number(servingSizeParam);
-      if (Number.isFinite(parsedServingSize)) {
-        setServingSize(Math.min(10, Math.max(1, parsedServingSize)));
-      }
-    }
-  }, [searchParams]);
 
   // -------------------------------------------------------
   // Nawigacja wizardowa
@@ -337,22 +351,19 @@ export function MealGeneratorWizard({
   // -------------------------------------------------------
   // Keyboard shortcuts - Cmd/Ctrl+Enter = generuj natychmiast
   // -------------------------------------------------------
-  const handleGenerateRef = useRef(handleGenerate);
-  handleGenerateRef.current = handleGenerate;
-
   useEffect(() => {
     if (view !== "form") return;
 
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
-        handleGenerateRef.current();
+        handleGenerate();
       }
     };
 
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [view]);
+  }, [handleGenerate, view]);
 
   // -------------------------------------------------------
   // Render
@@ -575,7 +586,7 @@ function WizardHeader({
 
           {!isGuestMode && (
             <Link
-              to="/onboarding"
+              to="/settings"
               className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-pill border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold leading-none text-accent shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent lg:self-end"
             >
               Edytuj preferencje

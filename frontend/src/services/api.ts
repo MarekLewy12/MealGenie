@@ -3,11 +3,9 @@ import axios from "axios";
 import type { LoginFormData, RegisterFormData } from "../schemas/auth";
 import { useAuthStore } from "../store/authStore";
 import type {
-  FullRecipe,
   MealResponse,
   MealSuggestion,
   MealType,
-  MealHistoryItem,
   MealHistoryDetail,
   MealHistoryResponse,
   GenerateRecipeResponse,
