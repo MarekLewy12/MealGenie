@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
+import { AppPageHeader } from "../AppPageHeader";
 import {
   generateMealSuggestions,
   guestGenerateMealSuggestions,
@@ -646,139 +647,96 @@ function WizardHeader({
   isSummaryStep: boolean;
   totalSteps: number;
 }) {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
-    <header className="relative isolate overflow-hidden border-b border-border bg-bg">
-      {/* Dekoracyjne gradienty w tle - jak DashboardHeader */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-accent-soft/15 via-transparent to-bg dark:from-accent-soft/[0.03] dark:to-bg" />
-        <div className="absolute -left-[10%] -top-[35%] h-[26rem] w-[26rem] rounded-full bg-gradient-to-br from-accent-soft/80 to-saffron-soft/65 blur-[100px] dark:from-accent/16 dark:to-saffron/6 dark:blur-[110px]" />
-        <div className="absolute -right-[8%] top-[15%] h-[22rem] w-[22rem] rounded-full bg-basil-soft/60 blur-[85px] dark:bg-basil/14 dark:blur-[95px]" />
-      </div>
-
-      <div className="relative mx-auto max-w-[1760px] px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-        <motion.div
-          layout={!prefersReducedMotion}
-          transition={
-            prefersReducedMotion ? undefined : wizardStepLayoutTransition
-          }
-          className={cn(
-            "flex flex-col gap-6",
-            isSummaryStep
-              ? "items-center text-center"
-              : "items-center gap-4 text-center sm:gap-6 lg:flex-row lg:items-end lg:justify-between lg:text-left",
-          )}
-        >
-          <motion.div
-            layout={!prefersReducedMotion}
-            transition={
-              prefersReducedMotion ? undefined : wizardStepLayoutTransition
-            }
-            className={cn(
-              "flex flex-col gap-3",
-              isSummaryStep
-                ? "items-center"
-                : "items-center lg:items-start",
-            )}
+    <AppPageHeader
+      align={isSummaryStep ? "center" : "left"}
+      eyebrow={
+        <p className="font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
+          {isSummaryStep
+            ? "Ostatni krok"
+            : isGuestMode
+              ? "Podgląd generatora"
+              : "Generator posiłków"}
+        </p>
+      }
+      title={
+        isSummaryStep ? (
+          <>
+            <span className="sm:hidden">
+              Sprawdź{" "}
+              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                wybory
+              </span>
+            </span>
+            <span className="hidden sm:inline">
+              Sprawdź{" "}
+              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                swoje wybory
+              </span>
+              <span className="text-ink-soft"> przed generowaniem.</span>
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="sm:hidden">
+              Zaprojektuj{" "}
+              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                przepis
+              </span>
+            </span>
+            <span className="hidden sm:inline">
+              Zaprojektuj{" "}
+              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                swój przepis
+              </span>
+              <span className="text-ink-soft"> w {totalSteps} krokach.</span>
+            </span>
+          </>
+        )
+      }
+      description={
+        isSummaryStep ? (
+          <>
+            <span className="sm:hidden">Sprawdź wybory i generuj.</span>
+            <span className="hidden sm:inline">
+              To jest finalna kontrola.
+              <br />
+              Możesz wrócić do pojedynczych ustawień albo od razu wygenerować
+              propozycje.
+            </span>
+          </>
+        ) : isGuestMode ? (
+          <>
+            <span className="sm:hidden">
+              Wybierz parametry i zobacz darmowy podgląd.
+            </span>
+            <span className="hidden sm:inline">
+              Wersja pokazowa: 3 darmowe propozycje. Każdy wybór buduje
+              podsumowanie po prawej.
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="sm:hidden">
+              Wybierz parametry, a MealGenie ułoży propozycje.
+            </span>
+            <span className="hidden sm:inline">
+              Każdy wybór buduje podsumowanie po prawej. Możesz pomijać kroki -
+              sensowne wartości domyślne są już ustawione.
+            </span>
+          </>
+        )
+      }
+      action={
+        !isGuestMode && !isSummaryStep ? (
+          <Link
+            to="/settings"
+            className="inline-flex shrink-0 items-center justify-center gap-2 self-center rounded-md px-0 py-0 text-sm font-semibold leading-none text-accent transition duration-fast ease-out hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:rounded-pill sm:border sm:border-border-strong sm:bg-bg-elevated sm:px-5 sm:py-2.5 sm:shadow-xs sm:hover:border-accent sm:hover:bg-accent-soft lg:self-end"
           >
-            <p className="font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
-              {isSummaryStep
-                ? "Ostatni krok"
-                : isGuestMode
-                  ? "Podgląd generatora"
-                  : "Generator posiłków"}
-            </p>
-            <h1 className="font-serif text-2xl font-medium leading-[1.05] text-ink sm:text-4xl lg:text-[2.75rem]">
-              {isSummaryStep ? (
-                <>
-                  <span className="sm:hidden">
-                    Sprawdź{" "}
-                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                      wybory
-                    </span>
-                  </span>
-                  <span className="hidden sm:inline">
-                    Sprawdź{" "}
-                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                      swoje wybory
-                    </span>
-                    <span className="text-ink-soft"> przed generowaniem.</span>
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="sm:hidden">
-                    Zaprojektuj{" "}
-                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                      przepis
-                    </span>
-                  </span>
-                  <span className="hidden sm:inline">
-                    Zaprojektuj{" "}
-                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                      swój przepis
-                    </span>
-                    <span className="text-ink-soft">
-                      {" "}
-                      w {totalSteps} krokach.
-                    </span>
-                  </span>
-                </>
-              )}
-            </h1>
-            <p
-              className={cn(
-                "text-sm leading-6 text-ink-soft sm:text-base",
-                isSummaryStep ? "mx-auto max-w-2xl" : "max-w-4xl",
-              )}
-            >
-              {isSummaryStep ? (
-                <>
-                  <span className="sm:hidden">
-                    Sprawdź wybory i generuj.
-                  </span>
-                  <span className="hidden sm:inline">
-                    To jest finalna kontrola.
-                    <br />
-                    Możesz wrócić do pojedynczych ustawień albo od razu
-                    wygenerować propozycje.
-                  </span>
-                </>
-              ) : isGuestMode ? (
-                <>
-                  <span className="sm:hidden">
-                    Wybierz parametry i zobacz darmowy podgląd.
-                  </span>
-                  <span className="hidden sm:inline">
-                    Wersja pokazowa: 3 darmowe propozycje. Każdy wybór buduje
-                    podsumowanie po prawej.
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="sm:hidden">
-                    Wybierz parametry, a MealGenie ułoży propozycje.
-                  </span>
-                  <span className="hidden sm:inline">
-                    Każdy wybór buduje podsumowanie po prawej. Możesz pomijać
-                    kroki - sensowne wartości domyślne są już ustawione.
-                  </span>
-                </>
-              )}
-            </p>
-          </motion.div>
-
-          {!isGuestMode && !isSummaryStep && (
-            <Link
-              to="/settings"
-              className="inline-flex shrink-0 items-center justify-center gap-2 self-center rounded-md px-0 py-0 text-sm font-semibold leading-none text-accent transition duration-fast ease-out hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:rounded-pill sm:border sm:border-border-strong sm:bg-bg-elevated sm:px-5 sm:py-2.5 sm:shadow-xs sm:hover:border-accent sm:hover:bg-accent-soft lg:self-end"
-            >
-              Edytuj preferencje
-            </Link>
-          )}
-        </motion.div>
-      </div>
-    </header>
+            Edytuj preferencje
+          </Link>
+        ) : null
+      }
+    />
   );
 }
