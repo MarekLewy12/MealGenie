@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
+  ListChecks,
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
@@ -23,6 +25,25 @@ type SuccessViewProps = {
   onGuestCta: () => void;
   onSelectMeal: (meal: MealSuggestion) => void;
 };
+
+function findScrollableParent(element: HTMLElement | null): HTMLElement | null {
+  let parent = element?.parentElement ?? null;
+
+  while (parent) {
+    const { overflowY } = window.getComputedStyle(parent);
+    const canScroll =
+      /(auto|scroll|overlay)/.test(overflowY) &&
+      parent.scrollHeight > parent.clientHeight;
+
+    if (canScroll) {
+      return parent;
+    }
+
+    parent = parent.parentElement;
+  }
+
+  return null;
+}
 
 const floatingElements = [
   {
@@ -203,15 +224,49 @@ export function SuccessView({
   onGuestCta,
   onSelectMeal,
 }: SuccessViewProps) {
+  const [showAllIngredients, setShowAllIngredients] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showAllIngredients) {
+      return;
+    }
+
+    const scrollToBottom = () => {
+      const scrollContainer = findScrollableParent(rootRef.current);
+      const scrollOptions: ScrollToOptions = {
+        top: scrollContainer
+          ? scrollContainer.scrollHeight
+          : document.documentElement.scrollHeight,
+        behavior: "smooth",
+      };
+
+      if (scrollContainer) {
+        scrollContainer.scrollTo(scrollOptions);
+      } else {
+        window.scrollTo(scrollOptions);
+      }
+    };
+
+    const earlyTimer = setTimeout(scrollToBottom, 150);
+    const finalTimer = setTimeout(scrollToBottom, 450);
+
+    return () => {
+      clearTimeout(earlyTimer);
+      clearTimeout(finalTimer);
+    };
+  }, [showAllIngredients]);
+
   return (
     <motion.div
+      ref={rootRef}
       variants={viewVariants}
       initial="initial"
       animate="animate"
       exit="exit"
       className="relative flex w-full flex-col items-center space-y-5 pb-6 sm:space-y-6 sm:pb-8"
     >
-      <div className="pointer-events-none absolute inset-0 z-[1] hidden overflow-hidden lg:block">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] hidden h-[100vh] overflow-hidden lg:block">
         {floatingElements.map((element, index) => (
           <motion.div
             key={`${element.emoji}-${index}`}
@@ -275,6 +330,15 @@ export function SuccessView({
             Losuj nowe
           </Button>
 
+          <Button
+            onClick={() => setShowAllIngredients((prev) => !prev)}
+            variant="secondary"
+            leftIcon={<ListChecks className="h-4 w-4 text-accent" />}
+            className="rounded-full border border-border bg-bg-elevated px-5 py-2.5 shadow-sm transition hover:border-accent/50 hover:bg-accent-soft"
+          >
+            {showAllIngredients ? "Zwiń składy" : "Pokaż pełne składy"}
+          </Button>
+
           {isGuestMode && (
             <Button
               onClick={onGuestCta}
@@ -298,6 +362,7 @@ export function SuccessView({
             <motion.div
               key={`${meal.name}-${index}`}
               variants={successItem}
+              layout
               className="h-full"
             >
               <MealCard
@@ -305,6 +370,7 @@ export function SuccessView({
                 onSelect={() => onSelectMeal(meal)}
                 showAction={!isGuestMode}
                 variant="premium"
+                showAllIngredients={showAllIngredients}
               />
             </motion.div>
           ))}
