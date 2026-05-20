@@ -26,6 +26,7 @@ type Step1PromptProps = {
   ingredients: string[];
   onIngredientsChange: (value: string[]) => void;
   isGuestMode: boolean;
+  totalSteps: number;
 };
 
 export function Step1Prompt({
@@ -34,6 +35,7 @@ export function Step1Prompt({
   ingredients,
   onIngredientsChange,
   isGuestMode,
+  totalSteps,
 }: Step1PromptProps) {
   const promptMaxLength = isGuestMode
     ? GUEST_PROMPT_MAX_LENGTH
@@ -54,9 +56,7 @@ export function Step1Prompt({
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <Eyebrow tone="accent">
-          Krok 1 z {isGuestMode ? "3" : "4"} · Inspiracja
-        </Eyebrow>
+        <Eyebrow tone="accent">Krok 1 z {totalSteps} · Inspiracja</Eyebrow>
         <h2 className="font-serif text-3xl font-medium leading-[1.08] text-ink sm:text-4xl lg:text-[2.5rem]">
           Co dziś gotujemy?{" "}
           <span className="text-ink-soft">Powiedz w paru słowach.</span>

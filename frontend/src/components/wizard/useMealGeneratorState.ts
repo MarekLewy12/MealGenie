@@ -161,7 +161,17 @@ export function useMealGeneratorState(searchParams: URLSearchParams) {
       availableIngredients: state.ingredients,
       useEquipment: state.isThermomixMode ? ["THERMOMIX"] : [],
     };
-  }, [state]);
+  }, [
+    state.mealType,
+    state.prepTime,
+    state.portionMode,
+    state.servingSize,
+    state.targetWeight,
+    state.hungerLevel,
+    state.userPrompt,
+    state.ingredients,
+    state.isThermomixMode,
+  ]);
 
   return {
     state,

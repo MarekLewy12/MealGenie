@@ -16,16 +16,6 @@ function clampTargetWeight(value: number) {
   return Math.min(MAX_TARGET_WEIGHT, Math.max(MIN_TARGET_WEIGHT, value));
 }
 
-function parseTargetWeightInput(value: string) {
-  const digitsOnly = value.replace(/\D/g, "");
-
-  if (digitsOnly.length === 0) {
-    return MIN_TARGET_WEIGHT;
-  }
-
-  return clampTargetWeight(Number(digitsOnly));
-}
-
 // ============================================
 // Krok 3: Dla kogo? (porcje + glod + Thermomix)
 // ============================================
@@ -41,6 +31,7 @@ type Step3AudienceProps = {
   onHungerLevelChange: (level: number) => void;
   isThermomixMode: boolean;
   onThermomixToggle: (value: boolean) => void;
+  totalSteps: number;
 };
 
 export function Step3Audience({
@@ -54,13 +45,16 @@ export function Step3Audience({
   onHungerLevelChange,
   isThermomixMode,
   onThermomixToggle,
+  totalSteps,
 }: Step3AudienceProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <Eyebrow tone="saffron">Krok 3 z 4 · Personalizacja</Eyebrow>
+        <Eyebrow tone="saffron">
+          Krok 3 z {totalSteps} · Personalizacja
+        </Eyebrow>
         <h2 className="font-serif text-3xl font-medium leading-[1.08] text-ink sm:text-4xl lg:text-[2.5rem]">
           Jaką porcję przygotować?{" "}
           <span className="text-ink-soft">MealGenie dopasuje ilość.</span>
@@ -200,9 +194,10 @@ export function Step3Audience({
                 animate={{ opacity: 1, y: 0 }}
                 exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
+                className="space-y-4"
               >
                 <div className="flex min-h-[5.5rem] items-center justify-center">
-                  <div className="grid w-full grid-cols-[3.5rem_minmax(0,1fr)_3.5rem] items-center rounded-2xl border border-border-strong bg-bg-elevated p-2 shadow-xs">
+                  <div className="grid w-full max-w-sm grid-cols-[3.25rem_minmax(0,1fr)_3.25rem] items-center rounded-2xl border border-border-strong bg-bg-elevated p-2 shadow-xs">
                     <button
                       type="button"
                       disabled={targetWeight <= MIN_TARGET_WEIGHT}
@@ -211,49 +206,21 @@ export function Step3Audience({
                           clampTargetWeight(targetWeight - 50),
                         )
                       }
-                      className="inline-flex min-h-14 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                       aria-label="Zmniejsz wagę o 50 gramów"
                     >
                       <Minus className="h-5 w-5" aria-hidden="true" />
                     </button>
 
                     <div className="flex min-w-0 flex-col items-center justify-center px-2 text-center">
-                      <AnimatePresence mode="popLayout" initial={false}>
-                        <motion.div
-                          key={targetWeight}
-                          initial={
-                            prefersReducedMotion
-                              ? false
-                              : { opacity: 0, y: 6, scale: 0.96 }
-                          }
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={
-                            prefersReducedMotion
-                              ? undefined
-                              : { opacity: 0, y: -6, scale: 0.96 }
-                          }
-                          transition={{ duration: 0.16, ease: "easeOut" }}
-                          className="flex min-w-0 items-baseline justify-center gap-1.5"
-                        >
-                          <input
-                            id="target-weight-input"
-                            aria-label="Docelowa waga w gramach"
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={targetWeight}
-                            onChange={(event) =>
-                              onTargetWeightChange(
-                                parseTargetWeightInput(event.target.value),
-                              )
-                            }
-                            className="min-w-0 max-w-[9rem] bg-transparent text-center font-mono text-6xl font-semibold leading-none text-ink outline-none transition focus:text-accent-deep focus-visible:!outline-none focus-visible:![box-shadow:none]"
-                          />
-                          <span className="font-mono text-2xl font-semibold leading-none text-ink-soft">
-                            g
-                          </span>
-                        </motion.div>
-                      </AnimatePresence>
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span className="font-mono text-3xl font-semibold leading-none text-ink sm:text-4xl">
+                          {targetWeight}
+                        </span>
+                        <span className="font-mono text-lg font-semibold leading-none text-ink-soft sm:text-xl">
+                          g
+                        </span>
+                      </div>
                     </div>
 
                     <button
@@ -264,16 +231,34 @@ export function Step3Audience({
                           clampTargetWeight(targetWeight + 50),
                         )
                       }
-                      className="inline-flex min-h-14 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl text-ink-soft transition hover:bg-accent-soft hover:text-accent-deep disabled:cursor-not-allowed disabled:text-ink-disabled disabled:hover:bg-transparent disabled:hover:text-ink-disabled focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                       aria-label="Zwiększ wagę o 50 gramów"
                     >
                       <Plus className="h-5 w-5" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
-                <p className="mt-3 text-sm leading-5 text-ink-muted">
-                  Idealne dla cukiernictwa i profesjonalnej gastronomii.
-                </p>
+
+                <div className="flex flex-wrap justify-center gap-2">
+                  {[250, 500, 750, 1000, 1500, 2000].map((preset) => {
+                    const isActive = targetWeight === preset;
+
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => onTargetWeightChange(preset)}
+                        className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                          isActive
+                            ? "border-accent bg-accent/10 font-bold text-accent-deep"
+                            : "border-border-strong bg-bg-elevated text-ink-soft hover:border-accent/40 hover:bg-bg hover:text-ink"
+                        }`}
+                      >
+                        {preset} g
+                      </button>
+                    );
+                  })}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -327,49 +312,62 @@ export function Step3Audience({
           </div>
         </fieldset>
 
-        {/* Tryb Thermomix - wycentrowana karta toggle */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={isThermomixMode}
-          aria-describedby="thermomix-description"
-          onClick={() => onThermomixToggle(!isThermomixMode)}
-          className={`group relative flex w-full flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-center transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent md:col-span-2 sm:p-8 ${
-            isThermomixMode
-              ? "border-basil bg-basil-soft text-ink shadow-sm ring-1 ring-basil/30"
-              : "border-border/60 bg-bg-sunken/40 text-ink hover:-translate-y-0.5 hover:border-basil/50 hover:bg-basil-soft/40 hover:shadow-sm"
-          }`}
-        >
-          {isThermomixMode && (
-            <span
-              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-pill bg-basil text-ink-inverse shadow-sm"
-              aria-hidden="true"
-            >
-              <Check className="h-4 w-4" strokeWidth={3} />
-            </span>
-          )}
-
-          <span
-            className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-colors ${
+        {/* Tryb Thermomix - wycentrowany, horyzontalny wiersz z dopieszczonym suwakiem */}
+        <div className="flex justify-center md:col-span-2">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isThermomixMode}
+            aria-describedby="thermomix-description"
+            onClick={() => onThermomixToggle(!isThermomixMode)}
+            className={`group relative flex w-full max-w-2xl items-center justify-between gap-6 rounded-2xl border p-5 text-left transition duration-fast ease-out focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent ${
               isThermomixMode
-                ? "bg-basil text-ink-inverse"
-                : "bg-bg-elevated text-ink-muted group-hover:text-basil"
+                ? "border-basil bg-basil-soft text-ink shadow-sm ring-1 ring-basil/30"
+                : "border-border/60 bg-bg-sunken/40 text-ink hover:-translate-y-0.5 hover:border-basil/50 hover:bg-basil-soft/40 hover:shadow-sm"
             }`}
-            aria-hidden="true"
           >
-            <ChefHat className="h-7 w-7" />
-          </span>
+            <div className="flex items-center gap-4">
+              <span
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                  isThermomixMode
+                    ? "bg-basil text-ink-inverse"
+                    : "bg-bg-elevated text-ink-muted group-hover:text-basil"
+                }`}
+                aria-hidden="true"
+              >
+                <ChefHat className="h-6 w-6" />
+              </span>
 
-          <p className="font-brand text-lg font-bold text-ink sm:text-xl">
-            Tryb Thermomix
-          </p>
-          <p
-            id="thermomix-description"
-            className="max-w-md text-base leading-7 text-ink-soft"
-          >
-            Przepisy uwzględnią robota - czasy, obroty i kolejność kroków.
-          </p>
-        </button>
+              <div className="space-y-0.5">
+                <p className="font-brand text-lg font-bold text-ink">
+                  Tryb Thermomix
+                </p>
+                <p
+                  id="thermomix-description"
+                  className="pr-2 text-sm leading-relaxed text-ink-soft"
+                >
+                  Przepisy uwzględnią robota - czasy, obroty i kolejność kroków.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center">
+              <div
+                className={`relative h-7 w-12 rounded-full transition-all duration-fast ease-out ${
+                  isThermomixMode
+                    ? "bg-basil ring-4 ring-basil/10"
+                    : "bg-border-strong group-hover:bg-border-strong/80"
+                }`}
+              >
+                <div
+                  className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-fast ease-out ${
+                    isThermomixMode ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );

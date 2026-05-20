@@ -12,18 +12,21 @@ type Step4MealTypeProps = {
   mealType: MealType;
   onMealTypeChange: (value: MealType) => void;
   isGuestMode: boolean;
+  displayStep: number;
+  totalSteps: number;
 };
 
 export function Step4MealType({
   mealType,
   onMealTypeChange,
-  isGuestMode,
+  displayStep,
+  totalSteps,
 }: Step4MealTypeProps) {
   return (
     <div className="space-y-8">
       <header className="space-y-3">
         <Eyebrow tone="accent">
-          Krok {isGuestMode ? "3 z 3" : "4 z 4"} · Kierunek
+          Krok {displayStep} z {totalSteps} · Kierunek
         </Eyebrow>
         <h2 className="font-serif text-3xl font-medium leading-[1.08] text-ink sm:text-4xl lg:text-[2.5rem]">
           Co jesz dzisiaj?{" "}

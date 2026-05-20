@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -22,6 +22,7 @@ import { WizardNavigation } from "./WizardNavigation";
 import { WizardPreviewPanel } from "./WizardPreviewPanel";
 import { WizardProgress } from "./WizardProgress";
 import { WizardSummaryCard } from "./WizardSummaryCard";
+import { findMealTypeOption } from "./mealOptions";
 import {
   slideVariants,
   viewVariants,
@@ -90,6 +91,33 @@ export function MealGeneratorWizard({
     jumpToStep,
     jumpToDisplayedStep,
   } = useWizardNavigation({ isGuestMode });
+  const mobileSummaryText = useMemo(() => {
+    const parts: string[] = [];
+    const mealOption = findMealTypeOption(generator.mealType);
+
+    if (mealOption) {
+      parts.push(`${mealOption.emoji} ${mealOption.label}`);
+    }
+
+    parts.push(`${generator.prepTime} min`);
+
+    if (!isGuestMode) {
+      parts.push(
+        generator.portionMode === "servings"
+          ? `${generator.servingSize} os.`
+          : `${generator.targetWeight} g`,
+      );
+    }
+
+    return parts.join(" • ");
+  }, [
+    generator.mealType,
+    generator.portionMode,
+    generator.prepTime,
+    generator.servingSize,
+    generator.targetWeight,
+    isGuestMode,
+  ]);
 
   // -------------------------------------------------------
   // Mutation - 1:1 z MealGenerator
@@ -223,6 +251,7 @@ export function MealGeneratorWizard({
             ingredients={generator.ingredients}
             onIngredientsChange={generatorActions.setIngredients}
             isGuestMode={isGuestMode}
+            totalSteps={totalSteps}
           />
         );
       case 2:
@@ -231,6 +260,7 @@ export function MealGeneratorWizard({
             prepTime={generator.prepTime}
             onPrepTimeChange={generatorActions.setPrepTime}
             isGuestMode={isGuestMode}
+            totalSteps={totalSteps}
           />
         );
       case 3:
@@ -246,6 +276,7 @@ export function MealGeneratorWizard({
             onHungerLevelChange={generatorActions.setHungerLevel}
             isThermomixMode={generator.isThermomixMode}
             onThermomixToggle={generatorActions.setThermomixMode}
+            totalSteps={totalSteps}
           />
         );
       case 4:
@@ -254,6 +285,8 @@ export function MealGeneratorWizard({
             mealType={generator.mealType}
             onMealTypeChange={generatorActions.setMealType}
             isGuestMode={isGuestMode}
+            displayStep={displayStep}
+            totalSteps={totalSteps}
           />
         );
       case 5:
@@ -428,11 +461,18 @@ export function MealGeneratorWizard({
                         aria-controls="wizard-preview-mobile"
                         className="flex w-full items-center justify-between rounded-xl border border-border bg-bg-elevated px-4 py-3 text-left shadow-xs transition hover:border-accent/40"
                       >
-                        <span className="font-brand text-sm font-semibold text-ink">
-                          Twój przepis
-                        </span>
+                        <div className="min-w-0 flex-1 pr-2">
+                          <span className="font-brand text-sm font-semibold text-ink">
+                            Twój przepis
+                          </span>
+                          {!isPreviewExpandedMobile && (
+                            <p className="mt-0.5 truncate text-xs text-ink-soft">
+                              {mobileSummaryText}
+                            </p>
+                          )}
+                        </div>
                         <ChevronDown
-                          className={`h-4 w-4 text-ink-soft transition-transform ${
+                          className={`h-4 w-4 shrink-0 text-ink-soft transition-transform ${
                             isPreviewExpandedMobile ? "rotate-180" : ""
                           }`}
                           aria-hidden="true"

@@ -11,17 +11,18 @@ type Step2TimeProps = {
   prepTime: number;
   onPrepTimeChange: (value: number) => void;
   isGuestMode: boolean;
+  totalSteps: number;
 };
 
 export function Step2Time({
   prepTime,
   onPrepTimeChange,
-  isGuestMode,
+  totalSteps,
 }: Step2TimeProps) {
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <Eyebrow tone="basil">Krok 2 z {isGuestMode ? "3" : "4"} · Tempo</Eyebrow>
+        <Eyebrow tone="basil">Krok 2 z {totalSteps} · Tempo</Eyebrow>
         <h2 className="font-serif text-3xl font-medium leading-[1.08] text-ink sm:text-4xl lg:text-[2.5rem]">
           Ile masz czasu?{" "}
           <span className="text-ink-soft">Wybierz tempo gotowania.</span>

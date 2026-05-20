@@ -26,9 +26,22 @@ export function TagInput({
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    if (!value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    const parsedTags = trimmed
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    const uniqueNewTags = parsedTags.filter(
+      (tag) =>
+        !value.some(
+          (existing) => existing.toLowerCase() === tag.toLowerCase(),
+        ),
+    );
+
+    if (uniqueNewTags.length > 0) {
+      onChange([...value, ...uniqueNewTags]);
     }
+
     setInputValue("");
   };
 

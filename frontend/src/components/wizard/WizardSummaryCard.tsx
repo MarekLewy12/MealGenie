@@ -22,6 +22,7 @@ import {
 import {
   previewFlashTransition,
   previewItemVariants,
+  wizardStepLayoutTransition,
 } from "./wizardMotion";
 
 export type WizardSummaryCardProps = {
@@ -76,6 +77,7 @@ export function WizardSummaryCard({
   return (
     <motion.div
       layout
+      transition={wizardStepLayoutTransition}
       className={cn(
         "relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-bg-elevated via-bg-elevated to-accent-soft/15 shadow-[var(--shadow-accent)] dark:to-accent/[0.04]",
         isSummary ? "p-6 sm:p-8 lg:p-10" : "p-6",
@@ -117,13 +119,18 @@ export function WizardSummaryCard({
               : `${filledCount} ${filledCount === 1 ? "wybór" : filledCount < 5 ? "wybory" : "wyborów"}`}
         </p>
 
-        <ul
+        <motion.ul
+          layout
+          transition={wizardStepLayoutTransition}
           className={cn(
             "mt-6",
             isSummary ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3" : "space-y-3",
           )}
         >
-          <AnimatePresence initial={false}>
+          <AnimatePresence
+            initial={false}
+            mode={isSummary ? "sync" : "popLayout"}
+          >
             {items.map((item) => {
               if (!isSummary && step < item.revealAtStep) return null;
               return (
@@ -144,7 +151,7 @@ export function WizardSummaryCard({
               );
             })}
           </AnimatePresence>
-        </ul>
+        </motion.ul>
 
         {isSummary && (
           <div className="mt-7 flex items-center justify-center gap-3 rounded-2xl border border-accent/20 bg-accent-soft/35 px-4 py-3 text-center dark:bg-accent/10">
