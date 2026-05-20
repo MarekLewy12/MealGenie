@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, ArrowRight, BookOpen, Loader2, Utensils } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AppPageHeader } from "../components/AppPageHeader";
 import { MealHistoryCard } from "../components/MealHistoryCard";
-import { Badge, Eyebrow, FolkDivider, HandwrittenKicker } from "../components/ui";
+import { Eyebrow, HandwrittenKicker } from "../components/ui";
 import { getMealHistory } from "../services/api";
 
 export function RecipesPage() {
@@ -14,53 +15,31 @@ export function RecipesPage() {
   });
 
   const meals = data?.items ?? [];
-  const favoriteCount = meals.filter((meal) => meal.isFavorite).length;
 
   return (
-    <main className="min-h-screen bg-bg px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-screen-2xl flex-col gap-8">
-        <header className="overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-sm">
-          <div className="grid gap-0 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
-            <div className="min-w-0 p-5 sm:p-7 lg:p-8">
-              <HandwrittenKicker>~ domowy zeszyt przepisów ~</HandwrittenKicker>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <Eyebrow>Twoja biblioteka</Eyebrow>
-                <Badge variant="neutral">{meals.length} przepisów</Badge>
-                <Badge variant="accent">{favoriteCount} ulubionych</Badge>
-              </div>
-              <h1 className="mt-4 flex flex-wrap items-center gap-3 font-serif text-4xl font-medium leading-tight text-ink sm:text-5xl">
-                <BookOpen className="h-8 w-8 text-accent" aria-hidden="true" />
-                Przepisy
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-ink-soft sm:text-base">
-                Wszystkie wygenerowane przepisy w jednym miejscu. Ulubione
-                nadal są oznaczone sercem na kartach.
-              </p>
-              <div className="mt-6">
-                <Link
-                  to="/generator"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse transition duration-fast hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-                >
-                  Wygeneruj nowy przepis
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
+    <main className="min-h-screen bg-bg text-ink">
+      <AppPageHeader
+        maxWidthClassName="max-w-screen-2xl"
+        eyebrow={<HandwrittenKicker>~ domowy zeszyt przepisów ~</HandwrittenKicker>}
+        title={
+          <span className="inline-flex items-center gap-3">
+            <BookOpen className="h-7 w-7 text-accent sm:h-8 sm:w-8" aria-hidden="true" />
+            Przepisy
+          </span>
+        }
+        description="Wszystkie wygenerowane przepisy w jednym miejscu. Ulubione nadal są oznaczone sercem na kartach."
+        action={
+          <Link
+            to="/generator"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-4 py-2 text-sm font-semibold text-ink-inverse transition duration-fast hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+          >
+            Generuj nowy przepis
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        }
+      />
 
-            <aside className="border-t border-dashed border-border-strong bg-bg-sunken p-5 sm:p-7 lg:border-l lg:border-t-0 lg:p-8">
-              <Eyebrow tone="muted">Stan biblioteki</Eyebrow>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <StatTile label="Wszystkie" value={data?.total ?? meals.length} />
-                <StatTile label="Ulubione" value={favoriteCount} />
-              </div>
-              <FolkDivider className="my-5" />
-              <p className="text-sm leading-6 text-ink-soft">
-                Karty zachowują te same akcje i prowadzą do szczegółów przepisu.
-              </p>
-            </aside>
-          </div>
-        </header>
-
+      <div className="mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-8 pt-6 sm:px-6 sm:pb-12 lg:px-8 lg:pt-8">
         {isLoading ? (
           <StatePanel
             tone="loading"
@@ -117,17 +96,6 @@ export function RecipesPage() {
         )}
       </div>
     </main>
-  );
-}
-
-function StatTile({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-md border border-border bg-bg-elevated p-4 text-center shadow-xs">
-      <div className="font-mono text-2xl font-semibold text-accent">{value}</div>
-      <div className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
-        {label}
-      </div>
-    </div>
   );
 }
 

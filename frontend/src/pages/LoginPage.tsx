@@ -32,11 +32,15 @@ import { HandwrittenKicker } from "../components/ui";
 
 type AuthMode = "login" | "register";
 
+function getModeFromSearchParams(searchParams: URLSearchParams): AuthMode {
+  return searchParams.get("mode") === "register" ? "register" : "login";
+}
+
 export function LoginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const getModeFromQuery = (): AuthMode =>
-    searchParams.get("mode") === "register" ? "register" : "login";
-  const [mode, setMode] = useState<AuthMode>(getModeFromQuery);
+  const [mode, setMode] = useState<AuthMode>(() =>
+    getModeFromSearchParams(searchParams),
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,7 +107,7 @@ export function LoginPage() {
   const isBusy = isSubmitting || isFormSubmitting;
 
   useEffect(() => {
-    const requestedMode = getModeFromQuery();
+    const requestedMode = getModeFromSearchParams(searchParams);
     if (requestedMode === mode) {
       return;
     }

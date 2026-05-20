@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 type PageTransitionProps = {
@@ -33,12 +33,14 @@ export function PageTransition({
   className = "",
   skipInitialAnimation = false,
 }: PageTransitionProps) {
+  const shouldReduceMotion = Boolean(useReducedMotion());
+
   return (
     <motion.div
       variants={pageTransitionVariants}
-      initial={skipInitialAnimation ? false : "initial"}
-      animate="animate"
-      exit="exit"
+      initial={skipInitialAnimation || shouldReduceMotion ? false : "initial"}
+      animate={shouldReduceMotion ? undefined : "animate"}
+      exit={shouldReduceMotion ? undefined : "exit"}
       className={`flex min-h-0 w-full flex-1 flex-col ${className}`}
     >
       {children}

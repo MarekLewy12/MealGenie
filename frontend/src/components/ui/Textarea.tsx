@@ -37,7 +37,7 @@ export function Textarea({
         aria-describedby={describedBy}
         className={cn(
           "min-h-28 w-full resize-y rounded-md border border-border bg-bg-elevated px-4 py-3 text-sm text-ink shadow-xs transition duration-fast ease-out",
-          "placeholder:text-ink-soft focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft",
+          "placeholder:text-ink-soft focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft focus-visible:!outline-none focus-visible:![box-shadow:none]",
           "disabled:cursor-not-allowed disabled:bg-bg-sunken disabled:text-ink-disabled",
           error && "border-bordeaux focus:border-bordeaux focus:ring-accent-soft",
           className,

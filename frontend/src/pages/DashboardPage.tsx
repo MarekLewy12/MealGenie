@@ -16,6 +16,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AppPageHeader } from "../components/AppPageHeader";
 import { MealHistoryCard } from "../components/MealHistoryCard";
 import {
   Badge,
@@ -241,44 +242,30 @@ function DashboardHeader({
   metrics: DashboardMetricProps[];
 }) {
   return (
-    <header className="relative overflow-hidden border-b border-border">
-      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-        <div className="absolute inset-0 bg-gradient-to-br from-saffron-soft/30 via-transparent to-accent-soft/15 dark:from-saffron/6 dark:via-transparent dark:to-accent/4" />
-        <div className="absolute -left-[10%] -top-[40%] h-[20rem] w-[20rem] rounded-full bg-saffron/20 blur-[100px] dark:bg-saffron/8" />
-        <div className="absolute -right-[5%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-accent/15 blur-[80px] dark:bg-accent/6" />
-      </div>
-
-      <div className="relative mx-auto max-w-[1760px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <HandwrittenKicker>
-              {timeGreeting === "Cześć"
-                ? "dobrze, że jesteś"
-                : timeGreeting.toLowerCase()}
-            </HandwrittenKicker>
-
-            <h1
-              id="mealgenie-dashboard-title"
-              className="mt-2 font-serif text-3xl font-medium leading-[1.1] text-ink sm:text-4xl lg:text-[2.75rem]"
-            >
-              {timeGreeting},{" "}
-              <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                {greetingName}
-              </span>
-              .
-              <br className="hidden min-[480px]:inline" />
-              <span className="text-ink-soft"> Co dziś ugotujemy?</span>
-            </h1>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            {metrics.map((metric) => (
-              <DashboardMetricCard key={metric.label} {...metric} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppPageHeader
+      titleId="mealgenie-dashboard-title"
+      eyebrow={
+        <HandwrittenKicker>
+          {timeGreeting === "Cześć"
+            ? "dobrze, że jesteś"
+            : timeGreeting.toLowerCase()}
+        </HandwrittenKicker>
+      }
+      title={
+        <>
+          {timeGreeting},{" "}
+          <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+            {greetingName}
+          </span>
+          .
+          <br className="hidden min-[480px]:inline" />
+          <span className="text-ink-soft"> Co dziś ugotujemy?</span>
+        </>
+      }
+      sideContent={metrics.map((metric) => (
+        <DashboardMetricCard key={metric.label} {...metric} />
+      ))}
+    />
   );
 }
 

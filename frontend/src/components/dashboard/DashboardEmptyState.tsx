@@ -10,7 +10,8 @@ import {
   landingStagger,
   sectionEntrance,
 } from "../home/landing/landingMotion";
-import { QuickStartCard, quickStarts } from "./quickStarts";
+import { quickStarts } from "./quickStartItems";
+import { QuickStartCard } from "./quickStarts";
 
 // ============================================
 // Karta Empty State - split-layout header + quick start grid + CTA

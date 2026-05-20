@@ -144,8 +144,8 @@ export async function generateMealSuggestions(
 
   console.log("Generowanie AI dla kontekstu:", {
     type: context.mealType,
-    prompt: context.userPrompt,
-    ingredients: context.availableIngredients,
+    hasPrompt: Boolean(context.userPrompt),
+    ingredientsCount: context.availableIngredients.length,
   });
 
   const completion = await openai.chat.completions.create({

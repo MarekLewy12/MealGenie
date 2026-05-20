@@ -100,7 +100,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
       <nav aria-label="Główna nawigacja aplikacji" className="flex flex-col gap-6">
         <div>
-          <p className="mb-3 px-3 font-brand text-[0.65rem] font-bold uppercase tracking-[0.15em] text-ink-muted">
+          <p className="mb-3 px-3 font-brand text-[0.7rem] font-bold uppercase tracking-[0.13em] text-ink-muted">
             Menu
           </p>
           <div className="grid gap-1.5">
@@ -112,7 +112,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "group flex min-h-11 items-center gap-3 rounded-pill border px-3 py-2 text-sm font-semibold transition duration-fast",
+                    "group flex min-h-11 items-center gap-3 rounded-pill border px-3 py-2 text-[0.95rem] font-semibold transition duration-fast",
                     "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
                     isActive
                       ? "border-accent/20 bg-accent-soft text-accent-deep shadow-xs"
@@ -121,7 +121,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                 }
               >
                 <item.icon
-                  className="h-[1.15rem] w-[1.15rem] shrink-0"
+                  className="h-[1.2rem] w-[1.2rem] shrink-0"
                   aria-hidden="true"
                 />
                 <span>{item.label}</span>
@@ -131,7 +131,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         </div>
 
         <div>
-          <p className="mb-3 px-3 font-brand text-[0.65rem] font-bold uppercase tracking-[0.15em] text-ink-muted">
+          <p className="mb-3 px-3 font-brand text-[0.7rem] font-bold uppercase tracking-[0.13em] text-ink-muted">
             Narzędzia
           </p>
           <div className="grid gap-1.5">
@@ -139,12 +139,12 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
               type="button"
               onClick={handleOpenAssistant}
               className={cn(
-                "group flex min-h-11 items-center gap-3 rounded-pill border border-transparent bg-bg-sunken px-3 py-2 text-left text-sm font-semibold text-ink transition duration-fast",
+                "group flex min-h-11 items-center gap-3 rounded-pill border border-transparent bg-bg-sunken px-3 py-2 text-left text-[0.95rem] font-semibold text-ink transition duration-fast",
                 "hover:border-basil/20 hover:bg-basil-soft hover:text-basil focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
               )}
             >
               <MessageSquare
-                className="h-[1.15rem] w-[1.15rem] shrink-0"
+                className="h-[1.2rem] w-[1.2rem] shrink-0"
                 aria-hidden="true"
               />
               <span>Czat z Asystentem</span>
@@ -158,7 +158,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "group flex min-h-11 items-center gap-3 rounded-pill border px-3 py-2 text-sm font-semibold transition duration-fast",
+                    "group flex min-h-11 items-center gap-3 rounded-pill border px-3 py-2 text-[0.95rem] font-semibold transition duration-fast",
                     "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
                     isActive
                       ? "border-accent/20 bg-accent-soft text-accent-deep shadow-xs"
@@ -167,7 +167,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                 }
               >
                 <item.icon
-                  className="h-[1.15rem] w-[1.15rem] shrink-0"
+                  className="h-[1.2rem] w-[1.2rem] shrink-0"
                   aria-hidden="true"
                 />
                 <span>{item.label}</span>
@@ -191,7 +191,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                 setIsProfileMenuOpen(false);
                 onNavigate?.();
               }}
-              className="flex min-h-10 items-center rounded-md px-3 py-2 text-sm font-semibold text-ink-soft transition hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              className="flex min-h-10 items-center rounded-md px-3 py-2 text-[0.95rem] font-semibold text-ink-soft transition hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
             >
               Preferencje gotowania
             </Link>
@@ -200,7 +200,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
               type="button"
               role="menuitem"
               onClick={handleLogout}
-              className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-semibold text-bordeaux transition hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[0.95rem] font-semibold text-bordeaux transition hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
               Wyloguj się
@@ -215,15 +215,15 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           onClick={() => setIsProfileMenuOpen((current) => !current)}
           className="flex min-h-12 w-full items-center gap-3 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-left shadow-xs transition duration-fast hover:border-accent/40 hover:bg-bg-sunken focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-accent-soft font-brand text-sm font-bold text-accent-deep">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-accent-soft font-brand text-[0.95rem] font-bold text-accent-deep">
             {initials}
           </span>
 
           <span className="min-w-0">
-            <span className="block truncate font-brand text-sm font-semibold text-ink">
+            <span className="block truncate font-brand text-[0.95rem] font-semibold text-ink">
               {displayName}
             </span>
-            <span className="block truncate text-xs text-ink-muted">
+            <span className="block truncate text-[0.8rem] text-ink-muted">
               Profil kulinarny
             </span>
           </span>

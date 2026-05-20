@@ -1,5 +1,4 @@
 import { AnimatePresence } from "framer-motion";
-import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -27,9 +26,8 @@ function App() {
   const shouldShowPublicHeader = ["/", "/try", "/login", "/mobile"].includes(
     location.pathname,
   );
-  const shouldSkipInitialPageTransition = useRef(true);
   const pageTransitionProps = {
-    skipInitialAnimation: shouldSkipInitialPageTransition.current,
+    skipInitialAnimation: location.key === "default",
   };
   const renderOnboardedRoute = (children: ReactNode) => (
     <PageTransition {...pageTransitionProps}>
@@ -40,10 +38,6 @@ function App() {
       )}
     </PageTransition>
   );
-
-  useEffect(() => {
-    shouldSkipInitialPageTransition.current = false;
-  }, []);
 
   return (
     <div className="relative min-h-screen w-full overflow-x-clip bg-bg text-ink transition-colors duration-base ease-in-out">

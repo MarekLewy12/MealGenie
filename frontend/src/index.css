@@ -268,6 +268,60 @@ button:disabled,
   );
 }
 
+.text-summary-gradient {
+  animation: summary-gradient-flow 6s linear infinite;
+  background-image: linear-gradient(
+    100deg,
+    var(--accent-deep) 0%,
+    var(--accent) 12.5%,
+    var(--saffron) 25%,
+    var(--basil) 37.5%,
+    var(--accent-deep) 50%,
+    var(--accent) 62.5%,
+    var(--saffron) 75%,
+    var(--basil) 87.5%,
+    var(--accent-deep) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: transparent;
+  padding-bottom: 0.08em;
+}
+
+.dark .text-summary-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--accent) 0%,
+    var(--saffron) 12.5%,
+    var(--basil) 25%,
+    var(--accent-hover) 37.5%,
+    var(--accent) 50%,
+    var(--saffron) 62.5%,
+    var(--basil) 75%,
+    var(--accent-hover) 87.5%,
+    var(--accent) 100%
+  );
+}
+
+@keyframes summary-gradient-flow {
+  0% {
+    background-position: 200% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-summary-gradient {
+    animation: none;
+  }
+}
+
 @property --hero-card-border-angle {
   syntax: "<angle>";
   inherits: false;

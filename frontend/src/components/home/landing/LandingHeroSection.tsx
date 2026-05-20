@@ -121,7 +121,7 @@ export function LandingHeroSection() {
               ? undefined
               : { duration: 15, repeat: Infinity, ease: "easeInOut" }
           }
-          className="absolute -left-[10%] -top-[10%] h-[50rem] w-[50rem] rounded-full bg-saffron/28 blur-[120px] dark:bg-saffron/18"
+          className="absolute -left-[10%] -top-[10%] h-[50rem] w-[50rem] rounded-full bg-gradient-to-br from-accent-soft/65 to-saffron-soft/55 blur-[120px] dark:from-accent-deep/12 dark:to-accent/4 dark:blur-[130px]"
         />
 
         <MotionDiv
@@ -139,7 +139,7 @@ export function LandingHeroSection() {
               ? undefined
               : { duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }
           }
-          className="absolute -right-[15%] top-[10%] h-[55rem] w-[55rem] rounded-full bg-accent/25 blur-[120px] dark:bg-accent/22"
+          className="absolute -right-[15%] top-[10%] h-[55rem] w-[55rem] rounded-full bg-accent-soft/55 blur-[120px] dark:bg-accent/[0.08] dark:blur-[130px]"
         />
 
         <MotionDiv
@@ -157,10 +157,10 @@ export function LandingHeroSection() {
               ? undefined
               : { duration: 20, repeat: Infinity, ease: "easeInOut", delay: 4 }
           }
-          className="absolute bottom-[-10%] left-[20%] h-[45rem] w-[45rem] rounded-full bg-basil/20 blur-[120px] dark:bg-basil/15"
+          className="absolute bottom-[-10%] left-[20%] h-[45rem] w-[45rem] rounded-full bg-basil-soft/45 blur-[120px] dark:bg-basil/10 dark:blur-[110px]"
         />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.42),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.32),transparent_30%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.45),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.35),transparent_30%)]" />
         <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.58)_0_1px,transparent_1.6px),radial-gradient(circle_at_70%_65%,rgba(32,37,31,0.18)_0_1px,transparent_1.4px)] [background-position:0_0,9px_13px] [background-size:19px_23px,29px_31px] dark:opacity-[0.06]" />
         <div className="absolute inset-x-0 bottom-[-1px] h-72 bg-gradient-to-b from-transparent via-bg/62 to-bg" />
       </div>

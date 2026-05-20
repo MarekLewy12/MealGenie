@@ -26,9 +26,22 @@ export function TagInput({
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    if (!value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    const parsedTags = trimmed
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    const uniqueNewTags = parsedTags.filter(
+      (tag) =>
+        !value.some(
+          (existing) => existing.toLowerCase() === tag.toLowerCase(),
+        ),
+    );
+
+    if (uniqueNewTags.length > 0) {
+      onChange([...value, ...uniqueNewTags]);
     }
+
     setInputValue("");
   };
 
@@ -76,7 +89,7 @@ export function TagInput({
           <input
             id={inputId}
             aria-describedby={hintId}
-            className="min-h-10 w-full flex-1 bg-transparent px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-disabled"
+            className="min-h-10 w-full flex-1 bg-transparent px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-disabled focus-visible:!outline-none focus-visible:![box-shadow:none]"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
