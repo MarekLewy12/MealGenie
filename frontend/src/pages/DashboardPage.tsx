@@ -241,11 +241,14 @@ function DashboardHeader({
   metrics: DashboardMetricProps[];
 }) {
   return (
-    <header className="relative overflow-hidden border-b border-border">
-      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-        <div className="absolute inset-0 bg-gradient-to-br from-saffron-soft/30 via-transparent to-accent-soft/15 dark:from-saffron/6 dark:via-transparent dark:to-accent/4" />
-        <div className="absolute -left-[10%] -top-[40%] h-[20rem] w-[20rem] rounded-full bg-saffron/20 blur-[100px] dark:bg-saffron/8" />
-        <div className="absolute -right-[5%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-accent/15 blur-[80px] dark:bg-accent/6" />
+    <header className="relative isolate overflow-hidden border-b border-border bg-bg">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-accent-soft/15 via-transparent to-bg dark:from-accent-soft/[0.03] dark:to-bg" />
+        <div className="absolute -left-[10%] -top-[35%] h-[26rem] w-[26rem] rounded-full bg-gradient-to-br from-accent-soft/80 to-saffron-soft/65 blur-[100px] dark:from-accent/16 dark:to-saffron/6 dark:blur-[110px]" />
+        <div className="absolute -right-[8%] top-[15%] h-[22rem] w-[22rem] rounded-full bg-basil-soft/60 blur-[85px] dark:bg-basil/14 dark:blur-[95px]" />
       </div>
 
       <div className="relative mx-auto max-w-[1760px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">

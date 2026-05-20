@@ -49,6 +49,39 @@ type MealGeneratorWizardProps = {
   mode?: MealGeneratorMode;
 };
 
+const MOBILE_WIZARD_QUERY = "(max-width: 768px)";
+
+function getIsMobileWizardViewport() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.matchMedia(MOBILE_WIZARD_QUERY).matches;
+}
+
+function findScrollableParent(element: HTMLElement | null) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  let parent = element?.parentElement ?? null;
+
+  while (parent) {
+    const { overflowY } = window.getComputedStyle(parent);
+    const canScroll =
+      /(auto|scroll|overlay)/.test(overflowY) &&
+      parent.scrollHeight > parent.clientHeight;
+
+    if (canScroll) {
+      return parent;
+    }
+
+    parent = parent.parentElement;
+  }
+
+  return null;
+}
+
 // ============================================
 // Glowny komponent wizarda - state, mutation, view state machine, shell
 // ============================================
@@ -64,6 +97,7 @@ export function MealGeneratorWizard({
   >(null);
   const [isPreviewExpandedMobile, setIsPreviewExpandedMobile] = useState(false);
   const [isEditingFromSummary, setIsEditingFromSummary] = useState(false);
+  const [isMobile, setIsMobile] = useState(getIsMobileWizardViewport);
 
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
@@ -118,6 +152,21 @@ export function MealGeneratorWizard({
     generator.targetWeight,
     isGuestMode,
   ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const media = window.matchMedia(MOBILE_WIZARD_QUERY);
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+
+    media.addEventListener("change", handleChange);
+
+    return () => media.removeEventListener("change", handleChange);
+  }, []);
 
   // -------------------------------------------------------
   // Mutation - 1:1 z MealGenerator
@@ -335,7 +384,7 @@ export function MealGeneratorWizard({
   }, [goToNextStep, handleGenerate, isSummaryStep, view]);
 
   // -------------------------------------------------------
-  // Scroll przy zmianie kroku - bez ruszania scrolla przy edycji pól
+  // Scroll przy zmianie kroku - dostosowany do urządzenia
   // -------------------------------------------------------
   useEffect(() => {
     if (view !== "form") return;
@@ -346,6 +395,22 @@ export function MealGeneratorWizard({
     }
 
     const animationFrame = window.requestAnimationFrame(() => {
+      if (isMobile) {
+        const scrollContainer = findScrollableParent(stepCardRef.current);
+        const scrollOptions: ScrollToOptions = {
+          top: 0,
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+        };
+
+        if (scrollContainer) {
+          scrollContainer.scrollTo(scrollOptions);
+        } else {
+          window.scrollTo(scrollOptions);
+        }
+
+        return;
+      }
+
       stepCardRef.current?.scrollIntoView({
         behavior: prefersReducedMotion ? "auto" : "smooth",
         block: "start",
@@ -353,7 +418,7 @@ export function MealGeneratorWizard({
     });
 
     return () => window.cancelAnimationFrame(animationFrame);
-  }, [prefersReducedMotion, step, view]);
+  }, [isMobile, prefersReducedMotion, step, view]);
 
   // -------------------------------------------------------
   // Render
@@ -365,9 +430,9 @@ export function MealGeneratorWizard({
           <motion.div
             key="wizard-form"
             variants={viewVariants}
-            initial="initial"
+            initial={false}
             animate="animate"
-            exit="exit"
+            exit={prefersReducedMotion ? undefined : "exit"}
           >
             <WizardHeader
               isGuestMode={isGuestMode}
@@ -395,7 +460,7 @@ export function MealGeneratorWizard({
 
                   <motion.div
                     ref={stepCardRef}
-                    layout={!prefersReducedMotion}
+                    layout={isMobile ? false : !prefersReducedMotion}
                     transition={
                       prefersReducedMotion
                         ? undefined
@@ -409,13 +474,15 @@ export function MealGeneratorWizard({
                     )}
                   >
                     <AnimatePresence
-                      mode={prefersReducedMotion ? "wait" : "popLayout"}
+                      mode={
+                        isMobile || prefersReducedMotion ? "wait" : "popLayout"
+                      }
                       custom={direction}
                       initial={false}
                     >
                       <motion.div
                         key={step}
-                        layout={!prefersReducedMotion}
+                        layout={isMobile ? false : !prefersReducedMotion}
                         custom={direction}
                         variants={slideVariants}
                         initial={prefersReducedMotion ? false : "hidden"}
@@ -582,15 +649,15 @@ function WizardHeader({
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <header className="relative overflow-hidden border-b border-border">
+    <header className="relative isolate overflow-hidden border-b border-border bg-bg">
       {/* Dekoracyjne gradienty w tle - jak DashboardHeader */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-saffron-soft/30 via-transparent to-accent-soft/15 dark:from-saffron/6 dark:via-transparent dark:to-accent/4" />
-        <div className="absolute -left-[10%] -top-[40%] h-[20rem] w-[20rem] rounded-full bg-saffron/20 blur-[100px] dark:bg-saffron/8" />
-        <div className="absolute -right-[5%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-accent/15 blur-[80px] dark:bg-accent/6" />
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent-soft/15 via-transparent to-bg dark:from-accent-soft/[0.03] dark:to-bg" />
+        <div className="absolute -left-[10%] -top-[35%] h-[26rem] w-[26rem] rounded-full bg-gradient-to-br from-accent-soft/80 to-saffron-soft/65 blur-[100px] dark:from-accent/16 dark:to-saffron/6 dark:blur-[110px]" />
+        <div className="absolute -right-[8%] top-[15%] h-[22rem] w-[22rem] rounded-full bg-basil-soft/60 blur-[85px] dark:bg-basil/14 dark:blur-[95px]" />
       </div>
 
-      <div className="relative mx-auto max-w-[1760px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="relative mx-auto max-w-[1760px] px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <motion.div
           layout={!prefersReducedMotion}
           transition={
@@ -600,7 +667,7 @@ function WizardHeader({
             "flex flex-col gap-6",
             isSummaryStep
               ? "items-center text-center"
-              : "lg:flex-row lg:items-end lg:justify-between",
+              : "items-center gap-4 text-center sm:gap-6 lg:flex-row lg:items-end lg:justify-between lg:text-left",
           )}
         >
           <motion.div
@@ -610,7 +677,9 @@ function WizardHeader({
             }
             className={cn(
               "flex flex-col gap-3",
-              isSummaryStep && "items-center",
+              isSummaryStep
+                ? "items-center"
+                : "items-center lg:items-start",
             )}
           >
             <p className="font-brand text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-ink-muted">
@@ -620,43 +689,90 @@ function WizardHeader({
                   ? "Podgląd generatora"
                   : "Generator posiłków"}
             </p>
-            <h1 className="font-serif text-3xl font-medium leading-[1.05] text-ink sm:text-4xl lg:text-[2.75rem]">
+            <h1 className="font-serif text-2xl font-medium leading-[1.05] text-ink sm:text-4xl lg:text-[2.75rem]">
               {isSummaryStep ? (
                 <>
-                  Sprawdź{" "}
-                  <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                    swoje wybory
+                  <span className="sm:hidden">
+                    Sprawdź{" "}
+                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                      wybory
+                    </span>
                   </span>
-                  <span className="text-ink-soft"> przed generowaniem.</span>
+                  <span className="hidden sm:inline">
+                    Sprawdź{" "}
+                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                      swoje wybory
+                    </span>
+                    <span className="text-ink-soft"> przed generowaniem.</span>
+                  </span>
                 </>
               ) : (
                 <>
-                  Zaprojektuj{" "}
-                  <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
-                    swój przepis
+                  <span className="sm:hidden">
+                    Zaprojektuj{" "}
+                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                      przepis
+                    </span>
                   </span>
-                  <span className="text-ink-soft"> w {totalSteps} krokach.</span>
+                  <span className="hidden sm:inline">
+                    Zaprojektuj{" "}
+                    <span className="bg-gradient-to-r from-accent via-accent-hover to-saffron bg-clip-text text-transparent">
+                      swój przepis
+                    </span>
+                    <span className="text-ink-soft">
+                      {" "}
+                      w {totalSteps} krokach.
+                    </span>
+                  </span>
                 </>
               )}
             </h1>
             <p
               className={cn(
-                "max-w-2xl text-sm leading-6 text-ink-soft sm:text-base",
-                isSummaryStep && "mx-auto",
+                "text-sm leading-6 text-ink-soft sm:text-base",
+                isSummaryStep ? "mx-auto max-w-2xl" : "max-w-4xl",
               )}
             >
-              {isSummaryStep
-                ? "To jest finalna kontrola. Możesz wrócić do pojedynczych ustawień albo od razu wygenerować propozycje."
-                : isGuestMode
-                  ? "Wersja pokazowa: 3 darmowe propozycje. Każdy wybór buduje podsumowanie po prawej."
-                  : "Każdy wybór buduje podsumowanie po prawej. Możesz pomijać kroki - sensowne wartości domyślne są już ustawione."}
+              {isSummaryStep ? (
+                <>
+                  <span className="sm:hidden">
+                    Sprawdź wybory i generuj.
+                  </span>
+                  <span className="hidden sm:inline">
+                    To jest finalna kontrola.
+                    <br />
+                    Możesz wrócić do pojedynczych ustawień albo od razu
+                    wygenerować propozycje.
+                  </span>
+                </>
+              ) : isGuestMode ? (
+                <>
+                  <span className="sm:hidden">
+                    Wybierz parametry i zobacz darmowy podgląd.
+                  </span>
+                  <span className="hidden sm:inline">
+                    Wersja pokazowa: 3 darmowe propozycje. Każdy wybór buduje
+                    podsumowanie po prawej.
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="sm:hidden">
+                    Wybierz parametry, a MealGenie ułoży propozycje.
+                  </span>
+                  <span className="hidden sm:inline">
+                    Każdy wybór buduje podsumowanie po prawej. Możesz pomijać
+                    kroki - sensowne wartości domyślne są już ustawione.
+                  </span>
+                </>
+              )}
             </p>
           </motion.div>
 
           {!isGuestMode && !isSummaryStep && (
             <Link
               to="/settings"
-              className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-pill border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold leading-none text-accent shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent lg:self-end"
+              className="inline-flex shrink-0 items-center justify-center gap-2 self-center rounded-md px-0 py-0 text-sm font-semibold leading-none text-accent transition duration-fast ease-out hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:rounded-pill sm:border sm:border-border-strong sm:bg-bg-elevated sm:px-5 sm:py-2.5 sm:shadow-xs sm:hover:border-accent sm:hover:bg-accent-soft lg:self-end"
             >
               Edytuj preferencje
             </Link>

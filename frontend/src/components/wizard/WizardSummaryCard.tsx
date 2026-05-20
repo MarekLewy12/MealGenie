@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import {
   Clock3,
@@ -21,7 +21,6 @@ import {
 } from "./mealOptions";
 import {
   previewFlashTransition,
-  previewItemVariants,
   wizardStepLayoutTransition,
 } from "./wizardMotion";
 
@@ -56,7 +55,7 @@ export function WizardSummaryCard({
   variant = "preview",
   onEditStep,
 }: WizardSummaryCardProps) {
-  const items = getPreviewItems({
+  const { items } = getPreviewItems({
     isGuestMode,
     userPrompt,
     ingredients,
@@ -65,7 +64,6 @@ export function WizardSummaryCard({
     servingSize,
     targetWeight,
     hungerLevel,
-    isThermomixMode,
     mealType,
   });
   const isSummary = variant === "summary";
@@ -89,9 +87,14 @@ export function WizardSummaryCard({
       />
 
       <div className="relative">
-        <Eyebrow tone="accent">
-          {isSummary ? "Podsumowanie" : "Twój przepis"}
-        </Eyebrow>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Eyebrow tone="accent">
+            {isSummary ? "Podsumowanie" : "Twój przepis"}
+          </Eyebrow>
+          {!isGuestMode && (
+            <ThermomixStatusBadge isEnabled={isThermomixMode} />
+          )}
+        </div>
         <h3
           className={cn(
             "mt-2 font-serif font-medium leading-tight text-ink",
@@ -119,39 +122,23 @@ export function WizardSummaryCard({
               : `${filledCount} ${filledCount === 1 ? "wybór" : filledCount < 5 ? "wybory" : "wyborów"}`}
         </p>
 
-        <motion.ul
-          layout
-          transition={wizardStepLayoutTransition}
+        <ul
           className={cn(
             "mt-6",
             isSummary ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3" : "space-y-3",
           )}
         >
-          <AnimatePresence
-            initial={false}
-            mode={isSummary ? "sync" : "popLayout"}
-          >
-            {items.map((item) => {
-              if (!isSummary && step < item.revealAtStep) return null;
-              return (
-                <motion.li
-                  key={item.key}
-                  variants={previewItemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit={{ opacity: 0, y: -4, transition: { duration: 0.18 } }}
-                  layout
-                >
-                  <SummaryItem
-                    item={item}
-                    variant={variant}
-                    onEditStep={onEditStep}
-                  />
-                </motion.li>
-              );
-            })}
-          </AnimatePresence>
-        </motion.ul>
+          {items.map((item) => (
+            <li key={item.key}>
+              <SummaryItem
+                item={item}
+                isRevealed={isSummary || step >= item.revealAtStep}
+                variant={variant}
+                onEditStep={onEditStep}
+              />
+            </li>
+          ))}
+        </ul>
 
         {isSummary && (
           <div className="mt-7 flex items-center justify-center gap-3 rounded-2xl border border-accent/20 bg-accent-soft/35 px-4 py-3 text-center dark:bg-accent/10">
@@ -193,7 +180,6 @@ type PreviewItemsOptions = Pick<
   | "servingSize"
   | "targetWeight"
   | "hungerLevel"
-  | "isThermomixMode"
   | "mealType"
 >;
 
@@ -206,7 +192,6 @@ function getPreviewItems({
   servingSize,
   targetWeight,
   hungerLevel,
-  isThermomixMode,
   mealType,
 }: PreviewItemsOptions) {
   const prepTimeOption = findPrepTimeOption(prepTime);
@@ -286,20 +271,6 @@ function getPreviewItems({
         isFilled: true,
       },
     );
-
-    if (isThermomixMode) {
-      items.push({
-        key: "thermomix",
-        icon: Sparkles,
-        label: "Tryb",
-        value: "Przepis na TM",
-        placeholder: "Bez sprzętu",
-        tone: "basil",
-        revealAtStep: 3,
-        editStep: 3,
-        isFilled: true,
-      });
-    }
   }
 
   items.push({
@@ -316,7 +287,7 @@ function getPreviewItems({
     isFilled: true,
   });
 
-  return items;
+  return { items };
 }
 
 const toneClasses: Record<PreviewTone, string> = {
@@ -327,24 +298,28 @@ const toneClasses: Record<PreviewTone, string> = {
 
 function SummaryItem({
   item,
+  isRevealed,
   variant,
   onEditStep,
 }: {
   item: PreviewItemConfig;
+  isRevealed: boolean;
   variant: WizardSummaryCardProps["variant"];
   onEditStep?: WizardSummaryCardProps["onEditStep"];
 }) {
   const Icon = item.icon;
-  const displayValue = item.isFilled ? item.value : item.placeholder;
+  const displayValue =
+    isRevealed && item.isFilled ? item.value : item.placeholder;
   const isSummary = variant === "summary";
 
   return (
     <motion.div
       className={cn(
-        "flex items-start gap-3 rounded-xl border border-border/60 bg-bg-elevated/60 backdrop-blur-sm dark:bg-white/[0.03]",
+        "flex items-start gap-3 rounded-xl border border-border/60 bg-bg-elevated/60 backdrop-blur-sm transition duration-fast ease-out dark:bg-white/[0.03]",
         isSummary ? "p-4" : "p-3",
+        !isRevealed && "border-border/40 bg-bg-sunken/35 opacity-70",
       )}
-      animate={{ scale: [1, 1.015, 1] }}
+      animate={isRevealed ? { scale: [1, 1.015, 1] } : { scale: 1 }}
       transition={previewFlashTransition}
       key={item.value}
     >
@@ -352,7 +327,7 @@ function SummaryItem({
         className={cn(
           "flex shrink-0 items-center justify-center rounded-lg",
           isSummary ? "h-10 w-10" : "h-9 w-9",
-          toneClasses[item.tone],
+          isRevealed ? toneClasses[item.tone] : "bg-bg-elevated text-ink-muted",
         )}
         aria-hidden="true"
       >
@@ -379,12 +354,39 @@ function SummaryItem({
           className={cn(
             "mt-1.5 leading-5",
             isSummary ? "text-base" : "truncate text-sm",
-            item.isFilled ? "text-ink" : "italic text-ink-muted",
+            isRevealed && item.isFilled ? "text-ink" : "italic text-ink-muted",
           )}
         >
           {displayValue}
         </p>
       </div>
     </motion.div>
+  );
+}
+
+function ThermomixStatusBadge({ isEnabled }: { isEnabled: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 rounded-pill border px-2.5 py-1 font-brand text-[10px] font-bold uppercase leading-none tracking-[0.12em]",
+        isEnabled
+          ? "border-basil/30 bg-basil-soft text-basil"
+          : "border-bordeaux/25 bg-bordeaux/10 text-bordeaux",
+      )}
+      aria-label={
+        isEnabled ? "Tryb Thermomix włączony" : "Tryb Thermomix wyłączony"
+      }
+    >
+      <span className="relative flex h-4 w-4 items-center justify-center">
+        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+        {!isEnabled && (
+          <span
+            className="absolute h-px w-5 rotate-[-35deg] rounded-full bg-current"
+            aria-hidden="true"
+          />
+        )}
+      </span>
+      {isEnabled ? "Thermomix" : "Bez Thermomixa"}
+    </span>
   );
 }

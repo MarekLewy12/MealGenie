@@ -274,8 +274,10 @@ export function Step3Audience({
             role="radiogroup"
             aria-label="Poziom apetytu od 1 (lekko) do 5 (uczta)"
           >
-            {hungerLevelOptions.map((option) => {
+            {hungerLevelOptions.map((option, index) => {
               const isActive = hungerLevel === option.value;
+              const isLast = index === hungerLevelOptions.length - 1;
+
               return (
                 <button
                   key={option.value}
@@ -287,6 +289,8 @@ export function Step3Audience({
                     isActive
                       ? "border-accent bg-accent-soft text-ink shadow-[var(--shadow-accent)] ring-1 ring-accent/30"
                       : "border-border-strong bg-bg-elevated text-ink shadow-xs hover:-translate-y-0.5 hover:border-accent/70 hover:bg-bg hover:shadow-md"
+                  } ${
+                    isLast ? "col-span-2 sm:col-span-2 lg:col-span-1" : "col-span-1"
                   }`}
                 >
                   {isActive && (

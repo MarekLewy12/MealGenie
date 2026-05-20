@@ -386,22 +386,13 @@ export function RecipePage() {
 
             <div className="flex flex-col justify-center p-5 sm:p-8 lg:p-10">
               <Eyebrow>Przepis MealGenie</Eyebrow>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-3 font-brand text-3xl font-semibold leading-[1.05] text-ink sm:text-5xl"
-              >
+              <h1 className="mt-3 font-brand text-3xl font-semibold leading-[1.05] text-ink sm:text-5xl">
                 {headerData?.name || recipe?.name || "Ładowanie przepisu"}
-              </motion.h1>
+              </h1>
               {headerData?.description && (
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="mt-4 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg"
-                >
+                <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg">
                   {headerData.description}
-                </motion.p>
+                </p>
               )}
 
               <FolkDivider className="my-5 max-w-48" />
