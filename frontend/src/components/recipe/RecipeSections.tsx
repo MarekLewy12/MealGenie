@@ -88,7 +88,7 @@ export function NutritionSection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
     >
-      <div className="mb-4">
+      <div className="mb-6">
         <Eyebrow tone="muted">Szybki przegląd</Eyebrow>
         <h2 className="mt-1 font-brand text-2xl font-semibold leading-tight text-ink">
           Makro na porcję
@@ -396,21 +396,35 @@ export function TipsSection({ tips }: { tips: string[] }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="rounded-2xl border border-saffron/30 bg-[radial-gradient(ellipse_at_top_right,var(--saffron-soft),transparent_80%),var(--bg-elevated)] p-6 shadow-sm transition-colors duration-300 ease-out hover:border-saffron/50 hover:bg-bg/50 hover:shadow-md sm:p-8"
+      className="group rounded-2xl border border-saffron/30 bg-[radial-gradient(ellipse_at_top_right,var(--saffron-soft),transparent_76%),var(--bg-elevated)] p-6 shadow-sm transition-colors duration-300 ease-out hover:border-saffron/50 hover:bg-bg/50 hover:shadow-md sm:p-8"
     >
-      <Eyebrow tone="saffron">Warto wiedzieć</Eyebrow>
-      <h2 className="mt-1 font-brand text-2xl font-semibold leading-tight text-ink">
-        Ogólne porady do przepisu
-      </h2>
-      <ul role="list" className="mt-5 space-y-4">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-saffron/30 bg-bg-elevated text-accent-deep shadow-xs transition-colors duration-300 group-hover:border-saffron/50 dark:text-saffron">
+          <Lightbulb className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <Eyebrow tone="saffron">Warto wiedzieć</Eyebrow>
+          <h2 className="mt-1 font-brand text-2xl font-semibold leading-tight text-ink">
+            Ogólne porady do przepisu
+          </h2>
+        </div>
+      </div>
+
+      <ul
+        role="list"
+        className="mt-6 overflow-hidden rounded-[1.1rem] border border-border/70 bg-bg-elevated/60"
+      >
         {tips.map((tip, idx) => (
-          <li key={idx} className="flex items-start gap-3.5">
+          <li
+            key={idx}
+            className={`group/tip flex items-start gap-3.5 px-4 py-4 transition-colors duration-300 hover:bg-bg-elevated ${
+              idx !== tips.length - 1 ? "border-b border-dotted border-border-dotted" : ""
+            }`}
+          >
             <span
               aria-hidden="true"
-              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-saffron/20 font-brand text-xs font-bold text-saffron dark:bg-saffron/30"
-            >
-              {idx + 1}
-            </span>
+              className="mt-1 h-2.5 w-2.5 shrink-0 rotate-45 border border-saffron bg-bg-elevated transition-colors duration-300 group-hover/tip:bg-saffron"
+            />
             <span className="text-base leading-relaxed text-ink-soft">{tip}</span>
           </li>
         ))}

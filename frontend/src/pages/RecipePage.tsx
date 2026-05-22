@@ -562,7 +562,7 @@ export function RecipePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div className="w-full">
+            <motion.div className="mx-auto max-w-[1760px] px-4 pt-6 sm:px-6 lg:px-8 lg:pt-10">
               <RecipeHero
                 title={headerData.name || recipe.name}
                 description={headerData.description}
@@ -579,12 +579,11 @@ export function RecipePage() {
                   portionValue: portionStatValue,
                   PortionIcon: PortionStatIcon,
                 }}
-                edgeToEdge
               />
             </motion.div>
             <RecipeHeroSeparator />
 
-            <div className="mx-auto max-w-[1760px] px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pt-10">
+            <div className="mx-auto max-w-[1760px] px-4 pb-16 pt-2 sm:px-6 lg:px-8 lg:pt-4">
               <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_620px]">
                 <aside className="order-1 space-y-8 lg:order-2 lg:self-stretch">
                   <NutritionSection nutrition={recipe.nutrition} />
@@ -635,12 +634,11 @@ export function RecipePage() {
 function RecipeHeroSeparator() {
   return (
     <div
-      className="relative flex items-center justify-center overflow-hidden pb-8 pt-6 sm:pb-10 sm:pt-8"
+      className="relative flex items-center justify-center overflow-hidden pb-6 pt-5 sm:pb-8 sm:pt-6"
       aria-hidden="true"
     >
       <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-border-strong/80 to-transparent dark:via-white/20" />
       <div className="absolute inset-x-[12%] top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-accent/45 to-transparent dark:via-accent/30" />
-      <div className="absolute inset-x-0 top-1/2 h-10 -translate-y-1/2 bg-gradient-to-r from-transparent via-accent-soft/35 to-transparent blur-lg dark:via-accent/10" />
 
       <div className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-3">
         <div className="h-1.5 w-1.5 rotate-45 bg-border-strong/80 dark:bg-white/25" />
