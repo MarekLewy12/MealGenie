@@ -226,6 +226,7 @@ export function SuccessView({
 }: SuccessViewProps) {
   const [showAllIngredients, setShowAllIngredients] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const hasMeals = meals.length > 0;
 
   useEffect(() => {
     if (!showAllIngredients) {
@@ -296,59 +297,72 @@ export function SuccessView({
 
       <div className="relative z-10 flex max-w-3xl flex-col items-center pt-4 text-center sm:pt-7 lg:pt-8">
         <h2 className="font-brand text-4xl font-semibold leading-[1.1] text-ink sm:text-5xl lg:text-[3.25rem]">
-          Trzy propozycje, <br className="hidden sm:block" />
-          <span className="text-summary-gradient">wskaż swój smak</span>
+          {hasMeals ? (
+            <>
+              Trzy propozycje, <br className="hidden sm:block" />
+              <span className="text-summary-gradient">wskaż swój smak</span>
+            </>
+          ) : (
+            <>
+              Potrzebuję <br className="hidden sm:block" />
+              <span className="text-summary-gradient">jeszcze jednej próby</span>
+            </>
+          )}
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft sm:text-base">
-          {isGuestMode
-            ? "Oto darmowy podgląd. Załóż konto, aby wybrać danie, zapisać je i przejść do pełnego przepisu."
-            : "Wybierz jeden wariant, a system ułoży pełny przepis krok po kroku."}
+          {hasMeals
+            ? isGuestMode
+              ? "Oto darmowy podgląd. Załóż konto, aby wybrać danie, zapisać je i przejść do pełnego przepisu."
+              : "Wybierz jeden wariant, a system ułoży pełny przepis krok po kroku."
+            : "Nie dostaliśmy poprawnej listy dań. Możesz ponowić generowanie albo wrócić do założeń."}
         </p>
 
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-          <Button
-            onClick={onReset}
-            variant="secondary"
-            leftIcon={
-              isGuestMode ? (
-                <ArrowLeft className="h-4 w-4" />
-              ) : (
-                <SlidersHorizontal className="h-4 w-4" />
-              )
-            }
-            className="rounded-full border-border-strong bg-bg-elevated px-5 py-2.5 shadow-md hover:border-accent hover:bg-accent-soft"
-          >
-            {isGuestMode ? "Zmień parametry" : "Zmień założenia"}
-          </Button>
-
-          <Button
-            onClick={onRegenerate}
-            variant="primary"
-            leftIcon={<RefreshCw className="h-4 w-4" />}
-            className="rounded-full px-5 py-2.5 shadow-accent"
-          >
-            Losuj nowe
-          </Button>
-
-          <Button
-            onClick={() => setShowAllIngredients((prev) => !prev)}
-            variant="secondary"
-            leftIcon={<ListChecks className="h-4 w-4 text-accent" />}
-            className="rounded-full border border-border bg-bg-elevated px-5 py-2.5 shadow-sm transition hover:border-accent/50 hover:bg-accent-soft"
-          >
-            {showAllIngredients ? "Zwiń składy" : "Pokaż pełne składy"}
-          </Button>
-
-          {isGuestMode && (
+        {hasMeals && (
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <Button
-              onClick={onGuestCta}
-              rightIcon={<ArrowRight className="h-4 w-4" />}
-              className="rounded-full px-6 shadow-accent"
+              onClick={onReset}
+              variant="secondary"
+              leftIcon={
+                isGuestMode ? (
+                  <ArrowLeft className="h-4 w-4" />
+                ) : (
+                  <SlidersHorizontal className="h-4 w-4" />
+                )
+              }
+              className="rounded-full border-border-strong bg-bg-elevated px-5 py-2.5 shadow-md hover:border-accent hover:bg-accent-soft"
             >
-              Załóż konto
+              {isGuestMode ? "Zmień parametry" : "Zmień założenia"}
             </Button>
-          )}
-        </div>
+
+            <Button
+              onClick={onRegenerate}
+              variant="primary"
+              leftIcon={<RefreshCw className="h-4 w-4" />}
+              className="rounded-full px-5 py-2.5 shadow-accent"
+            >
+              Losuj nowe
+            </Button>
+
+            <Button
+              onClick={() => setShowAllIngredients((prev) => !prev)}
+              variant="secondary"
+              leftIcon={<ListChecks className="h-4 w-4 text-accent" />}
+              className="rounded-full border border-border bg-bg-elevated px-5 py-2.5 shadow-sm transition hover:border-accent/50 hover:bg-accent-soft"
+            >
+              {showAllIngredients ? "Zwiń składy" : "Pokaż pełne składy"}
+            </Button>
+
+            {isGuestMode && (
+              <Button
+                onClick={onGuestCta}
+                rightIcon={<ArrowRight className="h-4 w-4" />}
+                className="rounded-full px-6 shadow-accent"
+              >
+                Załóż konto
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <motion.div
@@ -357,24 +371,59 @@ export function SuccessView({
         animate="visible"
         className="relative z-10 mx-auto w-full max-w-[1400px]"
       >
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {meals.map((meal, index) => (
-            <motion.div
-              key={`${meal.name}-${index}`}
-              variants={successItem}
-              layout
-              className="h-full"
-            >
-              <MealCard
-                meal={meal}
-                onSelect={() => onSelectMeal(meal)}
-                showAction={!isGuestMode}
-                variant="premium"
-                showAllIngredients={showAllIngredients}
-              />
-            </motion.div>
-          ))}
-        </div>
+        {hasMeals ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {meals.map((meal, index) => (
+              <motion.div
+                key={`${meal.name}-${index}`}
+                variants={successItem}
+                layout
+                className="h-full"
+              >
+                <MealCard
+                  meal={meal}
+                  onSelect={() => onSelectMeal(meal)}
+                  showAction={!isGuestMode}
+                  variant="premium"
+                  showAllIngredients={showAllIngredients}
+                />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={successItem}
+            className="mx-auto max-w-2xl rounded-2xl border border-border bg-bg-elevated p-6 text-center shadow-md sm:p-8"
+          >
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-pill bg-accent-soft text-accent">
+              <ListChecks className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <h3 className="mt-4 font-brand text-2xl font-semibold text-ink">
+              Nie dostaliśmy propozycji
+            </h3>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-soft">
+              Spróbuj ponownie albo zmień założenia. Twoje dotychczasowe wybory
+              zostają zachowane w formularzu.
+            </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              <Button
+                onClick={onRegenerate}
+                leftIcon={<RefreshCw className="h-4 w-4" />}
+                className="rounded-full px-5"
+              >
+                Losuj ponownie
+              </Button>
+              <Button
+                onClick={onReset}
+                variant="secondary"
+                leftIcon={<SlidersHorizontal className="h-4 w-4" />}
+                className="rounded-full border-border-strong bg-bg-elevated px-5 hover:border-accent hover:bg-accent-soft"
+              >
+                Zmień założenia
+              </Button>
+            </div>
+          </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );

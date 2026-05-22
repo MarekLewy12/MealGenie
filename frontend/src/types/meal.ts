@@ -93,3 +93,16 @@ export interface GenerateRecipeResponse {
 }
 
 export type PortionMode = "servings" | "weight";
+
+export interface RecipeGenerationContext {
+  portionMode: PortionMode;
+  servingSize: number;
+  targetWeightGrams?: number;
+  hungerLevel: number;
+}
+
+export interface RecipeRouteState {
+  teaser?: MealSuggestion;
+  unusedImageUrls?: string[];
+  recipeContext?: RecipeGenerationContext;
+}

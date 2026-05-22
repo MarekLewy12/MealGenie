@@ -223,6 +223,7 @@ const floatingElements = [
 export function LoadingView() {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [activePhaseIndex, setActivePhaseIndex] = useState(0);
+  const [isTakingLong, setIsTakingLong] = useState(false);
   const activePhase = loadingPhases[activePhaseIndex];
   const ActiveIcon = activePhase.icon;
 
@@ -251,6 +252,14 @@ export function LoadingView() {
     }, 500);
 
     return () => clearInterval(phaseInterval);
+  }, []);
+
+  useEffect(() => {
+    const slowGenerationTimer = setTimeout(() => {
+      setIsTakingLong(true);
+    }, 45_000);
+
+    return () => clearTimeout(slowGenerationTimer);
   }, []);
 
   return (
@@ -342,6 +351,11 @@ export function LoadingView() {
               transition={{ duration: 42, ease: "easeOut" }}
             />
           </div>
+          {isTakingLong && (
+            <p className="mt-3 text-center text-sm leading-6 text-ink-soft">
+              To trwa dłużej niż zwykle, ale nadal pracuję nad propozycjami.
+            </p>
+          )}
         </div>
 
         <div className="relative w-full overflow-hidden rounded-2xl border border-border/50 bg-bg-elevated/40 p-6 shadow-sm backdrop-blur-md dark:bg-white/[0.03] sm:p-8">

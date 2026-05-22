@@ -37,7 +37,11 @@ import {
 import { notify } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { downloadRecipePdf } from "../utils/downloadRecipePdf";
-import type { MealSuggestion, FullRecipe } from "../types/meal";
+import type {
+  FullRecipe,
+  RecipeGenerationContext,
+  RecipeRouteState,
+} from "../types/meal";
 import {
   Badge,
   Button,
@@ -50,13 +54,21 @@ import {
 
 type RecipeView = "loading" | "recipe" | "error";
 
+function getRecipeServings(recipeContext?: RecipeGenerationContext) {
+  if (!recipeContext || recipeContext.portionMode !== "servings") {
+    return 2;
+  }
+
+  return Math.min(12, Math.max(1, Math.trunc(recipeContext.servingSize)));
+}
+
 export function RecipePage() {
-  const { state } = useLocation() as {
-    state?: { teaser?: MealSuggestion; unusedImageUrls?: string[] };
-  };
+  const { state } = useLocation() as { state?: RecipeRouteState };
   const { id: routeId } = useParams<{ id: string }>();
   const teaser = state?.teaser;
   const unusedImageUrls = state?.unusedImageUrls;
+  const recipeContext = state?.recipeContext;
+  const recipeServings = getRecipeServings(recipeContext);
 
   const [view, setView] = useState<RecipeView>("loading");
   const [mealId, setMealId] = useState<string | null>(routeId || null);
@@ -80,7 +92,7 @@ export function RecipePage() {
       window.clearTimeout(copiedTimeoutRef.current);
       copiedTimeoutRef.current = null;
     }
-  }, [routeId, teaser]);
+  }, [recipeServings, routeId, teaser]);
 
   useEffect(() => {
     if (routeId) {
@@ -146,9 +158,18 @@ export function RecipePage() {
     error: generateError,
     refetch: refetchGenerate,
   } = useQuery({
-    queryKey: ["generateRecipe", teaser?.name, teaser?.cookingTimeMinutes],
+    queryKey: [
+      "generateRecipe",
+      teaser?.name,
+      teaser?.cookingTimeMinutes,
+      recipeServings,
+    ],
     queryFn: async () => {
-      const result = await generateFullRecipe(teaser!, 2, unusedImageUrls);
+      const result = await generateFullRecipe(
+        teaser!,
+        recipeServings,
+        unusedImageUrls,
+      );
       return result;
     },
     enabled: !!teaser && !routeId,
@@ -548,7 +569,10 @@ export function RecipePage() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <RecipeLoadingWithPreview teaser={teaser} />
+                    <RecipeLoadingWithPreview
+                      teaser={teaser}
+                      recipeContext={recipeContext}
+                    />
                   </motion.div>
                 )}
 

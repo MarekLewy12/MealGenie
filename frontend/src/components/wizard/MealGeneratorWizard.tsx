@@ -10,7 +10,7 @@ import {
   generateMealSuggestions,
   guestGenerateMealSuggestions,
 } from "../../services/api";
-import type { MealSuggestion } from "../../types/meal";
+import type { MealSuggestion, RecipeGenerationContext } from "../../types/meal";
 import { notify } from "../../store/notificationStore";
 import { ErrorView } from "./ErrorView";
 import { LoadingView } from "./LoadingView";
@@ -273,15 +273,30 @@ export function MealGeneratorWizard({
         .filter((meal) => meal.imageUrl !== selectedMeal.imageUrl)
         .map((meal) => meal.imageUrl)
         .filter((url): url is string => Boolean(url));
+      const recipeContext: RecipeGenerationContext = {
+        portionMode: generator.portionMode,
+        servingSize: generator.servingSize,
+        targetWeightGrams:
+          generator.portionMode === "weight" ? generator.targetWeight : undefined,
+        hungerLevel: generator.hungerLevel,
+      };
 
       navigate("/recipe", {
         state: {
           teaser: selectedMeal,
           unusedImageUrls,
+          recipeContext,
         },
       });
     },
-    [isGuestMode, navigate],
+    [
+      generator.hungerLevel,
+      generator.portionMode,
+      generator.servingSize,
+      generator.targetWeight,
+      isGuestMode,
+      navigate,
+    ],
   );
 
   const handleGuestCta = useCallback(() => {
