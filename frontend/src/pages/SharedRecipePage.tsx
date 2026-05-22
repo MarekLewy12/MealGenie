@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  ChefHat,
-  Clock,
-  Flame,
   Loader2,
+  Refrigerator,
   Scale,
   Sparkles,
   Users,
@@ -15,19 +13,18 @@ import { Link, useParams } from "react-router-dom";
 import {
   IngredientsSection,
   NutritionSection,
-  StatCard,
   StepsSection,
   SuggestionCard,
   TipsSection,
 } from "../components/recipe/RecipeSections";
+import { RecipeHero } from "../components/recipe/RecipeHero";
 import { Logo } from "../components/Logo";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { Badge, Card, Eyebrow, FolkDivider, MealEmoji } from "../components/ui";
+import { Card, Eyebrow } from "../components/ui";
 import { getSharedMeal } from "../services/api";
 import type { FullRecipe } from "../types/meal";
 import {
   formatRecipeContextPrimaryLabel,
-  getRecipeContextBadges,
 } from "../utils/recipeGenerationContext";
 
 export function SharedRecipePage() {
@@ -46,6 +43,7 @@ export function SharedRecipePage() {
   const imageUrl = meal?.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${meal.imageUrl}`
     : meal?.imageUrl;
+
   const errorCode = getApiErrorCode(error);
   const isSharedNotFound = isError && errorCode === "SHARED_MEAL_NOT_FOUND";
   const totalTime = recipe?.totalTimeMinutes || meal?.estimatedTime || 0;
@@ -55,24 +53,27 @@ export function SharedRecipePage() {
       : recipe?.difficulty === "Medium"
         ? "Średnie"
         : "Trudne";
-  const recipeContextBadges = getRecipeContextBadges(recipe?.generationContext);
   const portionStatLabel =
     recipe?.generationContext?.portionMode === "weight" ? "Waga" : "Porcje";
+  const PortionStatIcon =
+    recipe?.generationContext?.portionMode === "weight" ? Scale : Users;
   const portionStatValue =
     formatRecipeContextPrimaryLabel(recipe?.generationContext) ??
     (recipe?.servings ? `${recipe.servings}` : "—");
-  const PortionStatIcon =
-    recipe?.generationContext?.portionMode === "weight" ? Scale : Users;
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg px-4 text-ink">
-        <Card className="flex w-full max-w-sm flex-col items-center gap-4 p-8 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-accent" aria-hidden="true" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-bg px-4 text-ink">
+        <Logo className="mb-8 scale-90" />
+        <Card className="flex w-full max-w-sm flex-col items-center gap-4 border-dashed border-border-strong bg-bg-sunken p-8 text-center">
+          <Loader2
+            className="h-10 w-10 animate-spin text-accent"
+            aria-hidden="true"
+          />
           <div>
-            <Eyebrow>Udostępniony przepis</Eyebrow>
+            <Eyebrow tone="accent">Udostępniony przepis</Eyebrow>
             <p className="mt-2 font-serif text-2xl font-medium">
-              Otwieram kartkę z przepisem
+              Otwieram kartkę...
             </p>
           </div>
         </Card>
@@ -82,25 +83,26 @@ export function SharedRecipePage() {
 
   if (isError || !meal || !recipe) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg px-4 text-center text-ink">
-        <Card className="w-full max-w-md p-8">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-accent-soft text-accent-deep">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-bg px-4 text-center text-ink">
+        <Logo className="mb-8 scale-90" />
+        <Card className="w-full max-w-md border-bordeaux/30 bg-accent-soft p-8 text-bordeaux shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-bg-elevated text-bordeaux shadow-sm">
             <UtensilsCrossed className="h-7 w-7" aria-hidden="true" />
           </div>
-          <Eyebrow className="mt-5 block">
-            {isSharedNotFound ? "SHARED_MEAL_NOT_FOUND" : "Nie udało się otworzyć"}
+          <Eyebrow className="mt-5 block text-bordeaux/80">
+            {isSharedNotFound ? "Brak dostępu" : "Błąd ładowania"}
           </Eyebrow>
-          <h1 className="mt-3 font-serif text-3xl font-medium text-ink">
-            Przepis nie został znaleziony
+          <h1 className="mt-2 font-serif text-3xl font-medium text-ink">
+            Przepis niedostępny
           </h1>
           <p className="mt-3 text-ink-soft">
-            Ten link mógł wygasnąć albo udostępnianie zostało wyłączone.
+            Ten link mógł wygasnąć albo autor wyłączył jego udostępnianie.
           </p>
           <Link
             to="/"
-            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md border border-accent bg-accent px-5 py-2.5 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover"
+            className="mt-8 inline-flex min-h-11 w-full items-center justify-center rounded-pill border border-accent bg-accent px-5 py-2.5 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
-            Przejdź do MealGenie
+            Wróć do MealGenie
           </Link>
         </Card>
       </div>
@@ -109,148 +111,118 @@ export function SharedRecipePage() {
 
   return (
     <div className="min-h-screen bg-bg text-ink">
-      <header className="border-b border-border bg-bg-elevated/90 shadow-xs backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border bg-bg-elevated/90 shadow-xs backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link to="/" aria-label="MealGenie - strona główna">
+          <Link
+            to="/"
+            aria-label="MealGenie - strona główna"
+            className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+          >
             <Logo className="scale-90 origin-left" />
           </Link>
-
           <ThemeToggle />
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-4 py-5 sm:py-8">
-        <div className="grid overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-lg lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <div className="relative min-h-[230px] overflow-hidden sm:min-h-[320px] lg:min-h-[520px]">
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={meal.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full min-h-[230px] w-full items-center justify-center bg-accent-soft sm:min-h-[320px] lg:min-h-[520px]">
-                <MealEmoji name={meal.name} size="lg" className="text-7xl" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/45 via-accent-deep/10 to-transparent" />
-            <Badge variant="accent" className="absolute left-4 top-4 shadow-sm">
-              Udostępniony przepis
-            </Badge>
-          </div>
-
-          <div className="flex flex-col justify-center p-5 sm:p-8 lg:p-10">
-            <Eyebrow>Publiczna kartka przepisu</Eyebrow>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-3 font-brand text-3xl font-semibold leading-[1.05] text-ink sm:text-5xl"
-            >
-              {meal.name}
-            </motion.h1>
-            {meal.description && (
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="mt-4 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg"
-              >
-                {meal.description}
-              </motion.p>
-            )}
-            <FolkDivider className="my-5 max-w-48" />
-
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-              <StatCard
-                icon={Clock}
-                label="Czas"
-                value={`${totalTime} min`}
-                color="blue"
-              />
-              <StatCard
-                icon={ChefHat}
-                label="Trudność"
-                value={difficultyLabel}
-                color="purple"
-              />
-              <StatCard
-                icon={Flame}
-                label="Kalorie"
-                value={recipe.nutrition?.calories ? `${recipe.nutrition.calories} kcal` : "—"}
-                color="orange"
-              />
-              <StatCard
-                icon={PortionStatIcon}
-                label={portionStatLabel}
-                value={portionStatValue}
-                color="green"
-              />
-            </div>
-            {recipeContextBadges.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {recipeContextBadges.map((badge) => (
-                  <Badge key={badge} variant="neutral">
-                    {badge}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-4xl px-4 pb-16">
-        <div className="space-y-8">
-          <NutritionSection nutrition={recipe.nutrition} />
-
-          <IngredientsSection
-            ingredients={recipe.ingredients}
-            allowShoppingList={false}
-          />
-
-          <StepsSection steps={recipe.steps} />
-
-          {recipe.tips.length > 0 && <TipsSection tips={recipe.tips} />}
-
-          {recipe.servingSuggestion && (
-            <SuggestionCard
-              icon={Sparkles}
-              title="Jak podać"
-              content={recipe.servingSuggestion}
-            />
-          )}
-
-          {recipe.storageInfo && (
-            <SuggestionCard
-              icon={Sparkles}
-              title="Przechowywanie"
-              content={recipe.storageInfo}
-            />
-          )}
-
+      <main className="mx-auto max-w-6xl px-4 py-5 sm:py-8">
+        <AnimatePresence mode="wait">
           <motion.div
+            key="shared-recipe"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="rounded-lg border border-border bg-bg-inverse p-8 text-center text-ink-inverse shadow-md"
+            transition={{ duration: 0.5 }}
+            className="space-y-8 lg:space-y-12"
           >
-            <Sparkles className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-            <h2 className="font-serif text-2xl font-medium">
-              Chcesz więcej przepisów?
-            </h2>
-            <p className="mt-2 text-ink-inverse/80">
-              MealGenie tworzy przepisy dopasowane do Twoich preferencji, diety
-              i składników, które masz pod ręką.
-            </p>
-            <Link
-              to="/"
-              className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md border border-accent bg-accent px-8 py-3 text-sm font-semibold text-ink-inverse shadow-accent transition hover:bg-accent-hover"
-            >
-              Wypróbuj za darmo
-            </Link>
+            <RecipeHero
+              title={meal.name}
+              description={meal.description || undefined}
+              imageUrl={imageUrl}
+              badgeLabel="Udostępniony przepis"
+              badgeVariant="accent"
+              kickerText="przepis od znajomego"
+              stats={{
+                totalTime,
+                difficultyLabel,
+                calories: recipe.nutrition?.calories,
+                portionLabel: portionStatLabel,
+                portionValue: portionStatValue,
+                PortionIcon: PortionStatIcon,
+              }}
+            />
+
+            <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start xl:grid-cols-[minmax(0,1fr)_460px] xl:gap-12">
+              <aside className="order-1 space-y-8 lg:order-2 lg:self-stretch">
+                <NutritionSection nutrition={recipe.nutrition} />
+                <div className="lg:sticky lg:top-24">
+                  <IngredientsSection
+                    ingredients={recipe.ingredients}
+                    allowShoppingList={false}
+                  />
+                </div>
+              </aside>
+
+              <div className="order-2 space-y-10 lg:order-1">
+                <StepsSection steps={recipe.steps} />
+
+                <div className="space-y-6">
+                  {recipe.tips.length > 0 ? (
+                    <TipsSection tips={recipe.tips} />
+                  ) : null}
+
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    {recipe.servingSuggestion ? (
+                      <SuggestionCard
+                        icon={Sparkles}
+                        title="Jak podać"
+                        content={recipe.servingSuggestion}
+                      />
+                    ) : null}
+                    {recipe.storageInfo ? (
+                      <SuggestionCard
+                        icon={Refrigerator}
+                        title="Przechowywanie"
+                        content={recipe.storageInfo}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  className="mt-12 overflow-hidden rounded-[1.5rem] border border-accent/20 bg-[linear-gradient(135deg,var(--bg-elevated),var(--bg-elevated)_64%,var(--accent-soft))] p-8 text-center shadow-lg dark:bg-[linear-gradient(135deg,var(--bg-elevated),var(--bg-elevated)_72%,rgba(194,87,40,0.1))] sm:p-12"
+                >
+                  <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-accent/10 bg-accent-soft text-accent shadow-sm">
+                    <Sparkles className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <h2 className="font-brand text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+                    Chcesz więcej trafionych przepisów?
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-ink-soft">
+                    MealGenie dobierze posiłki idealnie pod to, co masz w
+                    lodówce, ile masz czasu i na co masz dziś ochotę.
+                  </p>
+                  <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                    <Link
+                      to="/try"
+                      className="inline-flex min-h-12 items-center justify-center rounded-pill border border-accent bg-accent px-8 text-sm font-semibold leading-none text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                    >
+                      Wypróbuj za darmo
+                    </Link>
+                    <Link
+                      to="/login?mode=register"
+                      className="inline-flex min-h-12 items-center justify-center rounded-pill border border-border-strong bg-bg-elevated px-8 text-sm font-semibold leading-none text-ink shadow-sm transition duration-fast ease-out hover:border-accent hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                    >
+                      Załóż profil
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
-        </div>
-      </div>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }

@@ -9,10 +9,7 @@ import {
 } from "@react-pdf/renderer";
 
 import type { FullRecipe } from "../types/meal";
-import {
-  formatHungerLevel,
-  formatRecipeContextPrimaryLabel,
-} from "../utils/recipeGenerationContext";
+import { formatRecipeContextPrimaryLabel } from "../utils/recipeGenerationContext";
 
 Font.register({
   family: "Lato",
@@ -261,7 +258,6 @@ export function RecipePdf({ recipe, imageUrl }: RecipePdfProps) {
   );
   const recipeContext = recipe.generationContext;
   const primaryContextValue = formatRecipeContextPrimaryLabel(recipeContext);
-  const hungerLabel = formatHungerLevel(recipeContext?.hungerLevel);
 
   return (
     <Document
@@ -306,14 +302,6 @@ export function RecipePdf({ recipe, imageUrl }: RecipePdfProps) {
               {primaryContextValue ?? recipe.servings}
             </Text>
           </View>
-          {hungerLabel ? (
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Apetyt</Text>
-              <Text style={styles.metaValue}>
-                {hungerLabel.replace("Apetyt ", "")}
-              </Text>
-            </View>
-          ) : null}
         </View>
 
         <View wrap={false}>

@@ -4,10 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Check,
-  Clock,
-  ChefHat,
   Download,
-  Flame,
   Heart,
   Loader2,
   MessageSquare,
@@ -30,32 +27,23 @@ import { DashboardBackLink } from "../components/DashboardBackLink";
 import {
   IngredientsSection,
   NutritionSection,
-  StatCard,
   StepsSection,
   SuggestionCard,
   TipsSection,
 } from "../components/recipe/RecipeSections";
+import { RecipeHero } from "../components/recipe/RecipeHero";
 import { notify } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { downloadRecipePdf } from "../utils/downloadRecipePdf";
 import {
   formatRecipeContextPrimaryLabel,
-  getRecipeContextBadges,
 } from "../utils/recipeGenerationContext";
 import type {
   FullRecipe,
   RecipeGenerationContext,
   RecipeRouteState,
 } from "../types/meal";
-import {
-  Badge,
-  Button,
-  Card,
-  Eyebrow,
-  FolkDivider,
-  IconButton,
-  MealEmoji,
-} from "../components/ui";
+import { Button, Card, Eyebrow, IconButton } from "../components/ui";
 
 type RecipeView = "loading" | "recipe" | "error";
 
@@ -83,6 +71,7 @@ export function RecipePage() {
   const [isCopied, setIsCopied] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [localRecipe, setLocalRecipe] = useState<FullRecipe | null>(null);
+
   const hasNotifiedRef = useRef(false);
   const copiedTimeoutRef = useRef<number | null>(null);
   const openRecipeChat = useChatStore((state) => state.openRecipeChat);
@@ -105,7 +94,6 @@ export function RecipePage() {
     }
   }, [routeId]);
 
-  // Widok historii tylko przy routeId i braku teasera.
   const isHistoryView = Boolean(routeId) && !teaser;
 
   const {
@@ -135,25 +123,23 @@ export function RecipePage() {
 
   useEffect(() => {
     if (!isHistoryView) return;
+
     if (historyMeal) {
       setView("recipe");
       setIsFavorite(historyMeal.isFavorite);
       setShareId(historyMeal.shareId ?? null);
       return;
     }
+
     if (!isHistoryError) return;
+
     setView("error");
-    setErrorMessage(
+    const msg =
       historyError instanceof Error
         ? historyError.message
-        : "Nie udało się załadować przepisu.",
-    );
-    notify.error(
-      historyError instanceof Error
-        ? historyError.message
-        : "Nie udało się załadować przepisu.",
-      "Błąd ładowania",
-    );
+        : "Nie udało się załadować przepisu.";
+    setErrorMessage(msg);
+    notify.error(msg, "Błąd ładowania");
   }, [isHistoryView, historyMeal, isHistoryError, historyError]);
 
   const {
@@ -172,15 +158,8 @@ export function RecipePage() {
       recipeContext?.targetWeightGrams,
       recipeContext?.hungerLevel,
     ],
-    queryFn: async () => {
-      const result = await generateFullRecipe(
-        teaser!,
-        recipeServings,
-        unusedImageUrls,
-        recipeContext,
-      );
-      return result;
-    },
+    queryFn: () =>
+      generateFullRecipe(teaser!, recipeServings, unusedImageUrls, recipeContext),
     enabled: !!teaser && !routeId,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 5,
@@ -198,11 +177,11 @@ export function RecipePage() {
 
     if (isGenerateError) {
       setView("error");
-      setErrorMessage(
+      const msg =
         generateError instanceof Error
           ? generateError.message
-          : "Nie udało się wygenerować przepisu.",
-      );
+          : "Nie udało się wygenerować przepisu.";
+      setErrorMessage(msg);
       if (!hasNotifiedRef.current) {
         notify.error("Nie udało się wygenerować przepisu.", "Generator");
         hasNotifiedRef.current = true;
@@ -267,6 +246,7 @@ export function RecipePage() {
           calories: recipe?.nutrition?.calories,
         }
       : null);
+
   const imageUrl = headerData?.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${headerData.imageUrl}`
     : headerData?.imageUrl;
@@ -278,7 +258,6 @@ export function RecipePage() {
         ? "Średnie"
         : "Trudne";
   const displayRecipeContext = recipe?.generationContext ?? recipeContext;
-  const recipeContextBadges = getRecipeContextBadges(displayRecipeContext);
   const portionStatLabel =
     displayRecipeContext?.portionMode === "weight" ? "Waga" : "Porcje";
   const PortionStatIcon =
@@ -388,287 +367,284 @@ export function RecipePage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-ink">
+    <div className="min-h-screen bg-bg pb-[calc(env(safe-area-inset-bottom)+6rem)] text-ink lg:pb-0">
       <header className="sticky top-0 z-30 border-b border-border bg-bg-elevated/90 shadow-xs backdrop-blur-xl">
-        <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between px-4 py-2">
+        <div className="mx-auto flex min-h-14 max-w-[1760px] items-center justify-between gap-3 px-4 py-2">
           <DashboardBackLink />
+          {recipe ? (
+            <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
+              {mealId ? (
+                <>
+                  <IconButton
+                    variant={isFavorite ? "secondary" : "ghost"}
+                    onClick={handleToggleFavorite}
+                    disabled={favoriteMutation.isPending}
+                    aria-label={
+                      isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"
+                    }
+                    className="sm:hidden"
+                    icon={
+                      favoriteMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Heart
+                          className={`h-4 w-4 ${isFavorite ? "fill-current text-accent" : ""}`}
+                        />
+                      )
+                    }
+                  />
+                  <Button
+                    variant={isFavorite ? "secondary" : "ghost"}
+                    onClick={handleToggleFavorite}
+                    disabled={favoriteMutation.isPending}
+                    className="hidden px-3 sm:inline-flex"
+                    leftIcon={
+                      favoriteMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Heart
+                          className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                        />
+                      )
+                    }
+                  >
+                    Ulubione
+                  </Button>
+                </>
+              ) : null}
+
+              <IconButton
+                variant="ghost"
+                onClick={handleShare}
+                disabled={shareMutation.isPending || !mealId}
+                aria-label={shareId ? "Kopiuj link do przepisu" : "Udostępnij przepis"}
+                className="sm:hidden"
+                icon={
+                  shareMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isCopied ? (
+                    <Check className="h-4 w-4 text-basil" />
+                  ) : (
+                    <Share2 className="h-4 w-4" />
+                  )
+                }
+              />
+              <Button
+                variant="ghost"
+                onClick={handleShare}
+                disabled={shareMutation.isPending || !mealId}
+                className="hidden px-3 sm:inline-flex"
+                leftIcon={
+                  shareMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isCopied ? (
+                    <Check className="h-4 w-4 text-basil" />
+                  ) : (
+                    <Share2 className="h-4 w-4" />
+                  )
+                }
+              >
+                {isCopied ? "Skopiowano" : shareId ? "Kopiuj link" : "Udostępnij"}
+              </Button>
+
+              {shareId ? (
+                <IconButton
+                  variant="ghost"
+                  onClick={handleDisableShare}
+                  disabled={shareMutation.isPending}
+                  aria-label="Wyłącz udostępnianie przepisu"
+                  className="text-bordeaux hover:bg-bordeaux/10"
+                  icon={<XCircle className="h-4 w-4" />}
+                />
+              ) : null}
+
+              <IconButton
+                variant="ghost"
+                onClick={handleExportPdf}
+                disabled={isExporting}
+                aria-label="Pobierz przepis jako PDF"
+                className="sm:hidden"
+                icon={
+                  isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )
+                }
+              />
+              <Button
+                variant="ghost"
+                onClick={handleExportPdf}
+                disabled={isExporting}
+                className="hidden px-3 sm:inline-flex"
+                leftIcon={
+                  isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )
+                }
+              >
+                PDF
+              </Button>
+
+              {mealId ? (
+                <>
+                  <IconButton
+                    variant="secondary"
+                    onClick={handleAskAssistant}
+                    aria-label="Otwórz asystenta tego przepisu"
+                    className="sm:hidden"
+                    icon={<MessageSquare className="h-4 w-4" />}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={handleAskAssistant}
+                    className="hidden px-3 sm:inline-flex"
+                    leftIcon={<MessageSquare className="h-4 w-4" />}
+                  >
+                    Asystent przepisu
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </header>
 
-      <main>
-        <section className="mx-auto max-w-6xl px-4 py-5 sm:py-8">
-          <div className="grid overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-lg lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-            <div className="relative min-h-[230px] overflow-hidden sm:min-h-[320px] lg:min-h-[560px]">
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={headerData?.name || recipe?.name || "Przepis"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full min-h-[230px] w-full items-center justify-center bg-accent-soft sm:min-h-[320px] lg:min-h-[560px]">
-                  <MealEmoji
-                    name={headerData?.name || recipe?.name || "Przepis"}
-                    size="lg"
-                    className="text-7xl"
-                  />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/45 via-accent-deep/10 to-transparent" />
-              <Badge
-                variant="accent"
-                className="absolute left-4 top-4 shadow-sm"
-              >
-                {isHistoryView ? "Zapisany przepis" : "Świeżo wygenerowany"}
-              </Badge>
-            </div>
+      <AnimatePresence mode="wait">
+        {view === "loading" ? (
+          <main className="mx-auto max-w-[1760px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <RecipeLoadingWithPreview
+                teaser={teaser}
+                recipeContext={recipeContext}
+              />
+            </motion.div>
+          </main>
+        ) : null}
 
-            <div className="flex flex-col justify-center p-5 sm:p-8 lg:p-10">
-              <Eyebrow>Przepis MealGenie</Eyebrow>
-              <h1 className="mt-3 font-brand text-3xl font-semibold leading-[1.05] text-ink sm:text-5xl">
-                {headerData?.name || recipe?.name || "Ładowanie przepisu"}
-              </h1>
-              {headerData?.description && (
-                <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg">
-                  {headerData.description}
-                </p>
-              )}
+        {view === "error" ? (
+          <main className="mx-auto max-w-[1760px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <ErrorCard
+                message={errorMessage}
+                onRetry={() => {
+                  if (isHistoryView) {
+                    setView("loading");
+                    refetchHistory();
+                    return;
+                  }
+                  if (teaser) {
+                    setView("loading");
+                    refetchGenerate();
+                  }
+                }}
+              />
+            </motion.div>
+          </main>
+        ) : null}
 
-              <FolkDivider className="my-5 max-w-48" />
+        {view === "recipe" && recipe && headerData ? (
+          <motion.main
+            key="recipe"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div className="mx-auto max-w-[1760px] px-4 pt-6 sm:px-6 lg:px-8 lg:pt-10">
+              <RecipeHero
+                title={headerData.name || recipe.name}
+                description={headerData.description}
+                imageUrl={imageUrl}
+                badgeLabel={
+                  isHistoryView ? "Zapisany przepis" : "Świeżo wygenerowany"
+                }
+                badgeVariant={isHistoryView ? "neutral" : "accent"}
+                stats={{
+                  totalTime,
+                  difficultyLabel,
+                  calories: recipe?.nutrition?.calories || headerData.calories,
+                  portionLabel: portionStatLabel,
+                  portionValue: portionStatValue,
+                  PortionIcon: PortionStatIcon,
+                }}
+              />
+            </motion.div>
+            <RecipeHeroSeparator />
 
-              {headerData && (
-                <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-                  <StatCard
-                    icon={Clock}
-                    label="Czas"
-                    value={`${totalTime} min`}
-                    color="blue"
-                  />
-                  <StatCard
-                    icon={ChefHat}
-                    label="Trudność"
-                    value={difficultyLabel}
-                    color="purple"
-                  />
-                  <StatCard
-                    icon={Flame}
-                    label="Kalorie"
-                    value={recipe?.nutrition?.calories || headerData.calories ? `${recipe?.nutrition?.calories || headerData.calories} kcal` : "—"}
-                    color="orange"
-                  />
-                  <StatCard
-                    icon={PortionStatIcon}
-                    label={portionStatLabel}
-                    value={portionStatValue}
-                    color="green"
-                  />
-                </div>
-              )}
-
-              {recipeContextBadges.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {recipeContextBadges.map((badge) => (
-                    <Badge key={badge} variant="neutral">
-                      {badge}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {recipe && (
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {mealId && (
-                    <Button
-                      variant={isFavorite ? "primary" : "secondary"}
-                      onClick={handleToggleFavorite}
-                      disabled={favoriteMutation.isPending}
-                      leftIcon={
-                        favoriteMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
-                        )
-                      }
-                    >
-                      {isFavorite ? "Ulubione" : "Dodaj do ulubionych"}
-                    </Button>
-                  )}
-
-                  <Button
-                    variant="secondary"
-                    onClick={handleShare}
-                    disabled={shareMutation.isPending || !mealId}
-                    leftIcon={
-                      shareMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isCopied ? (
-                        <Check className="h-4 w-4 text-basil" />
-                      ) : (
-                        <Share2 className="h-4 w-4" />
-                      )
-                    }
-                  >
-                    {shareMutation.isPending
-                      ? "Przetwarzam..."
-                      : isCopied
-                        ? "Skopiowano"
-                        : shareId
-                          ? "Kopiuj link"
-                          : "Udostępnij"}
-                  </Button>
-
-                  {shareId && (
-                    <IconButton
-                      aria-label="Wyłącz udostępnianie przepisu"
-                      variant="ghost"
-                      onClick={handleDisableShare}
-                      disabled={shareMutation.isPending}
-                      icon={<XCircle className="h-4 w-4" />}
-                      className="rounded-pill text-bordeaux"
-                      title="Wyłącz udostępnianie"
-                    />
-                  )}
-
-                  <Button
-                    variant="secondary"
-                    onClick={handleExportPdf}
-                    disabled={isExporting}
-                    leftIcon={
-                      isExporting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Download className="h-4 w-4" />
-                      )
-                    }
-                  >
-                    {isExporting ? "Generuję..." : "Pobierz PDF"}
-                  </Button>
-
-                  <Button
-                    variant="primary"
-                    onClick={handleAskAssistant}
-                    disabled={!recipe || !mealId}
-                    leftIcon={<MessageSquare className="h-4 w-4" />}
-                  >
-                    Zapytaj asystenta
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <div className="mx-auto max-w-6xl px-4 pb-16">
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[280px_1fr]">
-            <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
-              <Card className="p-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-soft text-accent-deep">
-                    <MessageSquare className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <Eyebrow tone="basil">Asystent w kuchni</Eyebrow>
-                    <p className="mt-2 text-sm font-semibold leading-snug text-ink">
-                      Potrzebujesz pomocy z tym przepisem?
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                      Zapytaj o kroki, zamienniki składników albo czas.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="primary"
-                  onClick={handleAskAssistant}
-                  disabled={!recipe || !mealId}
-                  leftIcon={<MessageSquare className="h-4 w-4" />}
-                  className="mt-4 w-full"
-                >
-                  Otwórz chat przepisu
-                </Button>
-              </Card>
-            </aside>
-
-            <div>
-              <AnimatePresence mode="wait">
-                {view === "loading" && (
-                  <motion.div
-                    key="loading"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <RecipeLoadingWithPreview
-                      teaser={teaser}
-                      recipeContext={recipeContext}
-                    />
-                  </motion.div>
-                )}
-
-                {view === "error" && (
-                  <motion.div
-                    key="error"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <ErrorCard
-                      message={errorMessage}
-                      onRetry={() => {
-                        if (isHistoryView) {
-                          setView("loading");
-                          refetchHistory();
-                          return;
-                        }
-                        if (teaser) {
-                          setView("loading");
-                          refetchGenerate();
-                        }
-                      }}
-                    />
-                  </motion.div>
-                )}
-
-                {view === "recipe" && recipe && (
-                  <motion.div
-                    key="recipe"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-8"
-                  >
-                    <NutritionSection nutrition={recipe.nutrition} />
-
+            <div className="mx-auto max-w-[1760px] px-4 pb-16 pt-2 sm:px-6 lg:px-8 lg:pt-4">
+              <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_620px]">
+                <aside className="order-1 space-y-8 lg:order-2 lg:self-stretch">
+                  <NutritionSection nutrition={recipe.nutrition} />
+                  <div className="lg:sticky lg:top-24">
                     <IngredientsSection
                       ingredients={recipe.ingredients}
                       allowShoppingList
                     />
+                  </div>
+                </aside>
 
-                    <StepsSection steps={recipe.steps} />
+                <div className="order-2 space-y-10 lg:order-1">
+                  <StepsSection steps={recipe.steps} />
 
-                    {recipe.tips.length > 0 && <TipsSection tips={recipe.tips} />}
+                  <div className="space-y-6">
+                    {recipe.tips.length > 0 ? (
+                      <TipsSection tips={recipe.tips} />
+                    ) : null}
 
-                    {recipe.servingSuggestion && (
-                      <SuggestionCard
-                        icon={Sparkles}
-                        title="Jak podać"
-                        content={recipe.servingSuggestion}
-                      />
-                    )}
-
-                    {recipe.storageInfo && (
-                      <SuggestionCard
-                        icon={Refrigerator}
-                        title="Przechowywanie"
-                        content={recipe.storageInfo}
-                      />
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      {recipe.servingSuggestion ? (
+                        <SuggestionCard
+                          icon={Sparkles}
+                          title="Jak podać"
+                          content={recipe.servingSuggestion}
+                        />
+                      ) : null}
+                      {recipe.storageInfo ? (
+                        <SuggestionCard
+                          icon={Refrigerator}
+                          title="Przechowywanie"
+                          content={recipe.storageInfo}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </main>
+          </motion.main>
+        ) : null}
+      </AnimatePresence>
+
+    </div>
+  );
+}
+
+function RecipeHeroSeparator() {
+  return (
+    <div
+      className="relative flex items-center justify-center overflow-hidden pb-6 pt-5 sm:pb-8 sm:pt-6"
+      aria-hidden="true"
+    >
+      <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-border-strong/80 to-transparent dark:via-white/20" />
+      <div className="absolute inset-x-[12%] top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-accent/45 to-transparent dark:via-accent/30" />
+
+      <div className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-3">
+        <div className="h-1.5 w-1.5 rotate-45 bg-border-strong/80 dark:bg-white/25" />
+        <div className="h-3 w-3 rotate-45 border border-accent bg-bg-elevated shadow-[0_0_18px_rgba(194,87,40,0.22)] dark:bg-bg" />
+        <div className="h-1.5 w-1.5 rotate-45 bg-border-strong/80 dark:bg-white/25" />
+      </div>
     </div>
   );
 }
@@ -681,14 +657,10 @@ function ErrorCard({
   onRetry: () => void;
 }) {
   return (
-    <Card className="p-6 text-center">
+    <Card className="mx-auto max-w-lg border-bordeaux/30 bg-accent-soft p-8 text-center text-bordeaux">
       <Eyebrow tone="accent">Nie udało się przygotować przepisu</Eyebrow>
-      <p className="mx-auto mt-3 max-w-xl text-ink-soft">{message}</p>
-      <Button
-        onClick={onRetry}
-        variant="primary"
-        className="mt-5"
-      >
+      <p className="mx-auto mt-3 text-ink-soft">{message}</p>
+      <Button onClick={onRetry} variant="primary" className="mx-auto mt-6">
         Spróbuj ponownie
       </Button>
     </Card>

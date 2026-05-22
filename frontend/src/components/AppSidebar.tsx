@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   BookOpen,
@@ -69,6 +70,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const openGlobalChat = useChatStore((state) => state.openGlobalChat);
+  const shouldReduceMotion = useReducedMotion();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const initials = getInitials(user?.name, user?.email);
@@ -178,35 +180,47 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
       </nav>
 
       <div className="relative mt-auto border-t border-border pt-4">
-        {isProfileMenuOpen && (
-          <div
-            role="menu"
-            aria-label="Menu profilu"
-            className="absolute bottom-full left-0 right-0 mb-3 rounded-lg border border-border bg-bg-elevated p-2 shadow-lg"
-          >
-            <Link
-              to="/settings"
-              role="menuitem"
-              onClick={() => {
-                setIsProfileMenuOpen(false);
-                onNavigate?.();
-              }}
-              className="flex min-h-10 items-center rounded-md px-3 py-2 text-[0.95rem] font-semibold text-ink-soft transition hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+        <AnimatePresence initial={false}>
+          {isProfileMenuOpen ? (
+            <motion.div
+              role="menu"
+              aria-label="Menu profilu"
+              initial={
+                shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }
+              }
+              animate={
+                shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }
+              }
+              exit={
+                shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }
+              }
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute bottom-full left-0 right-0 mb-3 origin-bottom rounded-lg border border-border bg-bg-elevated p-2 shadow-lg"
             >
-              Preferencje gotowania
-            </Link>
+              <Link
+                to="/settings"
+                role="menuitem"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  onNavigate?.();
+                }}
+                className="flex min-h-10 items-center rounded-md px-3 py-2 text-[0.95rem] font-semibold text-ink-soft transition hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              >
+                Preferencje gotowania
+              </Link>
 
-            <button
-              type="button"
-              role="menuitem"
-              onClick={handleLogout}
-              className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[0.95rem] font-semibold text-bordeaux transition hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-            >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              Wyloguj się
-            </button>
-          </div>
-        )}
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleLogout}
+                className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[0.95rem] font-semibold text-bordeaux transition hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Wyloguj się
+              </button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
         <button
           type="button"
