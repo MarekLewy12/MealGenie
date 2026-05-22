@@ -33,7 +33,8 @@ export function Step4MealType({
           <span className="text-ink-soft">Wybierz typ posiłku.</span>
         </h2>
         <p className="max-w-3xl text-base leading-7 text-ink-soft">
-          Ostatni wybór - potem MealGenie generuje przepis i obraz dania.
+          Ostatni wybór - potem MealGenie pokaże 3 propozycje, z których
+          wybierzesz jedną do rozwinięcia w pełny przepis.
         </p>
       </header>
 

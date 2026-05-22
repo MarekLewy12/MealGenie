@@ -6,9 +6,11 @@ import {
   Flame,
   BookOpen,
   Clock,
+  Scale,
   UtensilsCrossed,
+  Users,
 } from "lucide-react";
-import type { MealSuggestion } from "../types/meal";
+import type { MealSuggestion, RecipeGenerationContext } from "../types/meal";
 
 const loadingStages = [
   { icon: Sparkles, text: "Analizuję składniki...", color: "text-accent" },
@@ -26,9 +28,33 @@ const loadingStages = [
 
 type Props = {
   teaser?: MealSuggestion | null;
+  recipeContext?: RecipeGenerationContext;
 };
 
-export function RecipeLoadingWithPreview({ teaser }: Props) {
+function getRecipeContextLabel(recipeContext?: RecipeGenerationContext) {
+  if (!recipeContext) {
+    return null;
+  }
+
+  if (recipeContext.portionMode === "servings") {
+    const servingLabel =
+      recipeContext.servingSize === 1
+        ? "osoba"
+        : recipeContext.servingSize < 5
+          ? "osoby"
+          : "osób";
+
+    return `${recipeContext.servingSize} ${servingLabel}`;
+  }
+
+  if (recipeContext.targetWeightGrams) {
+    return `${recipeContext.targetWeightGrams} g użyte przy propozycjach`;
+  }
+
+  return null;
+}
+
+export function RecipeLoadingWithPreview({ teaser, recipeContext }: Props) {
   const [stageIndex, setStageIndex] = useState(0);
 
   useEffect(() => {
@@ -48,6 +74,9 @@ export function RecipeLoadingWithPreview({ teaser }: Props) {
   const imageUrl = teaser?.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${teaser.imageUrl}`
     : teaser?.imageUrl;
+  const recipeContextLabel = getRecipeContextLabel(recipeContext);
+  const RecipeContextIcon =
+    recipeContext?.portionMode === "weight" ? Scale : Users;
 
   return (
     <div className="flex flex-col items-center gap-8 px-6 py-16">
@@ -87,6 +116,12 @@ export function RecipeLoadingWithPreview({ teaser }: Props) {
                   </>
                 )}
               </div>
+              {recipeContextLabel && (
+                <div className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-pill border border-accent/20 bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent-deep">
+                  <RecipeContextIcon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{recipeContextLabel}</span>
+                </div>
+              )}
             </div>
           </div>
 
