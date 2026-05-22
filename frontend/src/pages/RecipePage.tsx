@@ -12,6 +12,7 @@ import {
   Loader2,
   MessageSquare,
   Refrigerator,
+  Scale,
   Share2,
   Sparkles,
   Users,
@@ -37,6 +38,10 @@ import {
 import { notify } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { downloadRecipePdf } from "../utils/downloadRecipePdf";
+import {
+  formatRecipeContextPrimaryLabel,
+  getRecipeContextBadges,
+} from "../utils/recipeGenerationContext";
 import type {
   FullRecipe,
   RecipeGenerationContext,
@@ -163,12 +168,16 @@ export function RecipePage() {
       teaser?.name,
       teaser?.cookingTimeMinutes,
       recipeServings,
+      recipeContext?.portionMode,
+      recipeContext?.targetWeightGrams,
+      recipeContext?.hungerLevel,
     ],
     queryFn: async () => {
       const result = await generateFullRecipe(
         teaser!,
         recipeServings,
         unusedImageUrls,
+        recipeContext,
       );
       return result;
     },
@@ -268,6 +277,15 @@ export function RecipePage() {
       : (recipe?.difficulty || headerData?.difficulty) === "Medium"
         ? "Średnie"
         : "Trudne";
+  const displayRecipeContext = recipe?.generationContext ?? recipeContext;
+  const recipeContextBadges = getRecipeContextBadges(displayRecipeContext);
+  const portionStatLabel =
+    displayRecipeContext?.portionMode === "weight" ? "Waga" : "Porcje";
+  const PortionStatIcon =
+    displayRecipeContext?.portionMode === "weight" ? Scale : Users;
+  const portionStatValue =
+    formatRecipeContextPrimaryLabel(displayRecipeContext) ??
+    (recipe?.servings ? `${recipe.servings}` : "—");
 
   const handleToggleFavorite = () => {
     if (!mealId || favoriteMutation.isPending) return;
@@ -439,11 +457,21 @@ export function RecipePage() {
                     color="orange"
                   />
                   <StatCard
-                    icon={Users}
-                    label="Porcje"
-                    value={recipe?.servings ? `${recipe.servings}` : "—"}
+                    icon={PortionStatIcon}
+                    label={portionStatLabel}
+                    value={portionStatValue}
                     color="green"
                   />
+                </div>
+              )}
+
+              {recipeContextBadges.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {recipeContextBadges.map((badge) => (
+                    <Badge key={badge} variant="neutral">
+                      {badge}
+                    </Badge>
+                  ))}
                 </div>
               )}
 

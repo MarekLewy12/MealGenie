@@ -9,6 +9,7 @@ import type {
   MealHistoryDetail,
   MealHistoryResponse,
   GenerateRecipeResponse,
+  RecipeGenerationContext,
 } from "../types/meal";
 import type { ChatRequest, ChatResponse } from "../types/chat";
 
@@ -83,10 +84,11 @@ export async function generateFullRecipe(
   mealTeaser: MealSuggestion,
   servings: number = 2,
   unusedImageUrls?: string[],
+  recipeContext?: RecipeGenerationContext,
 ): Promise<GenerateRecipeResponse> {
   const { data } = await api.post<GenerateRecipeResponse>(
     "/meals/recipe",
-    { mealTeaser, servings, unusedImageUrls },
+    { mealTeaser, servings, unusedImageUrls, recipeContext },
     { timeout: 60_000 },
   );
 

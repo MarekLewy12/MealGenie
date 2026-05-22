@@ -61,6 +61,7 @@ export interface FullRecipe {
   servingSuggestion?: string;
   storageInfo?: string;
   imageUrl: string | null;
+  generationContext?: RecipeGenerationContext;
 }
 
 // Typy dla historii i ulubionych.

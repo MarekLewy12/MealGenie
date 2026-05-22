@@ -17,7 +17,7 @@ export async function generateRecipeController(
       throw new Error("User ID missing in request context");
     }
 
-    const { mealTeaser, servings, unusedImageUrls } =
+    const { mealTeaser, servings, unusedImageUrls, recipeContext } =
       GenerateRecipeRequestSchema.parse(req.body);
 
     const preferences = await prisma.preference.findUnique({
@@ -34,6 +34,7 @@ export async function generateRecipeController(
     const recipe = await generateFullRecipe({
       teaser: mealTeaser,
       servings,
+      recipeContext,
       userPreferences: {
         diet: preferences.diet,
         allergies: preferences.allergies,

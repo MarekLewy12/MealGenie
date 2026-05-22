@@ -9,6 +9,10 @@ import {
 } from "@react-pdf/renderer";
 
 import type { FullRecipe } from "../types/meal";
+import {
+  formatHungerLevel,
+  formatRecipeContextPrimaryLabel,
+} from "../utils/recipeGenerationContext";
 
 Font.register({
   family: "Lato",
@@ -54,6 +58,7 @@ const styles = StyleSheet.create({
   },
   metaRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
@@ -61,7 +66,9 @@ const styles = StyleSheet.create({
   },
   metaItem: {
     flexGrow: 1,
+    minWidth: "20%",
     paddingRight: 12,
+    marginBottom: 8,
   },
   metaLabel: {
     fontSize: 9,
@@ -252,6 +259,9 @@ export function RecipePdf({ recipe, imageUrl }: RecipePdfProps) {
     },
     {},
   );
+  const recipeContext = recipe.generationContext;
+  const primaryContextValue = formatRecipeContextPrimaryLabel(recipeContext);
+  const hungerLabel = formatHungerLevel(recipeContext?.hungerLevel);
 
   return (
     <Document
@@ -289,9 +299,21 @@ export function RecipePdf({ recipe, imageUrl }: RecipePdfProps) {
             </Text>
           </View>
           <View style={styles.metaItem}>
-            <Text style={styles.metaLabel}>Porcje</Text>
-            <Text style={styles.metaValue}>{recipe.servings}</Text>
+            <Text style={styles.metaLabel}>
+              {recipeContext?.portionMode === "weight" ? "Waga" : "Porcje"}
+            </Text>
+            <Text style={styles.metaValue}>
+              {primaryContextValue ?? recipe.servings}
+            </Text>
           </View>
+          {hungerLabel ? (
+            <View style={styles.metaItem}>
+              <Text style={styles.metaLabel}>Apetyt</Text>
+              <Text style={styles.metaValue}>
+                {hungerLabel.replace("Apetyt ", "")}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         <View wrap={false}>
