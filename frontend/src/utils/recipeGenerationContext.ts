@@ -8,14 +8,6 @@ export function formatServingLabel(servingSize: number) {
   return `${servingSize} ${servingSize < 5 ? "osoby" : "osób"}`;
 }
 
-export function formatHungerLevel(hungerLevel?: number) {
-  if (!hungerLevel) {
-    return null;
-  }
-
-  return `Apetyt ${hungerLevel}/5`;
-}
-
 export function formatRecipeContextPrimaryLabel(
   recipeContext?: RecipeGenerationContext,
 ) {
@@ -30,27 +22,4 @@ export function formatRecipeContextPrimaryLabel(
   }
 
   return formatServingLabel(recipeContext.servingSize);
-}
-
-export function getRecipeContextBadges(recipeContext?: RecipeGenerationContext) {
-  if (!recipeContext) {
-    return [];
-  }
-
-  const badges: string[] = [];
-
-  if (recipeContext.portionMode === "weight" && recipeContext.targetWeightGrams) {
-    badges.push(`Docelowa waga: ${recipeContext.targetWeightGrams} g`);
-  }
-
-  if (recipeContext.portionMode === "servings") {
-    badges.push(`Porcja: ${formatServingLabel(recipeContext.servingSize)}`);
-  }
-
-  const hungerLabel = formatHungerLevel(recipeContext.hungerLevel);
-  if (hungerLabel) {
-    badges.push(hungerLabel);
-  }
-
-  return badges;
 }

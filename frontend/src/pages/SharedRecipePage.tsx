@@ -25,7 +25,6 @@ import { getSharedMeal } from "../services/api";
 import type { FullRecipe } from "../types/meal";
 import {
   formatRecipeContextPrimaryLabel,
-  getRecipeContextBadges,
 } from "../utils/recipeGenerationContext";
 
 export function SharedRecipePage() {
@@ -54,7 +53,6 @@ export function SharedRecipePage() {
       : recipe?.difficulty === "Medium"
         ? "Średnie"
         : "Trudne";
-  const recipeContextBadges = getRecipeContextBadges(recipe?.generationContext);
   const portionStatLabel =
     recipe?.generationContext?.portionMode === "weight" ? "Waga" : "Porcje";
   const PortionStatIcon =
@@ -150,16 +148,17 @@ export function SharedRecipePage() {
                 portionValue: portionStatValue,
                 PortionIcon: PortionStatIcon,
               }}
-              contextBadges={recipeContextBadges}
             />
 
-            <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_340px] lg:items-start xl:grid-cols-[1fr_380px] xl:gap-12">
-              <aside className="order-1 space-y-8 lg:sticky lg:top-24 lg:order-2">
+            <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start xl:grid-cols-[minmax(0,1fr)_460px] xl:gap-12">
+              <aside className="order-1 space-y-8 lg:order-2 lg:self-stretch">
                 <NutritionSection nutrition={recipe.nutrition} />
-                <IngredientsSection
-                  ingredients={recipe.ingredients}
-                  allowShoppingList={false}
-                />
+                <div className="lg:sticky lg:top-24">
+                  <IngredientsSection
+                    ingredients={recipe.ingredients}
+                    allowShoppingList={false}
+                  />
+                </div>
               </aside>
 
               <div className="order-2 space-y-10 lg:order-1">

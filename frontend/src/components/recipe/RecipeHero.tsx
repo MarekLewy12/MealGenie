@@ -20,7 +20,6 @@ export type RecipeHeroProps = {
     portionValue: string;
     PortionIcon: ElementType;
   };
-  contextBadges?: string[];
   isLoading?: boolean;
   edgeToEdge?: boolean;
 };
@@ -55,7 +54,6 @@ export function RecipeHero({
   badgeVariant = "accent",
   kickerText = "twój przepis",
   stats,
-  contextBadges = [],
   isLoading = false,
   edgeToEdge = false,
 }: RecipeHeroProps) {
@@ -111,20 +109,7 @@ export function RecipeHero({
         >
           <HandwrittenKicker className="mb-2">{kickerText}</HandwrittenKicker>
 
-          {contextBadges.length > 0 ? (
-            <div className="mb-5 mt-3 flex flex-wrap justify-center gap-2.5">
-              {contextBadges.map((badge) => (
-                <span
-                  key={badge}
-                  className="inline-flex items-center rounded-pill border border-[rgba(159,79,75,0.28)] bg-[rgba(255,255,255,0.72)] px-3 py-1.5 text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-ink shadow-[0_1px_0_rgba(255,255,255,0.7)_inset,0_8px_18px_-16px_rgba(159,79,75,0.42)] backdrop-blur-sm dark:border-white/15 dark:bg-[rgba(21,18,15,0.72)] dark:text-ink"
-                >
-                  {badge}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          <h1 className="font-serif text-3xl font-medium leading-[1.05] text-ink sm:text-4xl lg:text-5xl">
+          <h1 className="text-summary-gradient font-brand text-3xl font-semibold leading-[1.05] sm:text-4xl lg:text-5xl">
             {title}
           </h1>
 

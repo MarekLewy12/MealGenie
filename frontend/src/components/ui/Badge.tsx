@@ -14,7 +14,8 @@ const variantClasses: Record<BadgeVariant, string> = {
   basil: "bg-basil-soft text-basil",
   saffron: "bg-saffron-soft text-saffron",
   danger: "bg-accent-soft text-bordeaux",
-  neutral: "bg-bg-sunken text-ink-soft",
+  neutral:
+    "border border-border bg-[rgba(255,255,255,0.74)] text-ink-soft shadow-xs dark:bg-[rgba(26,21,18,0.72)]",
 };
 
 export function Badge({

@@ -37,7 +37,6 @@ import { useChatStore } from "../store/chatStore";
 import { downloadRecipePdf } from "../utils/downloadRecipePdf";
 import {
   formatRecipeContextPrimaryLabel,
-  getRecipeContextBadges,
 } from "../utils/recipeGenerationContext";
 import type {
   FullRecipe,
@@ -259,7 +258,6 @@ export function RecipePage() {
         ? "Średnie"
         : "Trudne";
   const displayRecipeContext = recipe?.generationContext ?? recipeContext;
-  const recipeContextBadges = getRecipeContextBadges(displayRecipeContext);
   const portionStatLabel =
     displayRecipeContext?.portionMode === "weight" ? "Waga" : "Porcje";
   const PortionStatIcon =
@@ -489,6 +487,26 @@ export function RecipePage() {
               >
                 PDF
               </Button>
+
+              {mealId ? (
+                <>
+                  <IconButton
+                    variant="secondary"
+                    onClick={handleAskAssistant}
+                    aria-label="Otwórz asystenta tego przepisu"
+                    className="sm:hidden"
+                    icon={<MessageSquare className="h-4 w-4" />}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={handleAskAssistant}
+                    className="hidden px-3 sm:inline-flex"
+                    leftIcon={<MessageSquare className="h-4 w-4" />}
+                  >
+                    Asystent przepisu
+                  </Button>
+                </>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -561,17 +579,21 @@ export function RecipePage() {
                   portionValue: portionStatValue,
                   PortionIcon: PortionStatIcon,
                 }}
-                contextBadges={recipeContextBadges}
                 edgeToEdge
               />
             </motion.div>
             <RecipeHeroSeparator />
 
             <div className="mx-auto max-w-[1760px] px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pt-10">
-              <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_380px] lg:items-start xl:grid-cols-[1fr_420px] xl:gap-12 2xl:grid-cols-[1fr_480px]">
-                <aside className="order-1 space-y-8 lg:sticky lg:top-24 lg:order-2">
+              <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_620px]">
+                <aside className="order-1 space-y-8 lg:order-2 lg:self-stretch">
                   <NutritionSection nutrition={recipe.nutrition} />
-                  <IngredientsSection ingredients={recipe.ingredients} allowShoppingList />
+                  <div className="lg:sticky lg:top-24">
+                    <IngredientsSection
+                      ingredients={recipe.ingredients}
+                      allowShoppingList
+                    />
+                  </div>
                 </aside>
 
                 <div className="order-2 space-y-10 lg:order-1">
@@ -606,16 +628,6 @@ export function RecipePage() {
         ) : null}
       </AnimatePresence>
 
-      {recipe && mealId ? (
-        <Button
-          variant="primary"
-          onClick={handleAskAssistant}
-          className="fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 min-h-12 rounded-pill shadow-[var(--shadow-accent)] sm:left-auto sm:right-6 sm:w-auto sm:px-6"
-          leftIcon={<MessageSquare className="h-4.5 w-4.5" />}
-        >
-          Gotuj z asystentem
-        </Button>
-      ) : null}
     </div>
   );
 }
