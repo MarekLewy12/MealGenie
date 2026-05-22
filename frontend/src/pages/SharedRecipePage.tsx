@@ -5,6 +5,7 @@ import {
   Clock,
   Flame,
   Loader2,
+  Scale,
   Sparkles,
   Users,
   UtensilsCrossed,
@@ -24,6 +25,10 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { Badge, Card, Eyebrow, FolkDivider, MealEmoji } from "../components/ui";
 import { getSharedMeal } from "../services/api";
 import type { FullRecipe } from "../types/meal";
+import {
+  formatRecipeContextPrimaryLabel,
+  getRecipeContextBadges,
+} from "../utils/recipeGenerationContext";
 
 export function SharedRecipePage() {
   const { shareId } = useParams<{ shareId: string }>();
@@ -50,6 +55,14 @@ export function SharedRecipePage() {
       : recipe?.difficulty === "Medium"
         ? "Średnie"
         : "Trudne";
+  const recipeContextBadges = getRecipeContextBadges(recipe?.generationContext);
+  const portionStatLabel =
+    recipe?.generationContext?.portionMode === "weight" ? "Waga" : "Porcje";
+  const portionStatValue =
+    formatRecipeContextPrimaryLabel(recipe?.generationContext) ??
+    (recipe?.servings ? `${recipe.servings}` : "—");
+  const PortionStatIcon =
+    recipe?.generationContext?.portionMode === "weight" ? Scale : Users;
 
   if (isLoading) {
     return (
@@ -167,12 +180,21 @@ export function SharedRecipePage() {
                 color="orange"
               />
               <StatCard
-                icon={Users}
-                label="Porcje"
-                value={recipe.servings ? `${recipe.servings}` : "—"}
+                icon={PortionStatIcon}
+                label={portionStatLabel}
+                value={portionStatValue}
                 color="green"
               />
             </div>
+            {recipeContextBadges.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {recipeContextBadges.map((badge) => (
+                  <Badge key={badge} variant="neutral">
+                    {badge}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

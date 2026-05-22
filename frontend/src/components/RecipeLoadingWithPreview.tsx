@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import type { MealSuggestion, RecipeGenerationContext } from "../types/meal";
+import { formatRecipeContextPrimaryLabel } from "../utils/recipeGenerationContext";
 
 const loadingStages = [
   { icon: Sparkles, text: "Analizuję składniki...", color: "text-accent" },
@@ -30,29 +31,6 @@ type Props = {
   teaser?: MealSuggestion | null;
   recipeContext?: RecipeGenerationContext;
 };
-
-function getRecipeContextLabel(recipeContext?: RecipeGenerationContext) {
-  if (!recipeContext) {
-    return null;
-  }
-
-  if (recipeContext.portionMode === "servings") {
-    const servingLabel =
-      recipeContext.servingSize === 1
-        ? "osoba"
-        : recipeContext.servingSize < 5
-          ? "osoby"
-          : "osób";
-
-    return `${recipeContext.servingSize} ${servingLabel}`;
-  }
-
-  if (recipeContext.targetWeightGrams) {
-    return `${recipeContext.targetWeightGrams} g użyte przy propozycjach`;
-  }
-
-  return null;
-}
 
 export function RecipeLoadingWithPreview({ teaser, recipeContext }: Props) {
   const [stageIndex, setStageIndex] = useState(0);
@@ -74,7 +52,7 @@ export function RecipeLoadingWithPreview({ teaser, recipeContext }: Props) {
   const imageUrl = teaser?.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${teaser.imageUrl}`
     : teaser?.imageUrl;
-  const recipeContextLabel = getRecipeContextLabel(recipeContext);
+  const recipeContextLabel = formatRecipeContextPrimaryLabel(recipeContext);
   const RecipeContextIcon =
     recipeContext?.portionMode === "weight" ? Scale : Users;
 
@@ -119,7 +97,11 @@ export function RecipeLoadingWithPreview({ teaser, recipeContext }: Props) {
               {recipeContextLabel && (
                 <div className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-pill border border-accent/20 bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent-deep">
                   <RecipeContextIcon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{recipeContextLabel}</span>
+                  <span className="truncate">
+                    {recipeContext?.portionMode === "weight"
+                      ? `Przepis dopasowany do ${recipeContextLabel}`
+                      : recipeContextLabel}
+                  </span>
                 </div>
               )}
             </div>
