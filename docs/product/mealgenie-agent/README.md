@@ -306,12 +306,16 @@ OpenAI docs opisuja Agents SDK jako dobry tor, gdy serwer posiada:
 
 To bardzo pasuje do MealGenie Agent, ale nie oznacza automatycznie, ze PR 1 ma instalowac SDK.
 
-Decyzja:
+Decyzja po PR 1:
 
 - PR 1 pozostaje bez OpenAI i bez nowych zaleznosci agentowych.
-- PR 2 powinien zawierac jawny technical spike: **Responses API bez SDK vs OpenAI Agents SDK for TypeScript**.
-- Jesli SDK zostanie wybrane, musi byc tylko warstwa runtime/tool loop/tracing; zasady DB, approvals, alergie, idempotency i write tools nadal kontroluje backend MealGenie.
-- Jesli SDK nie zostanie wybrane, budujemy cienki `openai-agent-runtime.ts` na Responses API.
+- PR 2 uzywa Responses API bez OpenAI Agents SDK.
+- PR 2 nie instaluje `@openai/agents`.
+- `AgentRun` i PostgreSQL pozostaja zrodlem prawdy dla stanu rozmowy.
+- OpenAI requesty w PR 2 uzywaja `store: false`.
+- PR 2 buduje cienki `openai-agent-runtime.ts` na Responses API.
+- Decyzje o Agents SDK wracaja dopiero w PR 3/PR 4, jesli realne tool registry, approvals, handoffs albo tracing uzasadnia dodatkowa warstwe.
+- Jesli SDK zostanie kiedys wybrane, musi byc tylko warstwa runtime/tool loop/tracing; zasady DB, approvals, alergie, idempotency i write tools nadal kontroluje backend MealGenie.
 
 ### Stany sesji
 
@@ -821,7 +825,7 @@ Przed publicznym wlaczeniem:
 
 ```env
 MEALGENIE_AGENT_ENABLED=false
-MEALGENIE_AGENT_MODEL=gpt-5.5
+MEALGENIE_AGENT_MODEL=gpt-5.4-mini
 MEALGENIE_AGENT_REASONING_EFFORT=low
 MEALGENIE_AGENT_TEXT_VERBOSITY=low
 MEALGENIE_AGENT_OPENAI_STORE=false
@@ -843,7 +847,13 @@ JWT_SECRET=
 GUEST_RATE_LIMIT_SALT=
 ```
 
-Uwaga: aktualne OpenAI docs wskazuja `gpt-5.5` jako najnowszy model i rekomenduja Responses API dla nowych agentowych flow. Przed PR 2 trzeba jednak porownac jakosc, latency i koszt dla MealGenie, zamiast traktowac model jako stale zalozenie produktowe. Jesli koszt lub latency beda za wysokie, dopuszczalny jest tanszy model agentowy po ewaluacji.
+Decyzja po PR 1:
+
+- PR 2 domyslnie uzywa `gpt-5.4-mini`, bo dialog kuchenny wymaga niskiego latency i kontrolowanego kosztu.
+- `gpt-5.5` zostaje opcja do pozniejszych ewaluacji dla trudniejszych scenariuszy, ale nie jest defaultem PR 2.
+- `reasoning.effort=low` jest domyslnym balansem dla intent detection, follow-upow i structured output.
+- `text.verbosity=low` utrzymuje krotkie odpowiedzi dialogowe.
+- `MEALGENIE_AGENT_OPENAI_STORE=false` jest wymagane, bo `AgentRun` pozostaje zrodlem prawdy dla stanu rozmowy.
 
 ---
 
@@ -900,12 +910,11 @@ Uruchomic prawdziwy dialog agentowy bez write tools.
 Zakres:
 
 - `openai-agent-runtime.ts`,
-- Responses API jako domyslny runtime dla nowego agentowego flow,
-- technical spike: Responses API bez SDK vs OpenAI Agents SDK for TypeScript,
-- decyzja czy `MEALGENIE_AGENT_USE_AGENTS_SDK` zostaje `false`, czy przechodzi na SDK,
-- model z `MEALGENIE_AGENT_MODEL`,
-- konfiguracja `reasoning.effort` i `text.verbosity`,
-- domyslne `store: false`, jesli stan rozmowy trzyma `AgentRun`,
+- Responses API jako runtime dla nowego agentowego flow,
+- brak OpenAI Agents SDK i brak nowej zaleznosci `@openai/agents`,
+- model z `MEALGENIE_AGENT_MODEL`, domyslnie `gpt-5.4-mini`,
+- konfiguracja `reasoning.effort=low` i `text.verbosity=low`,
+- `store: false`, bo stan rozmowy trzyma `AgentRun`,
 - structured output `AgentDecision` dla kazdej tury,
 - historia rozmowy z `messagesJson`,
 - state update w `stateJson`,
@@ -1087,7 +1096,9 @@ Ta sekcja zbiera aktualnie zaakceptowane rekomendacje. Nie sa to juz pytania otw
 - PR 1 od razu dodaje `AgentRun` i migracje Prisma.
 - Migracja PR 1 moze dodac tylko nowa tabele i relacje, bez zmian w istniejacych danych.
 - Nowy agentowy runtime powinien preferowac Responses API.
-- PR 2 ma rozstrzygnac, czy uzywamy OpenAI Agents SDK for TypeScript, czy cienkiego adaptera na Responses API.
+- PR 2 uzywa cienkiego adaptera na Responses API bez OpenAI Agents SDK.
+- PR 2 domyslnie uzywa `gpt-5.4-mini`, `reasoning.effort=low`, `text.verbosity=low` i `store: false`.
+- `gpt-5.5` zostaje opcja do pozniejszej ewaluacji, nie defaultem PR 2.
 - OpenAI powinno zwracac jeden structured output `AgentDecision` na ture, jesli backend kontroluje decyzje.
 - Tools/function calling stosujemy tam, gdzie model ma laczyc sie z funkcjami aplikacji.
 - `stepsJson` aktualizujemy synchronicznie na koniec kazdego requestu HTTP.

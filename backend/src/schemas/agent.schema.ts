@@ -41,6 +41,17 @@ export const AgentStepStatusSchema = z.enum([
   "skipped",
 ]);
 
+export const AgentErrorCodeSchema = z.enum([
+  "AGENT_DISABLED",
+  "AGENT_RUN_NOT_FOUND",
+  "VALIDATION_ERROR",
+  "INTERNAL_ERROR",
+  "AGENT_RUNTIME_ERROR",
+  "AGENT_TIMEOUT",
+  "AGENT_INVALID_OUTPUT",
+  "AGENT_REFUSAL",
+]);
+
 export const AgentMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
   content: z.string().min(1).max(4000),
@@ -72,15 +83,51 @@ export const AgentNextActionSchema = z.object({
 });
 
 export const AgentErrorSchema = z.object({
-  code: z.enum([
-    "AGENT_DISABLED",
-    "AGENT_RUN_NOT_FOUND",
-    "VALIDATION_ERROR",
-    "INTERNAL_ERROR",
-  ]),
+  code: AgentErrorCodeSchema,
   message: z.string(),
   retryable: z.boolean(),
   details: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const AgentPlanDraftSchema = z.object({
+  id: z.string().min(1).max(80),
+  title: z.string().min(1).max(120),
+  summary: z.string().min(1).max(800),
+  rationale: z.string().min(1).max(800),
+  usedIngredients: z.array(z.string().min(1).max(120)),
+  missingIngredients: z.array(z.string().min(1).max(120)),
+  assumptions: z.array(z.string().min(1).max(200)),
+  warnings: z.array(z.string().min(1).max(240)),
+});
+
+const AgentDecisionContextPatchSchema = z
+  .record(z.string(), z.unknown())
+  .optional();
+
+export const AgentDecisionSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("ask_follow_up"),
+    message: z.string().min(1).max(1200),
+    missingFields: z.array(z.string().min(1).max(80)),
+    collectedContext: AgentDecisionContextPatchSchema,
+  }),
+  z.object({
+    type: z.literal("show_plan"),
+    message: z.string().min(1).max(1200),
+    plan: AgentPlanDraftSchema,
+    missingFields: z.array(z.string().min(1).max(80)).default([]),
+    collectedContext: AgentDecisionContextPatchSchema,
+  }),
+  z.object({
+    type: z.literal("fail"),
+    errorCode: z.string().min(1).max(80),
+    message: z.string().min(1).max(1200),
+    retryable: z.boolean().default(false),
+  }),
+]);
+
+export const AgentDecisionOutputSchema = z.object({
+  decision: AgentDecisionSchema,
 });
 
 export const AgentMetaSchema = z.object({
@@ -142,3 +189,7 @@ export type AgentRunDetailResponse = z.infer<
 export type AgentMessage = z.infer<typeof AgentMessageSchema>;
 export type AgentState = z.infer<typeof AgentStateSchema>;
 export type AgentStep = z.infer<typeof AgentStepSchema>;
+export type AgentErrorCode = z.infer<typeof AgentErrorCodeSchema>;
+export type AgentPlanDraft = z.infer<typeof AgentPlanDraftSchema>;
+export type AgentDecision = z.infer<typeof AgentDecisionSchema>;
+export type AgentDecisionOutput = z.infer<typeof AgentDecisionOutputSchema>;
