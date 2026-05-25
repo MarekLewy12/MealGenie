@@ -9,7 +9,10 @@ import type {
   AgentState,
   AgentStep,
 } from "../../schemas/agent.schema.js";
-import { AgentStateSchema } from "../../schemas/agent.schema.js";
+import {
+  AgentPlanDraftSchema,
+  AgentStateSchema,
+} from "../../schemas/agent.schema.js";
 import { runAgentTurn } from "./agent-orchestrator.service.js";
 
 const prisma = new PrismaClient();
@@ -123,12 +126,36 @@ function toNextActions(
   run: AgentRunRecord,
 ): AgentChatResponse["nextActions"] {
   if (run.status === "awaiting_confirmation") {
-    return [
-      {
-        type: "adjust_goal",
-        label: "Doprecyzuj plan",
-      },
-    ];
+    const parsedPlan = AgentPlanDraftSchema.safeParse(run.planJson);
+    const state = parseState(run.stateJson);
+    const executeActions = ["create_recipe"];
+    const actions: AgentChatResponse["nextActions"] = [];
+
+    if (
+      parsedPlan.success &&
+      parsedPlan.data.shoppingDraft.length > 0
+    ) {
+      executeActions.push("populate_shopping_list");
+    }
+
+    if (parsedPlan.success && state.canExecute) {
+      actions.push({
+        type: "execute_plan",
+        label: "Wykonaj plan",
+        payload: {
+          runId: run.id,
+          acceptedPlanId: parsedPlan.data.id,
+          actions: executeActions,
+        },
+      });
+    }
+
+    actions.push({
+      type: "adjust_goal",
+      label: "Doprecyzuj plan",
+    });
+
+    return actions;
   }
 
   if (run.status === "failed") {
@@ -176,7 +203,7 @@ export function setAgentOrchestratorForTests(
   agentOrchestrator = orchestrator ?? runAgentTurn;
 }
 
-export async function createOrContinueAgentChat(args: {
+export async function chatSession(args: {
   userId: string;
   input: AgentChatRequest;
 }): Promise<AgentChatResponse> {
@@ -207,6 +234,7 @@ export async function createOrContinueAgentChat(args: {
     ];
     const state = parseState(existing.stateJson);
     const turn = await agentOrchestrator({
+      userId: args.userId,
       messages: messagesBeforeAssistant,
       state,
       clientState: args.input.clientState,
@@ -265,6 +293,7 @@ export async function createOrContinueAgentChat(args: {
 
   const state = buildInitialState();
   const turn = await agentOrchestrator({
+    userId: args.userId,
     messages: [userMessage],
     state,
     clientState: args.input.clientState,
@@ -323,7 +352,7 @@ export async function createOrContinueAgentChat(args: {
   return buildResponseFromRun(created);
 }
 
-export async function getAgentRunForUser(args: {
+export async function getRun(args: {
   userId: string;
   runId: string;
 }): Promise<AgentRunDetailResponse> {

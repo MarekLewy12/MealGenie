@@ -23,6 +23,34 @@ function createState(overrides: Partial<AgentState> = {}): AgentState {
   };
 }
 
+function createPlan(id = "plan-1") {
+  return {
+    id,
+    title: "Ryż z jajkiem",
+    summary: "Prosty, sycący posiłek.",
+    rationale: "Pasuje do ograniczonej spiżarni.",
+    usedIngredients: ["ryż", "jajka"],
+    missingIngredients: [],
+    assumptions: ["Masz sól i pieprz."],
+    warnings: [],
+    mealTeaser: {
+      name: "Ryż z jajkiem",
+      description: "Prosty, sycący posiłek.",
+      difficulty: "Easy" as const,
+      cookingTimeMinutes: 20,
+      calories: 520,
+      ingredients: [
+        { name: "ryż", amount: "150 g" },
+        { name: "jajka", amount: "2 szt." },
+      ],
+      stepsSummary: ["Ugotuj ryż.", "Usmaż jajka.", "Połącz składniki."],
+      imageUrl: null,
+    },
+    servings: 2,
+    shoppingDraft: [],
+  };
+}
+
 function createRuntime(results: AgentRuntimeResult[]) {
   const calls: AgentRuntimeInput[] = [];
   const runtime = async (args: AgentRuntimeInput) => {
@@ -71,16 +99,7 @@ describe("runAgentTurn", () => {
           type: "show_plan",
           message: "Mam draft planu.",
           missingFields: [],
-          plan: {
-            id: "plan-1",
-            title: "Ryż z jajkiem",
-            summary: "Szybki obiad.",
-            rationale: "Wykorzystuje produkty pod ręką.",
-            usedIngredients: ["ryż", "jajka"],
-            missingIngredients: [],
-            assumptions: ["Masz sól."],
-            warnings: [],
-          },
+          plan: createPlan(),
         },
         model: "gpt-5.4-mini",
         inputTokens: 20,
@@ -95,7 +114,7 @@ describe("runAgentTurn", () => {
 
     expect(result.status).toBe("awaiting_confirmation");
     expect(result.plan?.title).toBe("Ryż z jajkiem");
-    expect(result.state.canExecute).toBe(false);
+    expect(result.state.canExecute).toBe(true);
     expect(result.outputTokens).toBe(8);
   });
 
@@ -116,16 +135,7 @@ describe("runAgentTurn", () => {
           type: "show_plan",
           message: "Pokazuję najlepszy możliwy plan.",
           missingFields: [],
-          plan: {
-            id: "plan-2",
-            title: "Omlet z ryżem",
-            summary: "Plan po limicie pytań.",
-            rationale: "Wykorzystuje dostępne informacje.",
-            usedIngredients: ["ryż", "jajka"],
-            missingIngredients: [],
-            assumptions: ["Porcja dla jednej osoby."],
-            warnings: [],
-          },
+          plan: createPlan("plan-2"),
         },
         model: "gpt-5.4-mini",
         inputTokens: 12,
