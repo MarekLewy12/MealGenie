@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -226,6 +226,7 @@ export function SuccessView({
 }: SuccessViewProps) {
   const [showAllIngredients, setShowAllIngredients] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = Boolean(useReducedMotion());
   const hasMeals = meals.length > 0;
 
   useEffect(() => {
@@ -239,7 +240,7 @@ export function SuccessView({
         top: scrollContainer
           ? scrollContainer.scrollHeight
           : document.documentElement.scrollHeight,
-        behavior: "smooth",
+        behavior: shouldReduceMotion ? "auto" : "smooth",
       };
 
       if (scrollContainer) {
@@ -256,7 +257,7 @@ export function SuccessView({
       clearTimeout(earlyTimer);
       clearTimeout(finalTimer);
     };
-  }, [showAllIngredients]);
+  }, [showAllIngredients, shouldReduceMotion]);
 
   return (
     <motion.div
@@ -268,31 +269,32 @@ export function SuccessView({
       className="relative flex w-full flex-col items-center space-y-5 pb-6 sm:space-y-6 sm:pb-8"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] hidden h-[100vh] overflow-hidden lg:block">
-        {floatingElements.map((element, index) => (
-          <motion.div
-            key={`${element.emoji}-${index}`}
-            className={`absolute drop-shadow-sm grayscale-[0.1] ${element.size} ${element.blur} ${element.opacity}`}
-            style={{
-              top: element.top,
-              left: "left" in element ? element.left : undefined,
-              right: "right" in element ? element.right : undefined,
-            }}
-            animate={{
-              y: element.yMap,
-              x: element.xMap,
-              rotate: element.rotateMap,
-              scale: element.scaleMap,
-            }}
-            transition={{
-              duration: element.duration,
-              repeat: Infinity,
-              delay: element.delay,
-              ease: "easeInOut",
-            }}
-          >
-            {element.emoji}
-          </motion.div>
-        ))}
+        {!shouldReduceMotion &&
+          floatingElements.map((element, index) => (
+            <motion.div
+              key={`${element.emoji}-${index}`}
+              className={`absolute drop-shadow-sm grayscale-[0.1] ${element.size} ${element.blur} ${element.opacity}`}
+              style={{
+                top: element.top,
+                left: "left" in element ? element.left : undefined,
+                right: "right" in element ? element.right : undefined,
+              }}
+              animate={{
+                y: element.yMap,
+                x: element.xMap,
+                rotate: element.rotateMap,
+                scale: element.scaleMap,
+              }}
+              transition={{
+                duration: element.duration,
+                repeat: Infinity,
+                delay: element.delay,
+                ease: "easeInOut",
+              }}
+            >
+              {element.emoji}
+            </motion.div>
+          ))}
       </div>
 
       <div className="relative z-10 flex max-w-3xl flex-col items-center pt-4 text-center sm:pt-7 lg:pt-8">

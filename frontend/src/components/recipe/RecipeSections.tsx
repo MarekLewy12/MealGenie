@@ -17,44 +17,6 @@ import { useShoppingListStore } from "../../store/shoppingListStore";
 import type { FullRecipe, FullRecipeIngredient } from "../../types/meal";
 import { Badge, Eyebrow, IconButton } from "../ui";
 
-// Zachowujemy dla wstecznej kompatybilności.
-export function StatCard({
-  icon: Icon,
-  label,
-  value,
-  color,
-}: {
-  icon: ElementType;
-  label: string;
-  value: string;
-  color: "blue" | "purple" | "orange" | "green";
-}) {
-  const colors = {
-    blue: "bg-bg-elevated text-ink",
-    purple: "bg-accent-soft text-accent-deep",
-    orange: "bg-saffron-soft text-ink",
-    green: "bg-basil-soft text-ink",
-  };
-
-  return (
-    <div
-      className={`flex min-h-[76px] items-center gap-2 rounded-xl border border-border p-3 shadow-xs sm:gap-3 sm:p-4 ${colors[color]}`}
-    >
-      <div className="rounded-lg bg-bg-elevated/70 p-2 text-accent shadow-xs">
-        <Icon className="h-4.5 w-4.5" />
-      </div>
-      <div className="min-w-0">
-        <p className="font-brand text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
-          {label}
-        </p>
-        <p className="truncate font-serif text-lg font-medium leading-tight text-ink">
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export function NutritionSection({
   nutrition,
 }: {

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { createFocusTrap, type FocusTrap } from "focus-trap";
 import { Outlet } from "react-router-dom";
 import { X } from "lucide-react";
 
@@ -9,6 +10,11 @@ import { TopContextBar } from "./TopContextBar";
 
 export function AuthenticatedLayout() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const mobileNavDialogRef = useRef<HTMLDivElement | null>(null);
+  const mobileNavCloseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const mobileNavReturnFocusRef = useRef<HTMLElement | null>(null);
+  const mobileNavFocusTrapRef = useRef<FocusTrap | null>(null);
 
   // Blokuje globalny scrollbar (html) - zalogowany layout uzywa wewnetrznego
   // scrolla w content area. Bez tego pojawiaja sie dwa aktywne scrollbary
@@ -23,17 +29,41 @@ export function AuthenticatedLayout() {
   }, []);
 
   useEffect(() => {
-    if (!isMobileNavOpen) return;
+    if (!isMobileNavOpen || !mobileNavDialogRef.current) return;
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsMobileNavOpen(false);
-      }
+    const dialogElement = mobileNavDialogRef.current;
+    const focusTrap = createFocusTrap(dialogElement, {
+      initialFocus: () => mobileNavCloseButtonRef.current ?? dialogElement,
+      fallbackFocus: () => dialogElement,
+      returnFocusOnDeactivate: false,
+      escapeDeactivates: true,
+      allowOutsideClick: true,
+      clickOutsideDeactivates: false,
+      onDeactivate: () => {
+        if (isMobileNavOpen) {
+          setIsMobileNavOpen(false);
+        }
+      },
+    });
+
+    mobileNavFocusTrapRef.current = focusTrap;
+    focusTrap.activate();
+
+    return () => {
+      focusTrap.deactivate({ returnFocus: false });
+      mobileNavFocusTrapRef.current = null;
+      window.requestAnimationFrame(() => {
+        mobileNavReturnFocusRef.current?.focus();
+        mobileNavReturnFocusRef.current = null;
+      });
     };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMobileNavOpen]);
+
+  const openMobileNav = () => {
+    mobileNavReturnFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setIsMobileNavOpen(true);
+  };
 
   return (
     <div className="relative flex min-h-0 flex-1 bg-bg text-ink">
@@ -42,7 +72,7 @@ export function AuthenticatedLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopContextBar onOpenMobileNav={() => setIsMobileNavOpen(true)} />
+        <TopContextBar onOpenMobileNav={openMobileNav} />
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
@@ -52,15 +82,22 @@ export function AuthenticatedLayout() {
       <AnimatePresence>
         {isMobileNavOpen && (
           <motion.div
+            ref={mobileNavDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu aplikacji"
+            tabIndex={-1}
             className="fixed inset-0 z-[70] lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
           >
             <button
               type="button"
               aria-label="Zamknij menu aplikacji"
               onClick={() => setIsMobileNavOpen(false)}
+              tabIndex={-1}
               className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
             />
 
@@ -70,10 +107,14 @@ export function AuthenticatedLayout() {
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: shouldReduceMotion ? 0.01 : 0.24,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
               <div className="flex justify-end border-b border-border px-3 py-3">
                 <button
+                  ref={mobileNavCloseButtonRef}
                   type="button"
                   onClick={() => setIsMobileNavOpen(false)}
                   aria-label="Zamknij menu"

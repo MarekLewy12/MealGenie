@@ -1,5 +1,5 @@
 import type { ElementType } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   X,
   CheckCircle2,
@@ -60,18 +60,32 @@ const styles: Record<
   },
 };
 
-function NotificationItem({ notification }: { notification: Notification }) {
+function NotificationItem({
+  notification,
+  shouldReduceMotion,
+}: {
+  notification: Notification;
+  shouldReduceMotion: boolean;
+}) {
   const removeNotification = useNotificationStore((s) => s.removeNotification);
   const Icon = icons[notification.type];
   const style = styles[notification.type];
+  const isError = notification.type === "error";
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 100, scale: 0.95 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 100, scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}
+      aria-atomic="true"
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 100, scale: 0.95 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 100, scale: 0.95 }}
+      transition={
+        shouldReduceMotion
+          ? { duration: 0.01 }
+          : { type: "spring", stiffness: 400, damping: 30 }
+      }
       className={`relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-lg border p-4 text-ink shadow-md backdrop-blur-sm ${style.bg} ${style.border}`}
     >
       <div className={`mt-0.5 flex-shrink-0 ${style.icon}`}>
@@ -106,7 +120,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
           initial={{ width: "100%" }}
           animate={{ width: "0%" }}
           transition={{
-            duration: notification.duration / 1000,
+            duration: shouldReduceMotion ? 0.01 : notification.duration / 1000,
             ease: "linear",
           }}
         />
@@ -117,6 +131,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 
 export function NotificationContainer() {
   const notifications = useNotificationStore((s) => s.notifications);
+  const shouldReduceMotion = Boolean(useReducedMotion());
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[100] flex flex-col items-end gap-3 p-4 sm:p-6">
@@ -126,6 +141,7 @@ export function NotificationContainer() {
             <NotificationItem
               key={notification.id}
               notification={notification}
+              shouldReduceMotion={shouldReduceMotion}
             />
           ))}
         </AnimatePresence>

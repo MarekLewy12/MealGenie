@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChefHat, ImageIcon, Sparkles, Utensils } from "lucide-react";
 
 import { viewVariants } from "./wizardMotion";
@@ -224,6 +224,7 @@ export function LoadingView() {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [activePhaseIndex, setActivePhaseIndex] = useState(0);
   const [isTakingLong, setIsTakingLong] = useState(false);
+  const shouldReduceMotion = Boolean(useReducedMotion());
   const activePhase = loadingPhases[activePhaseIndex];
   const ActiveIcon = activePhase.icon;
 
@@ -276,31 +277,32 @@ export function LoadingView() {
         className="pointer-events-none absolute inset-0 z-[1] hidden overflow-hidden lg:block"
         aria-hidden="true"
       >
-        {floatingElements.map((element, index) => (
-          <motion.div
-            key={`${element.emoji}-${index}`}
-            className={`absolute drop-shadow-sm grayscale-[0.1] ${element.size} ${element.blur} ${element.opacity}`}
-            style={{
-              top: element.top,
-              left: "left" in element ? element.left : undefined,
-              right: "right" in element ? element.right : undefined,
-            }}
-            animate={{
-              y: element.yMap,
-              x: element.xMap,
-              rotate: element.rotateMap,
-              scale: element.scaleMap,
-            }}
-            transition={{
-              duration: element.duration,
-              repeat: Infinity,
-              delay: element.delay,
-              ease: "easeInOut",
-            }}
-          >
-            {element.emoji}
-          </motion.div>
-        ))}
+        {!shouldReduceMotion &&
+          floatingElements.map((element, index) => (
+            <motion.div
+              key={`${element.emoji}-${index}`}
+              className={`absolute drop-shadow-sm grayscale-[0.1] ${element.size} ${element.blur} ${element.opacity}`}
+              style={{
+                top: element.top,
+                left: "left" in element ? element.left : undefined,
+                right: "right" in element ? element.right : undefined,
+              }}
+              animate={{
+                y: element.yMap,
+                x: element.xMap,
+                rotate: element.rotateMap,
+                scale: element.scaleMap,
+              }}
+              transition={{
+                duration: element.duration,
+                repeat: Infinity,
+                delay: element.delay,
+                ease: "easeInOut",
+              }}
+            >
+              {element.emoji}
+            </motion.div>
+          ))}
       </div>
 
       <div className="relative z-10 flex w-full max-w-2xl flex-col items-center">
@@ -317,8 +319,12 @@ export function LoadingView() {
 
           <motion.div
             className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-accent text-ink-inverse shadow-[var(--shadow-accent)] sm:h-24 sm:w-24"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            animate={shouldReduceMotion ? undefined : { scale: [1, 1.05, 1] }}
+            transition={
+              shouldReduceMotion
+                ? undefined
+                : { duration: 2, repeat: Infinity, ease: "easeInOut" }
+            }
           >
             <ChefHat className="h-10 w-10 sm:h-12 sm:w-12" aria-hidden="true" />
           </motion.div>
@@ -328,10 +334,10 @@ export function LoadingView() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activePhaseIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 0.3 }}
               className="flex items-center justify-center gap-2.5"
             >
               <ActiveIcon className="h-5 w-5 text-accent" aria-hidden="true" />
@@ -348,7 +354,7 @@ export function LoadingView() {
               className="h-full bg-gradient-to-r from-accent to-saffron"
               initial={{ width: "2%" }}
               animate={{ width: "98%" }}
-              transition={{ duration: 42, ease: "easeOut" }}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 42, ease: "easeOut" }}
             />
           </div>
           {isTakingLong && (
@@ -366,10 +372,10 @@ export function LoadingView() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentFactIndex}
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.4 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+                transition={{ duration: shouldReduceMotion ? 0.01 : 0.4 }}
                 className="absolute inset-0 flex items-center justify-center text-center"
               >
                 <p className="font-serif text-lg font-medium leading-snug text-ink-soft sm:text-xl">

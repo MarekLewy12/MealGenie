@@ -1,5 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from "react";
-import { RefreshCw, AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+
+import { Logo } from "./Logo";
 
 interface Props {
   children?: ReactNode;
@@ -28,28 +30,42 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-6 text-center dark:bg-[#020617] dark:text-white">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-red-500 dark:bg-red-900/20">
-            <AlertTriangle className="h-10 w-10" />
-          </div>
-          <h1 className="mb-2 text-2xl font-bold">
-            Ups! Aplikacja napotkała błąd.
-          </h1>
-          <p className="mb-8 text-sm text-slate-500 dark:text-slate-400">
-            {this.state.error?.message || "Nieznany błąd krytyczny."}
-          </p>
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-4 py-12 text-center text-ink sm:px-6">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_10%,rgba(232,111,69,0.08),transparent_38%),radial-gradient(ellipse_at_82%_8%,rgba(47,138,95,0.07),transparent_34%)] dark:bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,138,74,0.035),transparent_50%)]"
+            aria-hidden="true"
+          />
 
-          <button
-            onClick={() => {
-              localStorage.clear();
-              window.location.href = "/";
-            }}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-500"
-          >
-            <RefreshCw className="h-5 w-5" />
-            Wyczyść dane i odśwież
-          </button>
-        </div>
+          <section className="relative w-full max-w-lg rounded-xl border border-border bg-bg-elevated p-6 shadow-lg sm:p-8">
+            <Logo className="mx-auto origin-center scale-95" />
+
+            <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-pill border border-bordeaux/25 bg-accent-soft text-bordeaux shadow-sm">
+              <AlertTriangle className="h-8 w-8" aria-hidden="true" />
+            </div>
+
+            <p className="mt-6 font-brand text-xs font-bold uppercase tracking-[0.16em] text-bordeaux">
+              Błąd aplikacji
+            </p>
+            <h1 className="mt-2 font-serif text-3xl font-medium leading-tight text-ink">
+              Ups, coś zatrzymało MealGenie.
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-ink-soft">
+              {this.state.error?.message || "Nieznany błąd krytyczny."}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = "/";
+              }}
+              className="mx-auto mt-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              Wyczyść dane i odśwież
+            </button>
+          </section>
+        </main>
       );
     }
 
