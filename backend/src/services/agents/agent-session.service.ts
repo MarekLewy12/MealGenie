@@ -3,14 +3,18 @@ import { randomUUID } from "node:crypto";
 import type {
   AgentChatRequest,
   AgentChatResponse,
+  AgentErrorCode,
   AgentMessage,
   AgentRunDetailResponse,
   AgentState,
   AgentStep,
 } from "../../schemas/agent.schema.js";
 import { AgentStateSchema } from "../../schemas/agent.schema.js";
+import { runAgentTurn } from "./agent-orchestrator.service.js";
 
 const prisma = new PrismaClient();
+type AgentOrchestrator = typeof runAgentTurn;
+let agentOrchestrator: AgentOrchestrator = runAgentTurn;
 
 type AgentRunRecord = {
   id: string;
@@ -51,45 +55,8 @@ function buildInitialState(): AgentState {
     collectedContext: {},
     missingFields: ["goal", "availableIngredients", "constraints"],
     canExecute: false,
-    followUpCount: 1,
+    followUpCount: 0,
   };
-}
-
-function buildMockSteps(startedAt: string, completedAt: string): AgentStep[] {
-  return [
-    {
-      key: "session",
-      label: "Sesja Agenta",
-      actor: "chef_orchestrator",
-      status: "succeeded",
-      summary: "Utworzyłem bezpieczną sesję rozmowy z Agentem.",
-      startedAt,
-      completedAt,
-      durationMs: 0,
-    },
-    {
-      key: "preferences",
-      label: "Preferencje",
-      actor: "chef_orchestrator",
-      status: "pending",
-      summary: "W PR 2 Agent zacznie sprawdzać zapisany profil użytkownika.",
-    },
-    {
-      key: "allergy_guard",
-      label: "Strażnik Alergii",
-      actor: "allergy_guard",
-      status: "pending",
-      summary: "W PR 2 rozpoczniemy kontrolę alergii i ograniczeń.",
-    },
-  ];
-}
-
-function buildAssistantMessage(): string {
-  return (
-    "Jestem gotowy jako MealGenie Agent. W tej wersji zapisuję sesję i " +
-    "przygotowuję panel pracy Agenta; właściwe planowanie kulinarne pojawi " +
-    "się w kolejnym kroku."
-  );
 }
 
 function toMeta(args: {
@@ -132,6 +99,55 @@ function parseState(value: unknown): AgentState {
   return parsed.success ? parsed.data : buildInitialState();
 }
 
+function isRetryableErrorCode(code: string | null): boolean {
+  return (
+    code === "AGENT_RUNTIME_ERROR" ||
+    code === "AGENT_TIMEOUT" ||
+    code === "AGENT_INVALID_OUTPUT"
+  );
+}
+
+function toError(run: AgentRunRecord): AgentChatResponse["error"] {
+  if (!run.errorCode) {
+    return null;
+  }
+
+  return {
+    code: run.errorCode as AgentErrorCode,
+    message: run.errorMessage ?? "Wystąpił błąd Agenta.",
+    retryable: isRetryableErrorCode(run.errorCode),
+  };
+}
+
+function toNextActions(
+  run: AgentRunRecord,
+): AgentChatResponse["nextActions"] {
+  if (run.status === "awaiting_confirmation") {
+    return [
+      {
+        type: "adjust_goal",
+        label: "Doprecyzuj plan",
+      },
+    ];
+  }
+
+  if (run.status === "failed") {
+    return [
+      {
+        type: "reply",
+        label: "Spróbuj ponownie",
+      },
+    ];
+  }
+
+  return [
+    {
+      type: "reply",
+      label: "Kontynuuj rozmowę",
+    },
+  ];
+}
+
 function buildResponseFromRun(run: AgentRunRecord): AgentChatResponse {
   const messages = parseMessages(run.messagesJson);
   const lastAssistantMessage = [...messages]
@@ -148,15 +164,16 @@ function buildResponseFromRun(run: AgentRunRecord): AgentChatResponse {
     state: parseState(run.stateJson),
     plan: run.planJson ?? null,
     steps: parseSteps(run.stepsJson),
-    nextActions: [
-      {
-        type: "reply",
-        label: "Kontynuuj rozmowę",
-      },
-    ],
-    error: null,
+    nextActions: toNextActions(run),
+    error: toError(run),
     meta: toMeta(run),
   };
+}
+
+export function setAgentOrchestratorForTests(
+  orchestrator?: AgentOrchestrator,
+) {
+  agentOrchestrator = orchestrator ?? runAgentTurn;
 }
 
 export async function createOrContinueAgentChat(args: {
@@ -169,13 +186,6 @@ export async function createOrContinueAgentChat(args: {
     content: args.input.message,
     createdAt: startedAt,
   };
-  const assistantMessage: AgentMessage = {
-    role: "assistant",
-    content: buildAssistantMessage(),
-    createdAt: nowIso(),
-  };
-  const completedAt = nowIso();
-  const steps = buildMockSteps(startedAt, completedAt);
 
   if (args.input.runId) {
     const existingRows = await prisma.$queryRaw<AgentRunRecord[]>`
@@ -191,21 +201,41 @@ export async function createOrContinueAgentChat(args: {
       throw new AgentRunNotFoundError();
     }
 
-    const messages = [
+    const messagesBeforeAssistant = [
       ...parseMessages(existing.messagesJson),
       userMessage,
-      assistantMessage,
     ];
     const state = parseState(existing.stateJson);
+    const turn = await agentOrchestrator({
+      messages: messagesBeforeAssistant,
+      state,
+      clientState: args.input.clientState,
+    });
+    const assistantMessage: AgentMessage = {
+      role: "assistant",
+      content: turn.assistantContent,
+      createdAt: nowIso(),
+    };
+    const messages = [...messagesBeforeAssistant, assistantMessage];
 
     const updatedRows = await prisma.$queryRaw<AgentRunRecord[]>`
       UPDATE "AgentRun"
       SET
         "messagesJson" = CAST(${JSON.stringify(messages)} AS JSONB),
-        "stateJson" = CAST(${JSON.stringify(state)} AS JSONB),
-        "stepsJson" = CAST(${JSON.stringify(steps)} AS JSONB),
-        "status" = 'collecting_context',
-        "updatedAt" = CURRENT_TIMESTAMP
+        "stateJson" = CAST(${JSON.stringify(turn.state)} AS JSONB),
+        "stepsJson" = CAST(${JSON.stringify(turn.steps)} AS JSONB),
+        "planJson" = CAST(${turn.plan ? JSON.stringify(turn.plan) : null} AS JSONB),
+        "status" = ${turn.status},
+        "model" = ${turn.model},
+        "inputTokens" = ${turn.inputTokens},
+        "outputTokens" = ${turn.outputTokens},
+        "errorCode" = ${turn.errorCode},
+        "errorMessage" = ${turn.errorMessage},
+        "updatedAt" = CURRENT_TIMESTAMP,
+        "completedAt" = CASE
+          WHEN ${turn.status} = 'failed' THEN CURRENT_TIMESTAMP
+          ELSE "completedAt"
+        END
       WHERE "id" = ${existing.id}
       RETURNING *
     `;
@@ -215,22 +245,7 @@ export async function createOrContinueAgentChat(args: {
       throw new AgentRunNotFoundError();
     }
 
-    return {
-      runId: updated.id,
-      status: "collecting_context",
-      message: { role: "assistant", content: assistantMessage.content },
-      state,
-      plan: updated.planJson ?? null,
-      steps,
-      nextActions: [
-        {
-          type: "reply",
-          label: "Kontynuuj rozmowę",
-        },
-      ],
-      error: null,
-      meta: toMeta(updated),
-    };
+    return buildResponseFromRun(updated);
   }
 
   if (args.input.idempotencyKey) {
@@ -249,6 +264,16 @@ export async function createOrContinueAgentChat(args: {
   }
 
   const state = buildInitialState();
+  const turn = await agentOrchestrator({
+    messages: [userMessage],
+    state,
+    clientState: args.input.clientState,
+  });
+  const assistantMessage: AgentMessage = {
+    role: "assistant",
+    content: turn.assistantContent,
+    createdAt: nowIso(),
+  };
   const runId = randomUUID();
   const createdRows = await prisma.$queryRaw<AgentRunRecord[]>`
     INSERT INTO "AgentRun" (
@@ -260,17 +285,31 @@ export async function createOrContinueAgentChat(args: {
       "messagesJson",
       "stateJson",
       "stepsJson",
+      "planJson",
+      "model",
+      "inputTokens",
+      "outputTokens",
+      "errorCode",
+      "errorMessage",
+      "completedAt",
       "updatedAt"
     )
     VALUES (
       ${runId},
       ${args.userId},
       ${args.input.mode},
-      'collecting_context',
+      ${turn.status},
       ${args.input.idempotencyKey ?? null},
       CAST(${JSON.stringify([userMessage, assistantMessage])} AS JSONB),
-      CAST(${JSON.stringify(state)} AS JSONB),
-      CAST(${JSON.stringify(steps)} AS JSONB),
+      CAST(${JSON.stringify(turn.state)} AS JSONB),
+      CAST(${JSON.stringify(turn.steps)} AS JSONB),
+      CAST(${turn.plan ? JSON.stringify(turn.plan) : null} AS JSONB),
+      ${turn.model},
+      ${turn.inputTokens},
+      ${turn.outputTokens},
+      ${turn.errorCode},
+      ${turn.errorMessage},
+      CASE WHEN ${turn.status} = 'failed' THEN CURRENT_TIMESTAMP ELSE NULL END,
       CURRENT_TIMESTAMP
     )
     RETURNING *
@@ -281,22 +320,7 @@ export async function createOrContinueAgentChat(args: {
     throw new Error("Failed to create agent run");
   }
 
-  return {
-    runId: created.id,
-    status: "collecting_context",
-    message: { role: "assistant", content: assistantMessage.content },
-    state,
-    plan: null,
-    steps,
-    nextActions: [
-      {
-        type: "reply",
-        label: "Kontynuuj rozmowę",
-      },
-    ],
-    error: null,
-    meta: toMeta(created),
-  };
+  return buildResponseFromRun(created);
 }
 
 export async function getAgentRunForUser(args: {
@@ -322,23 +346,12 @@ export async function getAgentRunForUser(args: {
     .find((message) => message.role === "assistant");
 
   return {
-    runId: run.id,
-    status: run.status as AgentRunDetailResponse["status"],
+    ...buildResponseFromRun(run),
     message: {
       role: "assistant",
-      content: assistantMessage?.content ?? "Sesja Agenta nie ma jeszcze odpowiedzi.",
+      content:
+        assistantMessage?.content ?? "Sesja Agenta nie ma jeszcze odpowiedzi.",
     },
-    state: parseState(run.stateJson),
-    plan: run.planJson ?? null,
-    steps: parseSteps(run.stepsJson),
-    nextActions: [
-      {
-        type: "reply",
-        label: "Kontynuuj rozmowę",
-      },
-    ],
-    error: null,
-    meta: toMeta(run),
     messages,
     result: run.resultJson ?? null,
   };
