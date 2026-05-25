@@ -4,7 +4,7 @@ import { registerUser, loginUser } from "../services/auth.service.js";
 
 // Schemat walidacji
 const authSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: z.email({ error: "Invalid email format" }),
   password: z.string().min(6, "Password must be at least 6 characters"),
   name: z.string().min(2, "Name is too short").optional(),
 });

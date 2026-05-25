@@ -30,6 +30,10 @@ import {
   toggleShareController,
 } from "./controllers/share.controller.js";
 import { chatController } from "./controllers/chat.controller.js";
+import {
+  createAgentChatController,
+  getAgentRunController,
+} from "./controllers/agents.controller.js";
 import { ingredientSuggestionsController } from "./controllers/ingredients.controller.js";
 import { authenticateToken } from "./middlewares/authMiddleware.js";
 import { cleanupOldImages } from "./services/image.service.js";
@@ -77,6 +81,8 @@ app.post("/api/meals/suggest", authenticateToken, suggestMealsController);
 app.post("/api/meals/guest-suggest", guestSuggestController);
 app.post("/api/meals/recipe", authenticateToken, generateRecipeController);
 app.post("/api/chat", authenticateToken, chatController);
+app.post("/api/agents/chat", authenticateToken, createAgentChatController);
+app.get("/api/agents/runs/:id", authenticateToken, getAgentRunController);
 app.get("/api/meals/shared/:shareId", getSharedMealController);
 // Kolejnosc ma znaczenie: /history przed /:id, zeby nie przechwycic "history" jako parametru.
 app.get("/api/meals/history", authenticateToken, getMealHistoryController);

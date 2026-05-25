@@ -108,11 +108,11 @@ export type MealWithImage = MealTeaser & {
 };
 
 export const MealIdParamSchema = z.object({
-  id: z.string().uuid("Nieprawidłowy format ID przepisu"),
+  id: z.uuid({ error: "Nieprawidłowy format ID przepisu" }),
 });
 
 export const ShareIdParamSchema = z.object({
-  shareId: z.string().uuid("Nieprawidłowy format linku udostępniania"),
+  shareId: z.uuid({ error: "Nieprawidłowy format linku udostępniania" }),
 });
 
 export const GetHistoryQuerySchema = z.object({
@@ -122,21 +122,21 @@ export const GetHistoryQuerySchema = z.object({
 });
 
 export const MealHistoryItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   description: z.string().nullable(),
   imageUrl: z.string().nullable(),
   estimatedTime: z.number().nullable(),
   category: MealTypeSchema.nullable(),
   isFavorite: z.boolean(),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 export const MealHistoryDetailSchema = MealHistoryItemSchema.extend({
   fullRecipeJson: z.any().nullable(),
   ingredients: z.array(z.string()),
   rating: z.number().nullable(),
-  shareId: z.string().uuid().nullable().optional(),
+  shareId: z.uuid().nullable().optional(),
 });
 
 export type MealIdParam = z.infer<typeof MealIdParamSchema>;

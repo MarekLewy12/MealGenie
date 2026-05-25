@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email("Nieprawidłowy format email"),
+  email: z.email({ error: "Nieprawidłowy format email" }),
   password: z.string().min(6, "Hasło musi mieć minimum 6 znaków"),
 });
 

@@ -17,7 +17,7 @@ const GlobalChatSchema = z.object({
 
 const RecipeChatSchema = z.object({
   mode: z.literal("recipe"),
-  recipeId: z.string().uuid("recipeId musi być poprawnym UUID"),
+  recipeId: z.uuid({ error: "recipeId musi być poprawnym UUID" }),
   messages: z.array(ChatMessageInputSchema).min(1).max(50),
 });
 
