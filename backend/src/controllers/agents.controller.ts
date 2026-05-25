@@ -1,12 +1,17 @@
 import { type NextFunction, type Request, type Response } from "express";
 import {
   AgentChatRequestSchema,
+  AgentExecuteRequestSchema,
   AgentRunIdParamSchema,
 } from "../schemas/agent.schema.js";
 import {
+  AgentExecutionError,
+  executePlan,
+} from "../services/agents/agent-execution.service.js";
+import {
   AgentRunNotFoundError,
-  createOrContinueAgentChat,
-  getAgentRunForUser,
+  chatSession,
+  getRun as getSessionRun,
 } from "../services/agents/agent-session.service.js";
 
 function isAgentEnabled(): boolean {
@@ -21,7 +26,7 @@ function getUserId(req: Request): string {
   return userId;
 }
 
-function sendAgentDisabled(res: Response) {
+function sendDisabled(res: Response) {
   return res.status(403).json({
     error: {
       code: "AGENT_DISABLED",
@@ -31,7 +36,7 @@ function sendAgentDisabled(res: Response) {
   });
 }
 
-function sendAgentNotFound(res: Response) {
+function sendNotFound(res: Response) {
   return res.status(404).json({
     error: {
       code: "AGENT_RUN_NOT_FOUND",
@@ -41,47 +46,83 @@ function sendAgentNotFound(res: Response) {
   });
 }
 
-export async function createAgentChatController(
+function sendExecutionError(res: Response, error: AgentExecutionError) {
+  return res.status(error.statusCode).json({
+    error: {
+      code: error.code,
+      message: error.message,
+      retryable: error.retryable,
+    },
+  });
+}
+
+export async function chat(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
     if (!isAgentEnabled()) {
-      return sendAgentDisabled(res);
+      return sendDisabled(res);
     }
 
     const userId = getUserId(req);
     const input = AgentChatRequestSchema.parse(req.body);
-    const response = await createOrContinueAgentChat({ userId, input });
+    const response = await chatSession({ userId, input });
 
     return res.json(response);
   } catch (error) {
     if (error instanceof AgentRunNotFoundError) {
-      return sendAgentNotFound(res);
+      return sendNotFound(res);
     }
     return next(error);
   }
 }
 
-export async function getAgentRunController(
+export async function getRun(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
     if (!isAgentEnabled()) {
-      return sendAgentDisabled(res);
+      return sendDisabled(res);
     }
 
     const userId = getUserId(req);
     const { id } = AgentRunIdParamSchema.parse(req.params);
-    const response = await getAgentRunForUser({ userId, runId: id });
+    const response = await getSessionRun({ userId, runId: id });
 
     return res.json(response);
   } catch (error) {
     if (error instanceof AgentRunNotFoundError) {
-      return sendAgentNotFound(res);
+      return sendNotFound(res);
+    }
+    return next(error);
+  }
+}
+
+export async function execute(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!isAgentEnabled()) {
+      return sendDisabled(res);
+    }
+
+    const userId = getUserId(req);
+    const input = AgentExecuteRequestSchema.parse(req.body);
+    const response = await executePlan({ userId, input });
+
+    return res.json(response);
+  } catch (error) {
+    if (error instanceof AgentRunNotFoundError) {
+      return sendNotFound(res);
+    }
+    if (error instanceof AgentExecutionError) {
+      return sendExecutionError(res, error);
     }
     return next(error);
   }

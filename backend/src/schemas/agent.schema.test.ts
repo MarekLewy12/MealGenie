@@ -2,8 +2,30 @@ import {
   AgentDecisionSchema,
   AgentChatRequestSchema,
   AgentChatResponseSchema,
+  AgentExecuteRequestSchema,
+  AgentExecuteResponseSchema,
   AgentPlanDraftSchema,
 } from "./agent.schema.js";
+
+const mealTeaser = {
+  name: "Ryż z jajkiem",
+  description: "Prosty, sycący posiłek.",
+  difficulty: "Easy" as const,
+  cookingTimeMinutes: 20,
+  calories: 520,
+  ingredients: [
+    {
+      name: "ryż",
+      amount: "150 g",
+    },
+    {
+      name: "jajka",
+      amount: "2 szt.",
+    },
+  ],
+  stepsSummary: ["Ugotuj ryż.", "Usmaż jajka.", "Połącz składniki."],
+  imageUrl: null,
+};
 
 describe("AgentChatRequestSchema", () => {
   it("accepts the minimal first message", () => {
@@ -93,10 +115,21 @@ describe("AgentPlanDraftSchema", () => {
       missingIngredients: ["bazylia"],
       assumptions: ["Masz podstawowe przyprawy."],
       warnings: ["Nie sprawdzono jeszcze zapisanych alergii."],
+      mealTeaser,
+      servings: 2,
+      shoppingDraft: [
+        {
+          name: "bazylia",
+          quantity: 1,
+          unit: "pęczek",
+          category: "Zioła",
+        },
+      ],
     });
 
     expect(parsed.id).toBe("plan-1");
     expect(parsed.missingIngredients).toContain("bazylia");
+    expect(parsed.mealTeaser.name).toBe("Ryż z jajkiem");
   });
 
   it("rejects a plan without required fields", () => {
@@ -137,6 +170,9 @@ describe("AgentDecisionSchema", () => {
         missingIngredients: [],
         assumptions: ["Masz sól i pieprz."],
         warnings: [],
+        mealTeaser,
+        servings: 2,
+        shoppingDraft: [],
       },
     });
 
@@ -164,5 +200,59 @@ describe("AgentDecisionSchema", () => {
         message: "Nie powinno przejść.",
       }),
     ).toThrow();
+  });
+});
+
+describe("AgentExecuteRequestSchema", () => {
+  it("accepts create recipe and shopping actions", () => {
+    const parsed = AgentExecuteRequestSchema.parse({
+      runId: "00000000-0000-4000-8000-000000000001",
+      acceptedPlanId: "plan-1",
+      actions: ["create_recipe", "populate_shopping_list"],
+      idempotencyKey: "execute-123",
+    });
+
+    expect(parsed.actions).toContain("create_recipe");
+  });
+
+  it("rejects unsupported image generation in PR3", () => {
+    expect(() =>
+      AgentExecuteRequestSchema.parse({
+        runId: "00000000-0000-4000-8000-000000000001",
+        acceptedPlanId: "plan-1",
+        actions: ["generate_image"],
+      }),
+    ).toThrow();
+  });
+});
+
+describe("AgentExecuteResponseSchema", () => {
+  it("accepts the execute response shape", () => {
+    const now = new Date().toISOString();
+    const parsed = AgentExecuteResponseSchema.parse({
+      runId: "00000000-0000-4000-8000-000000000001",
+      status: "completed",
+      steps: [],
+      result: {
+        recipe: { name: "Ryż z jajkiem" },
+        mealHistoryId: "00000000-0000-4000-8000-000000000002",
+        shoppingItemsAdded: [],
+        skippedShoppingItems: [],
+      },
+      error: null,
+      meta: {
+        createdAt: now,
+        updatedAt: now,
+        completedAt: now,
+        durationMs: 0,
+        model: "gpt-5.4-mini",
+        tokenUsage: {
+          inputTokens: 10,
+          outputTokens: 5,
+        },
+      },
+    });
+
+    expect(parsed.status).toBe("completed");
   });
 });

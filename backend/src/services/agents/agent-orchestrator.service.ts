@@ -12,6 +12,11 @@ import {
   type AgentRuntimeResult,
   runOpenAIAgentRuntime,
 } from "./openai-agent-runtime.js";
+import {
+  checkAllergyAndPreferenceConflicts,
+  getAgentToolContext,
+  type AgentToolContext,
+} from "./agent-tool-registry.js";
 
 type AgentTurnStatus = "collecting_context" | "awaiting_confirmation" | "failed";
 
@@ -29,6 +34,7 @@ export type AgentTurnResult = {
 };
 
 export type AgentOrchestratorInput = {
+  userId?: string;
   messages: AgentMessage[];
   state: AgentState;
   clientState?: {
@@ -141,6 +147,7 @@ function decisionToTurn(
   state: AgentState,
   startedAt: string,
   completedAt: string,
+  toolContext?: AgentToolContext,
 ): AgentTurnResult {
   const decision = runtimeResult.decision;
   const steps = buildStepsForDecision({ decision, startedAt, completedAt });
@@ -166,13 +173,49 @@ function decisionToTurn(
   }
 
   if (decision.type === "show_plan") {
+    const conflictCheck = checkAllergyAndPreferenceConflicts(
+      decision.plan,
+      toolContext?.preferences ?? null,
+    );
+
+    if (!conflictCheck.ok) {
+      const conflictSummary = conflictCheck.conflicts.join(" ").slice(0, 400);
+
+      return {
+        status: "failed",
+        assistantContent:
+          "Nie mogę wykonać tego planu, bo wykryłem konflikt z zapisanymi ograniczeniami.",
+        state: {
+          collectedContext: mergeContext(state, decision),
+          missingFields: decision.missingFields,
+          canExecute: false,
+          followUpCount: state.followUpCount,
+        },
+        plan: decision.plan,
+        steps: steps.map((step) =>
+          step.key === "review" || step.key === "allergy_guard"
+            ? {
+                ...step,
+                status: "failed",
+                summary: conflictSummary,
+              }
+            : step,
+        ),
+        errorCode: "AGENT_ALLERGY_CONFLICT",
+        errorMessage: conflictSummary,
+        model: runtimeResult.model,
+        inputTokens: runtimeResult.inputTokens,
+        outputTokens: runtimeResult.outputTokens,
+      };
+    }
+
     return {
       status: "awaiting_confirmation",
       assistantContent: decision.message,
       state: {
         collectedContext: mergeContext(state, decision),
         missingFields: decision.missingFields,
-        canExecute: false,
+        canExecute: true,
         followUpCount: state.followUpCount,
       },
       plan: decision.plan,
@@ -240,9 +283,13 @@ export async function runAgentTurn(
   const forcePlan = args.state.followUpCount >= 3;
 
   try {
+    const toolContext = args.userId
+      ? await getAgentToolContext(args.userId)
+      : undefined;
     let runtimeResult = await runtime({
       messages: args.messages,
       state: args.state,
+      toolContext,
       clientState: args.clientState,
       forcePlan,
     });
@@ -251,6 +298,7 @@ export async function runAgentTurn(
       runtimeResult = await runtime({
         messages: args.messages,
         state: args.state,
+        toolContext,
         clientState: args.clientState,
         forcePlan: true,
       });
@@ -265,7 +313,13 @@ export async function runAgentTurn(
       }
     }
 
-    return decisionToTurn(runtimeResult, args.state, startedAt, nowIso());
+    return decisionToTurn(
+      runtimeResult,
+      args.state,
+      startedAt,
+      nowIso(),
+      toolContext,
+    );
   } catch (error) {
     const runtimeError =
       error instanceof AgentRuntimeError
