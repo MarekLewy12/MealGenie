@@ -54,6 +54,10 @@ export function AgentPage() {
   const hasConversation = agent.messages.length > 0;
   const isBusy = agent.isSending || agent.isExecuting;
   const shouldShowCanvas = hasConversation || Boolean(agent.plan);
+  const premiumEase = [0.16, 1, 0.3, 1] as const;
+  const layoutTransition = shouldReduceMotion
+    ? { duration: 0.01 }
+    : { duration: 0.72, ease: premiumEase };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -120,6 +124,15 @@ export function AgentPage() {
     void agent.submitMessage(prompt);
   };
 
+  const handleRestartFromError = () => {
+    const lastUserMessage = [...agent.messages]
+      .reverse()
+      .find((message) => message.role === "user");
+
+    agent.resetSession();
+    setDraft(lastUserMessage?.content ?? "");
+  };
+
   return (
     <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-bg text-ink">
       {/* MAGIA AI W TLE - AURORA */}
@@ -134,10 +147,7 @@ export function AgentPage() {
 
       <motion.div
         layout
-        transition={{
-          duration: shouldReduceMotion ? 0.01 : 0.36,
-          ease: [0.22, 1, 0.36, 1],
-        }}
+        transition={{ layout: layoutTransition }}
         className={cn(
           "mx-auto flex min-h-0 w-full flex-1 flex-col gap-6 px-4 pb-0 pt-4 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6",
           shouldShowCanvas
@@ -164,13 +174,25 @@ export function AgentPage() {
                   key="agent-empty-state"
                   className="h-full"
                   initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  animate={
+                    shouldReduceMotion
+                      ? { opacity: 1 }
+                      : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+                  }
                   exit={
                     shouldReduceMotion
                       ? { opacity: 0 }
-                      : { opacity: 0, y: -12, scale: 0.98 }
+                      : {
+                          opacity: 0,
+                          y: -20,
+                          scale: 0.985,
+                          filter: "blur(8px)",
+                        }
                   }
-                  transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0.01 : 0.44,
+                    ease: premiumEase,
+                  }}
                 >
                   <AgentEmptyState onSelectPrompt={handleStarterPrompt} />
                 </motion.div>
@@ -179,87 +201,108 @@ export function AgentPage() {
                   key="agent-conversation"
                   className="flex flex-col gap-6 pb-6"
                   initial={
-                    shouldReduceMotion ? false : { opacity: 0, y: 12 }
+                    shouldReduceMotion
+                      ? false
+                      : { opacity: 0, y: 18, filter: "blur(6px)" }
                   }
-                  animate={{ opacity: 1, y: 0 }}
+                  animate={
+                    shouldReduceMotion
+                      ? { opacity: 1 }
+                      : { opacity: 1, y: 0, filter: "blur(0px)" }
+                  }
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0 }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{
+                    delay: shouldReduceMotion ? 0 : 0.12,
+                    duration: shouldReduceMotion ? 0.01 : 0.5,
+                    ease: premiumEase,
+                  }}
                 >
-                {agent.messages.map((message, index) => (
-                  <motion.div
-                    key={`${message.createdAt}-${index}`}
-                    initial={
-                      shouldReduceMotion ? false : { opacity: 0, y: 10 }
-                    }
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                    className={cn(
-                      "flex w-full",
-                      message.role === "user" ? "justify-end" : "justify-start",
-                    )}
-                  >
-                    <div className="flex max-w-[85%] items-end gap-3 sm:max-w-[75%]">
-                      {message.role === "assistant" ? (
-                        <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent sm:flex">
-                          <Bot className="h-4 w-4" aria-hidden="true" />
-                        </div>
-                      ) : null}
-
-                      <div
-                        className={cn(
-                          "px-5 py-3.5 text-sm leading-relaxed shadow-sm",
-                          message.role === "user"
-                            ? "rounded-2xl rounded-br-sm bg-accent text-white shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)]"
-                            : "rounded-2xl rounded-bl-sm border border-border/50 bg-bg-elevated/80 text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/[0.05]",
-                        )}
-                      >
-                        {message.role === "user" ? (
-                          <p className="whitespace-pre-wrap">{message.content}</p>
-                        ) : (
-                          <div className="prose prose-sm max-w-none prose-p:my-0 prose-p:leading-relaxed prose-strong:text-ink prose-ul:my-2 prose-li:my-0 dark:prose-invert">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm, remarkBreaks]}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
+                  {agent.messages.map((message, index) => (
+                    <motion.div
+                      key={`${message.createdAt}-${index}`}
+                      initial={
+                        shouldReduceMotion ? false : { opacity: 0, y: 10 }
+                      }
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                      className={cn(
+                        "flex w-full",
+                        message.role === "user" ? "justify-end" : "justify-start",
+                      )}
+                    >
+                      <div className="flex max-w-[85%] items-end gap-3 sm:max-w-[75%]">
+                        {message.role === "assistant" ? (
+                          <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent sm:flex">
+                            <Bot className="h-4 w-4" aria-hidden="true" />
                           </div>
-                        )}
+                        ) : null}
+
+                        <div
+                          className={cn(
+                            "px-5 py-3.5 text-sm leading-relaxed shadow-sm",
+                            message.role === "user"
+                              ? "rounded-2xl rounded-br-sm bg-accent text-white shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)]"
+                              : "rounded-2xl rounded-bl-sm border border-border/50 bg-bg-elevated/80 text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/[0.05]",
+                          )}
+                        >
+                          {message.role === "user" ? (
+                            <p className="whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          ) : (
+                            <div className="prose prose-sm max-w-none prose-p:my-0 prose-p:leading-relaxed prose-strong:text-ink prose-ul:my-2 prose-li:my-0 dark:prose-invert">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkBreaks]}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {agent.steps.length > 0 ? (
+                    <motion.div
+                      initial={shouldReduceMotion ? false : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="ml-0 sm:ml-11"
+                    >
+                      <AgentTimeline steps={agent.steps} />
+                    </motion.div>
+                  ) : null}
+
+                  {agent.isSending ? (
+                    <motion.div
+                      initial={shouldReduceMotion ? false : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-start sm:ml-11"
+                    >
+                      <div className="flex gap-1 rounded-2xl rounded-bl-sm border border-border bg-bg-elevated px-4 py-3 shadow-sm">
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-accent [animation-delay:0ms]" />
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-accent [animation-delay:150ms]" />
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-accent [animation-delay:300ms]" />
+                      </div>
+                    </motion.div>
+                  ) : null}
+
+                  {agent.error && !agent.isExecuting ? (
+                    <div className="ml-0 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux sm:ml-11">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <span>{agent.error.message}</span>
+                        <button
+                          type="button"
+                          onClick={handleRestartFromError}
+                          className="inline-flex shrink-0 items-center justify-center rounded-full border border-bordeaux/20 bg-bg-elevated/80 px-3 py-1.5 font-brand text-xs font-semibold uppercase tracking-[0.12em] text-bordeaux shadow-sm transition-all hover:-translate-y-0.5 hover:border-bordeaux/35 hover:bg-bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux"
+                        >
+                          Popraw prompt
+                        </button>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
+                  ) : null}
 
-                {agent.steps.length > 0 ? (
-                  <motion.div
-                    initial={shouldReduceMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="ml-0 sm:ml-11"
-                  >
-                    <AgentTimeline steps={agent.steps} />
-                  </motion.div>
-                ) : null}
-
-                {agent.isSending ? (
-                  <motion.div
-                    initial={shouldReduceMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex justify-start sm:ml-11"
-                  >
-                    <div className="flex gap-1 rounded-2xl rounded-bl-sm border border-border bg-bg-elevated px-4 py-3 shadow-sm">
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-accent [animation-delay:0ms]" />
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-accent [animation-delay:150ms]" />
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-accent [animation-delay:300ms]" />
-                    </div>
-                  </motion.div>
-                ) : null}
-
-                {agent.error && !agent.isExecuting ? (
-                  <div className="ml-0 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux sm:ml-11">
-                    {agent.error.message}
-                  </div>
-                ) : null}
-
-                <div ref={messagesEndRef} className="h-2" />
+                  <div ref={messagesEndRef} className="h-2" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -308,15 +351,43 @@ export function AgentPage() {
               key="agent-canvas-column"
               layout
               initial={
-                shouldReduceMotion ? false : { opacity: 0, x: 28, scale: 0.98 }
+                shouldReduceMotion
+                  ? false
+                  : { opacity: 0, x: 44, scale: 0.965, filter: "blur(10px)" }
               }
-              animate={{ opacity: 1, x: 0, scale: 1 }}
+              animate={
+                shouldReduceMotion
+                  ? { opacity: 1 }
+                  : { opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }
+              }
               exit={
                 shouldReduceMotion
                   ? { opacity: 0 }
-                  : { opacity: 0, x: 18, scale: 0.98 }
+                  : { opacity: 0, x: 24, scale: 0.985, filter: "blur(6px)" }
               }
-              transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                layout: layoutTransition,
+                opacity: {
+                  delay: shouldReduceMotion ? 0 : 0.16,
+                  duration: shouldReduceMotion ? 0.01 : 0.5,
+                  ease: premiumEase,
+                },
+                x: {
+                  delay: shouldReduceMotion ? 0 : 0.16,
+                  duration: shouldReduceMotion ? 0.01 : 0.66,
+                  ease: premiumEase,
+                },
+                scale: {
+                  delay: shouldReduceMotion ? 0 : 0.16,
+                  duration: shouldReduceMotion ? 0.01 : 0.66,
+                  ease: premiumEase,
+                },
+                filter: {
+                  delay: shouldReduceMotion ? 0 : 0.16,
+                  duration: shouldReduceMotion ? 0.01 : 0.5,
+                  ease: premiumEase,
+                },
+              }}
               className="w-full shrink-0 lg:h-full lg:w-[26rem] xl:w-[28rem]"
             >
               <AnimatePresence mode="wait" initial={false}>

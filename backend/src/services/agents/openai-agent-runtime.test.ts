@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { AgentRuntimeError, runOpenAIAgentRuntime } from "./openai-agent-runtime.js";
 import type { AgentMessage, AgentState } from "../../schemas/agent.schema.js";
 
@@ -38,9 +39,15 @@ function createClient(args: { response?: unknown; error?: unknown }) {
 
 describe("runOpenAIAgentRuntime", () => {
   const previousEnv = { ...process.env };
+  let consoleErrorSpy: jest.SpiedFunction<typeof console.error>;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
 
   afterEach(() => {
     process.env = { ...previousEnv };
+    consoleErrorSpy.mockRestore();
   });
 
   it("uses Responses API with PR2 defaults and parses an agent decision", async () => {
@@ -141,6 +148,34 @@ describe("runOpenAIAgentRuntime", () => {
     });
   });
 
+  it("maps malformed parsed output to AGENT_INVALID_OUTPUT", async () => {
+    const fake = createClient({
+      response: {
+        output_parsed: {
+          decision: {
+            type: "show_plan",
+            message: "Plan gotowy.",
+            missingFields: [],
+            collectedContext: [],
+            plan: null,
+            errorCode: "",
+            retryable: false,
+          },
+        },
+      },
+    });
+
+    await expect(
+      runOpenAIAgentRuntime(
+        { messages, state, forcePlan: false },
+        fake.client as never,
+      ),
+    ).rejects.toMatchObject({
+      code: "AGENT_INVALID_OUTPUT",
+      retryable: true,
+    });
+  });
+
   it("maps refusals to AGENT_REFUSAL", async () => {
     const fake = createClient({
       response: {
@@ -189,5 +224,78 @@ describe("runOpenAIAgentRuntime", () => {
       code: "AGENT_TIMEOUT",
       retryable: true,
     });
+  });
+
+  it("logs a sanitized runtime error cause without debug details by default", async () => {
+    process.env.MEALGENIE_AGENT_MODEL = "gpt-4.1";
+    const apiError = Object.assign(new Error("The model does not exist."), {
+      status: 404,
+      code: "model_not_found",
+      type: "invalid_request_error",
+      request_id: "req_agent_123",
+      param: "model",
+    });
+    const fake = createClient({ error: apiError });
+
+    await expect(
+      runOpenAIAgentRuntime(
+        { messages, state, forcePlan: false },
+        fake.client as never,
+      ),
+    ).rejects.toMatchObject({
+      code: "AGENT_RUNTIME_ERROR",
+      retryable: true,
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "[AGENT_RUNTIME_ERROR]",
+      expect.objectContaining({
+        scope: "mealgenie-agent-runtime",
+        code: "AGENT_RUNTIME_ERROR",
+        model: "gpt-4.1",
+        retryable: true,
+        causeName: "Error",
+        causeMessage: "The model does not exist.",
+        causeStatus: 404,
+        causeCode: "model_not_found",
+        causeType: "invalid_request_error",
+        requestId: "req_agent_123",
+      }),
+    );
+    const logEntry = consoleErrorSpy.mock.calls[0]?.[1] as Record<
+      string,
+      unknown
+    >;
+    expect(logEntry).not.toHaveProperty("causeStack");
+    expect(logEntry).not.toHaveProperty("causeParam");
+  });
+
+  it("includes extra runtime error details when debug logging is enabled", async () => {
+    process.env.MEALGENIE_AGENT_DEBUG_ERRORS = "true";
+    const apiError = Object.assign(new Error("Invalid request"), {
+      status: 400,
+      code: "bad_request",
+      type: "invalid_request_error",
+      param: "text.format",
+    });
+    const fake = createClient({ error: apiError });
+
+    await expect(
+      runOpenAIAgentRuntime(
+        { messages, state, forcePlan: false },
+        fake.client as never,
+      ),
+    ).rejects.toMatchObject({
+      code: "AGENT_RUNTIME_ERROR",
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "[AGENT_RUNTIME_ERROR]",
+      expect.objectContaining({
+        code: "AGENT_RUNTIME_ERROR",
+        causeStack: expect.stringContaining("Invalid request"),
+        causeParam: "text.format",
+      }),
+    );
   });
 });

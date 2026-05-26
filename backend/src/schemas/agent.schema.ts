@@ -150,10 +150,6 @@ export const AgentDecisionSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-export const AgentDecisionOutputSchema = z.object({
-  decision: AgentDecisionSchema,
-});
-
 export const AgentMetaSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -260,5 +256,4 @@ export type AgentStep = z.infer<typeof AgentStepSchema>;
 export type AgentErrorCode = z.infer<typeof AgentErrorCodeSchema>;
 export type AgentPlanDraft = z.infer<typeof AgentPlanDraftSchema>;
 export type AgentDecision = z.infer<typeof AgentDecisionSchema>;
-export type AgentDecisionOutput = z.infer<typeof AgentDecisionOutputSchema>;
 export type AgentExecuteAction = z.infer<typeof AgentExecuteActionSchema>;
