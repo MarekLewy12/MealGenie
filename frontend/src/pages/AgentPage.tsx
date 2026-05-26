@@ -47,6 +47,7 @@ export function AgentPage() {
   const agent = useAgentSession();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
   const redirectedMealIdRef = useRef<string | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
@@ -72,6 +73,25 @@ export function AgentPage() {
     notify.success("Plan wykonany! Przepis jest gotowy.", "Agent MealGenie");
     navigate(`/recipe/${mealHistoryId}`);
   }, [agent.executeResult?.mealHistoryId, navigate]);
+
+  useEffect(() => {
+    const input = messageInputRef.current;
+    if (!input) return;
+
+    const previousHeight = input.offsetHeight;
+    input.style.height = "auto";
+    const nextHeight = input.scrollHeight;
+
+    if (previousHeight !== nextHeight) {
+      input.style.height = `${previousHeight}px`;
+      window.requestAnimationFrame(() => {
+        input.style.height = `${nextHeight}px`;
+      });
+      return;
+    }
+
+    input.style.height = `${nextHeight}px`;
+  }, [draft]);
 
   const submitDraft = () => {
     const message = draft.trim();
@@ -213,7 +233,7 @@ export function AgentPage() {
             )}
           </div>
 
-          <div className="shrink-0 px-4 pb-6 pt-4 sm:px-6 sm:pt-5 lg:px-8">
+          <div className="shrink-0 px-4 pb-8 pt-6 sm:px-6 sm:pt-7 lg:px-8">
             <form
               onSubmit={handleSubmit}
               className="relative mx-auto flex w-full max-w-3xl items-center gap-2 rounded-[2rem] border border-accent/45 bg-bg-elevated/90 p-2 shadow-[0_16px_42px_-24px_rgba(32,37,31,0.34),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_0_34px_-24px_rgba(232,111,69,0.5)] backdrop-blur-xl transition-all focus-within:border-accent/80 focus-within:shadow-[0_18px_46px_-24px_rgba(32,37,31,0.38),0_0_0_1px_rgba(255,255,255,0.68)_inset,0_0_0_4px_rgba(232,111,69,0.16),0_0_40px_-22px_rgba(232,111,69,0.75)] dark:border-accent/35 dark:bg-black/55 dark:shadow-[0_16px_42px_-24px_rgba(0,0,0,0.78),0_0_0_1px_rgba(255,255,255,0.08)_inset,0_0_34px_-24px_rgba(232,138,74,0.55)] xl:max-w-4xl"
@@ -222,6 +242,7 @@ export function AgentPage() {
                 Wiadomość do Agenta
               </label>
               <textarea
+                ref={messageInputRef}
                 id="agent-message"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
@@ -231,7 +252,7 @@ export function AgentPage() {
                 }
                 rows={1}
                 disabled={isBusy}
-                className="agent-message-input max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-2.5 text-sm leading-6 text-ink outline-none placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
+                className="agent-message-input min-h-11 flex-1 resize-none overflow-hidden bg-transparent px-3 py-2.5 text-sm leading-6 text-ink outline-none transition-[height] duration-200 ease-out placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
               />
               <button
                 type="submit"
