@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   BookOpen,
+  Bot,
   Home,
   LogOut,
   MessageSquare,
@@ -39,6 +40,11 @@ const sidebarLinks: SidebarLink[] = [
     to: "/generator",
     label: "Generator",
     icon: Wand2,
+  },
+  {
+    to: "/agent",
+    label: "Agent",
+    icon: Bot,
   },
   {
     to: "/recipes",
@@ -106,7 +112,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             Menu
           </p>
           <div className="grid gap-1.5">
-            {sidebarLinks.slice(0, 3).map((item) => (
+            {sidebarLinks.slice(0, 4).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -126,7 +132,13 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                   className="h-[1.2rem] w-[1.2rem] shrink-0"
                   aria-hidden="true"
                 />
-                <span>{item.label}</span>
+                <span
+                  className={cn(
+                    item.to === "/agent" && "text-agent-nav-gradient font-brand",
+                  )}
+                >
+                  {item.label}
+                </span>
               </NavLink>
             ))}
           </div>
@@ -152,7 +164,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
               <span>Czat z Asystentem</span>
             </button>
 
-            {sidebarLinks.slice(3).map((item) => (
+            {sidebarLinks.slice(4).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

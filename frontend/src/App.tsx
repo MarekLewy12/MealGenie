@@ -2,6 +2,7 @@ import { AnimatePresence } from "framer-motion";
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
+import { AgentPage } from "./pages/AgentPage";
 import { GeneratorPage } from "./pages/GeneratorPage";
 import { GuestGeneratorPage } from "./pages/GuestGeneratorPage";
 import { HomePage } from "./pages/HomePage";
@@ -142,6 +143,10 @@ function App() {
                     <Route
                       path="/generator"
                       element={renderOnboardedRoute(<GeneratorPage />)}
+                    />
+                    <Route
+                      path="/agent"
+                      element={renderOnboardedRoute(<AgentPage />)}
                     />
                     {/* /recipe/:id przed /recipe. */}
                     <Route

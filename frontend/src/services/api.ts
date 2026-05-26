@@ -12,6 +12,13 @@ import type {
   RecipeGenerationContext,
 } from "../types/meal";
 import type { ChatRequest, ChatResponse } from "../types/chat";
+import type {
+  AgentChatResponse,
+  AgentClientState,
+  AgentExecuteAction,
+  AgentExecuteResponse,
+  AgentRunDetailResponse,
+} from "../types/agent";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -168,5 +175,50 @@ export async function loginUser(data: LoginFormData) {
 
 export async function getPreferences() {
   const { data } = await api.get<SavePreferencesPayload | null>("/preferences");
+  return data;
+}
+
+export type AgentChatPayload = {
+  runId?: string;
+  message: string;
+  clientState?: AgentClientState;
+  idempotencyKey?: string;
+};
+
+export async function chatWithAgent(payload: AgentChatPayload) {
+  const { data } = await api.post<AgentChatResponse>(
+    "/agents/chat",
+    {
+      ...payload,
+      mode: "CHEF_ORCHESTRATOR",
+    },
+    { timeout: 45_000 },
+  );
+
+  return data;
+}
+
+export async function getAgentRun(runId: string) {
+  const { data } = await api.get<AgentRunDetailResponse>(
+    `/agents/runs/${runId}`,
+  );
+
+  return data;
+}
+
+export type AgentExecutePayload = {
+  runId: string;
+  acceptedPlanId: string;
+  actions: AgentExecuteAction[];
+  idempotencyKey?: string;
+};
+
+export async function executeAgentPlan(payload: AgentExecutePayload) {
+  const { data } = await api.post<AgentExecuteResponse>(
+    "/agents/execute",
+    payload,
+    { timeout: 120_000 },
+  );
+
   return data;
 }
