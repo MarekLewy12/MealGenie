@@ -98,6 +98,20 @@ export type AgentShoppingDraftItem = {
   category?: string | null;
 };
 
+export type AgentPlanRevisionSection =
+  | "overview"
+  | "ingredients"
+  | "shopping"
+  | "details"
+  | "warnings";
+
+export type AgentPlanRevision = {
+  summary: string;
+  changedSections: AgentPlanRevisionSection[];
+  sourceMessage: string;
+  createdAt: string;
+};
+
 export type AgentPlanDraft = {
   id: string;
   title: string;
@@ -112,6 +126,7 @@ export type AgentPlanDraft = {
   servings: number;
   recipeContext?: RecipeGenerationContext;
   shoppingDraft: AgentShoppingDraftItem[];
+  revision?: AgentPlanRevision;
 };
 
 export type AgentMeta = {

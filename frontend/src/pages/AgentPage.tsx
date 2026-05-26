@@ -4,6 +4,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -32,7 +33,7 @@ import { Badge, Button, HandwrittenKicker } from "../components/ui";
 import { useAgentSession } from "../hooks/useAgentSession";
 import { useAuthStore } from "../store/authStore";
 import { notify } from "../store/notificationStore";
-import type { AgentStep } from "../types/agent";
+import type { AgentPlanRevisionSection, AgentStep } from "../types/agent";
 import { cn } from "../utils/cn";
 
 const starterPrompts = [
@@ -41,6 +42,98 @@ const starterPrompts = [
   "Obiad bez mięsa na dziś.",
   "Resztki warzyw, zero marnowania.",
 ];
+
+const STEP_PACE_MS = 680;
+
+function usePacedAgentSteps({
+  runId,
+  shouldReduceMotion,
+  steps,
+}: {
+  runId: string | null;
+  shouldReduceMotion: boolean | null;
+  steps: AgentStep[];
+}) {
+  const [paceIndex, setPaceIndex] = useState(-1);
+  const [pacedRunId, setPacedRunId] = useState<string | null>(null);
+  const stepsSignature = steps
+    .map((step) => `${step.key}:${step.status}`)
+    .join("|");
+
+  useEffect(() => {
+    if (!runId || steps.length === 0) {
+      const timeoutId = window.setTimeout(() => {
+        setPaceIndex(-1);
+        setPacedRunId(runId);
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (runId !== pacedRunId) {
+      const timeoutId = window.setTimeout(() => {
+        setPacedRunId(runId);
+        setPaceIndex(shouldReduceMotion ? steps.length - 1 : 0);
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [pacedRunId, runId, shouldReduceMotion, steps.length]);
+
+  useEffect(() => {
+    if (shouldReduceMotion || paceIndex < 0 || paceIndex >= steps.length - 1) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setPaceIndex((current) => Math.min(current + 1, steps.length - 1));
+    }, STEP_PACE_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [paceIndex, shouldReduceMotion, steps.length, stepsSignature]);
+
+  useEffect(() => {
+    if (
+      !shouldReduceMotion &&
+      steps[0]?.status === "running" &&
+      paceIndex > 0
+    ) {
+      const timeoutId = window.setTimeout(() => setPaceIndex(0), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [paceIndex, shouldReduceMotion, stepsSignature, steps]);
+
+  const pacedSteps = useMemo(() => {
+    if (shouldReduceMotion || paceIndex < 0) {
+      return steps;
+    }
+
+    return steps.map((step, index) => {
+      if (index > paceIndex) {
+        return { ...step, status: "pending" as const };
+      }
+
+      if (
+        index === paceIndex &&
+        index < steps.length - 1 &&
+        step.status === "succeeded"
+      ) {
+        return { ...step, status: "running" as const };
+      }
+
+      return step;
+    });
+  }, [paceIndex, shouldReduceMotion, steps]);
+
+  return {
+    isPacing:
+      !shouldReduceMotion &&
+      steps.length > 0 &&
+      paceIndex >= 0 &&
+      paceIndex < steps.length - 1,
+    steps: pacedSteps,
+  };
+}
 
 export function AgentPage() {
   const [draft, setDraft] = useState("");
@@ -52,8 +145,13 @@ export function AgentPage() {
   const shouldReduceMotion = useReducedMotion();
 
   const hasConversation = agent.messages.length > 0;
-  const isBusy = agent.isSending || agent.isExecuting;
+  const isBusy = agent.isBusy;
   const shouldShowCanvas = hasConversation || Boolean(agent.plan);
+  const { isPacing: isPacingSteps, steps: pacedSteps } = usePacedAgentSteps({
+    runId: agent.runId,
+    steps: agent.steps,
+    shouldReduceMotion,
+  });
   const premiumEase = [0.16, 1, 0.3, 1] as const;
   const layoutTransition = shouldReduceMotion
     ? { duration: 0.01 }
@@ -263,16 +361,6 @@ export function AgentPage() {
                     </motion.div>
                   ))}
 
-                  {agent.steps.length > 0 ? (
-                    <motion.div
-                      initial={shouldReduceMotion ? false : { opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="ml-0 sm:ml-11"
-                    >
-                      <AgentTimeline steps={agent.steps} />
-                    </motion.div>
-                  ) : null}
-
                   {agent.isSending ? (
                     <motion.div
                       initial={shouldReduceMotion ? false : { opacity: 0 }}
@@ -388,7 +476,7 @@ export function AgentPage() {
                   ease: premiumEase,
                 },
               }}
-              className="w-full shrink-0 lg:h-full lg:w-[26rem] xl:w-[28rem]"
+              className="w-full shrink-0 lg:h-[calc(100%-2rem)] lg:w-[26rem] xl:w-[28rem]"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {agent.plan ? (
@@ -396,14 +484,22 @@ export function AgentPage() {
                     canExecute={agent.canExecute}
                     error={agent.isExecuting ? agent.error?.message : null}
                     isExecuting={agent.isExecuting}
+                    isUpdating={agent.status === "planning" || isPacingSteps}
                     plan={agent.plan}
                     shouldReduceMotion={shouldReduceMotion}
+                    steps={pacedSteps}
                     onExecute={() =>
                       void agent.executePlan([
                         "create_recipe",
                         "populate_shopping_list",
                       ])
                     }
+                  />
+                ) : hasConversation ? (
+                  <AgentProcessCanvas
+                    error={agent.error?.message ?? null}
+                    shouldReduceMotion={shouldReduceMotion}
+                    steps={pacedSteps}
                   />
                 ) : (
                   <PlanPlaceholder shouldReduceMotion={shouldReduceMotion} />
@@ -579,11 +675,15 @@ function AgentTimeline({ steps }: { steps: AgentStep[] }) {
   if (visibleSteps.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-bg-sunken/30 p-4">
+    <div className="rounded-2xl border border-white/45 bg-bg-elevated/75 p-4 shadow-[0_14px_36px_-24px_rgba(32,37,31,0.45),0_0_0_1px_rgba(255,255,255,0.38)_inset] backdrop-blur-xl dark:border-white/10 dark:bg-black/35 dark:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.08)_inset]">
       <div className="mb-3 flex items-center gap-2">
-        <ListChecks className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-        <span className="font-brand text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
-          Co sprawdziłem
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-soft text-accent shadow-sm">
+          <ListChecks className="h-4 w-4" aria-hidden="true" />
+        </div>
+        <span className="font-brand text-xs font-bold uppercase tracking-[0.12em] text-ink-soft">
+          {visibleSteps.some((step) => step.status === "running")
+            ? "Pracuję nad tym"
+            : "Co sprawdziłem"}
         </span>
       </div>
       <div className="grid gap-3">
@@ -630,21 +730,93 @@ function AgentTimeline({ steps }: { steps: AgentStep[] }) {
   );
 }
 
+function AgentProcessCanvas({
+  error,
+  shouldReduceMotion,
+  steps,
+}: {
+  error: string | null;
+  shouldReduceMotion: boolean | null;
+  steps: AgentStep[];
+}) {
+  const hasRunningStep = steps.some((step) => step.status === "running");
+
+  return (
+    <motion.aside
+      key="agent-process"
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.97, y: 18 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97, y: 12 }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex min-h-[32rem] flex-col overflow-hidden rounded-[24px] border border-white/35 bg-bg-elevated/55 p-5 shadow-[0_18px_44px_-28px_rgba(32,37,31,0.45),0_0_0_1px_rgba(255,255,255,0.34)_inset] backdrop-blur-xl dark:border-white/10 dark:bg-black/30 dark:shadow-[0_18px_44px_-28px_rgba(0,0,0,0.75),0_0_0_1px_rgba(255,255,255,0.08)_inset] lg:h-full"
+      aria-label="Proces pracy Agenta"
+    >
+      <div
+        className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-accent/15 blur-[70px]"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -bottom-24 left-8 h-52 w-52 rounded-full bg-basil/10 blur-[80px]"
+        aria-hidden="true"
+      />
+
+      <div className="relative">
+        <Badge variant="accent">
+          {hasRunningStep ? "Agent pracuje" : "Analiza gotowa"}
+        </Badge>
+        <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-ink">
+          Układam kierunek
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+          Zbieram kontekst, sprawdzam ograniczenia i przygotowuję następny ruch
+          w rozmowie.
+        </p>
+      </div>
+
+      <div className="relative mt-6">
+        <AgentTimeline steps={steps} />
+      </div>
+
+      {error ? (
+        <div className="relative mt-5 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux">
+          {error}
+        </div>
+      ) : null}
+
+      <div className="relative mt-auto pt-6">
+        <div className="rounded-2xl border border-border/50 bg-bg-elevated/65 px-4 py-3 text-xs leading-relaxed text-ink-soft shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/[0.04]">
+          Plan pojawi się tutaj, gdy Agent skończy analizę i będzie gotowy do
+          akceptacji.
+        </div>
+      </div>
+    </motion.aside>
+  );
+}
+
 function PlanCanvas({
   canExecute,
   error,
   isExecuting,
+  isUpdating,
   onExecute,
   plan,
   shouldReduceMotion,
+  steps,
 }: {
   canExecute: boolean;
   error: string | null;
   isExecuting: boolean;
+  isUpdating: boolean;
   onExecute: () => void;
   plan: NonNullable<ReturnType<typeof useAgentSession>["plan"]>;
   shouldReduceMotion: boolean | null;
+  steps: AgentStep[];
 }) {
+  const changedSections = new Set<AgentPlanRevisionSection>(
+    plan.revision?.changedSections ?? [],
+  );
+  const hasRevision = Boolean(plan.revision);
+
   return (
     <motion.aside
       key="plan-ready"
@@ -660,23 +832,52 @@ function PlanCanvas({
         aria-hidden="true"
       />
 
-      <div className="relative border-b border-border bg-bg-sunken/40 px-6 py-5">
-        <Badge variant="accent">Plan gotowy</Badge>
+      <div
+        className={cn(
+          "relative border-b border-border bg-bg-sunken/40 px-6 py-5 transition-colors",
+          changedSections.has("overview") ? "bg-accent-soft/50" : null,
+        )}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="accent">
+            {isUpdating ? "Aktualizuję plan" : "Plan gotowy"}
+          </Badge>
+          {hasRevision ? <Badge variant="neutral">Zaktualizowano</Badge> : null}
+        </div>
         <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-ink">
           {plan.title}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           {plan.summary}
         </p>
+        {plan.revision ? (
+          <p className="mt-3 rounded-xl border border-accent/20 bg-bg-elevated/70 px-3 py-2 text-xs font-medium leading-relaxed text-accent-deep shadow-sm backdrop-blur-sm dark:text-accent-hover">
+            {plan.revision.summary}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5">
+        {isUpdating && steps.length > 0 ? (
+          <div className="mb-5">
+            <AgentTimeline steps={steps} />
+          </div>
+        ) : null}
+
         <div className="grid gap-6 text-sm">
-          <PlanSection title="Uzasadnienie" icon={MessageSquareText}>
+          <PlanSection
+            changed={changedSections.has("details")}
+            title="Uzasadnienie"
+            icon={MessageSquareText}
+          >
             <p className="leading-relaxed">{plan.rationale}</p>
           </PlanSection>
 
-          <PlanSection title="Baza dania" icon={ChefHat}>
+          <PlanSection
+            changed={changedSections.has("ingredients")}
+            title="Baza dania"
+            icon={ChefHat}
+          >
             {plan.usedIngredients.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {plan.usedIngredients.map((item) => (
@@ -693,7 +894,11 @@ function PlanCanvas({
             )}
           </PlanSection>
 
-          <PlanSection title="Do kupienia" icon={ShoppingBasket}>
+          <PlanSection
+            changed={changedSections.has("shopping")}
+            title="Do kupienia"
+            icon={ShoppingBasket}
+          >
             {plan.shoppingDraft.length > 0 ? (
               <ul className="space-y-2">
                 {plan.shoppingDraft.map((item) => (
@@ -727,7 +932,7 @@ function PlanCanvas({
       <div className="border-t border-border bg-bg-elevated p-5">
         <Button
           type="button"
-          disabled={!canExecute || isExecuting}
+          disabled={!canExecute || isExecuting || isUpdating}
           rightIcon={
             isExecuting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -738,7 +943,11 @@ function PlanCanvas({
           className="w-full py-3.5 shadow-accent"
           onClick={onExecute}
         >
-          {isExecuting ? "Gotuję przepis..." : "Akceptuję - przygotuj przepis"}
+          {isExecuting
+            ? "Gotuję przepis..."
+            : isUpdating
+              ? "Aktualizuję plan..."
+              : "Akceptuję - przygotuj przepis"}
         </Button>
       </div>
     </motion.aside>
@@ -776,21 +985,35 @@ function PlanPlaceholder({
 }
 
 function PlanSection({
+  changed = false,
   title,
   icon: Icon,
   children,
 }: {
+  changed?: boolean;
   title: string;
   icon: ElementType;
   children: ReactNode;
 }) {
   return (
-    <section>
+    <section
+      className={cn(
+        "-mx-3 rounded-2xl px-3 py-2 transition-colors",
+        changed
+          ? "border border-accent/20 bg-accent-soft/45 shadow-[0_10px_24px_-20px_rgba(232,111,69,0.45)]"
+          : "border border-transparent",
+      )}
+    >
       <div className="mb-2 flex items-center gap-2">
         <Icon className="h-4 w-4 text-ink-muted" aria-hidden="true" />
         <h3 className="font-brand text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
           {title}
         </h3>
+        {changed ? (
+          <span className="ml-auto rounded-full bg-bg-elevated/80 px-2 py-0.5 font-brand text-[0.65rem] font-bold uppercase tracking-[0.12em] text-accent-deep shadow-xs dark:text-accent-hover">
+            Zaktualizowano
+          </span>
+        ) : null}
       </div>
       <div className="text-ink-soft">{children}</div>
     </section>

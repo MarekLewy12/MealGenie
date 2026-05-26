@@ -122,6 +122,16 @@ export const AgentPlanDraftSchema = z.object({
       }),
     )
     .default([]),
+  revision: z
+    .object({
+      summary: z.string().min(1).max(400),
+      changedSections: z.array(
+        z.enum(["overview", "ingredients", "shopping", "details", "warnings"]),
+      ),
+      sourceMessage: z.string().min(1).max(1200),
+      createdAt: z.iso.datetime(),
+    })
+    .optional(),
 });
 
 const AgentDecisionContextPatchSchema = z

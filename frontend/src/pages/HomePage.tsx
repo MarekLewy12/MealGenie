@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { Logo } from "../components/Logo";
 import {
+  LandingAgentCanvasSection,
   LandingFinalCtaSection,
   LandingHeroSection,
   LandingMarqueeStrip,
@@ -23,6 +24,8 @@ export function HomePage() {
 
       <LandingMarqueeStrip />
       <LandingProblemSolutionSection />
+
+      <LandingAgentCanvasSection />
 
       <LandingShowcaseSection />
 

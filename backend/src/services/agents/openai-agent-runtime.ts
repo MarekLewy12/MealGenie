@@ -4,6 +4,7 @@ import type {
   AgentDecision,
   AgentErrorCode,
   AgentMessage,
+  AgentPlanDraft,
   AgentState,
 } from "../../schemas/agent.schema.js";
 import type { AgentToolContext } from "./agent-tool-registry.js";
@@ -51,6 +52,8 @@ export type AgentRuntimeResult = {
 export type AgentRuntimeInput = {
   messages: AgentMessage[];
   state: AgentState;
+  currentPlan?: AgentPlanDraft | null;
+  turnMode?: "discovery" | "revision";
   toolContext?: AgentToolContext;
   clientState?: {
     timezone?: string;
@@ -149,6 +152,9 @@ Zadanie na kazda ture:
 - po maksymalnie 3 turach doprecyzowujacych pokaz plan draftowy zamiast kolejnego pytania,
 - gdy pokazujesz plan draftowy, wypelnij mealTeaser, servings, mealType i shoppingDraft
   tak, zeby backend mogl po potwierdzeniu utworzyc przepis i liste zakupow,
+- w trybie discovery zbieraj kontekst i przygotuj pierwszy plan,
+- w trybie revision aktualizuj currentPlan zgodnie z ostatnia wiadomoscia uzytkownika:
+  zachowaj currentPlan.id, nie zaczynaj od zera i zmieniaj tylko to, o co prosi uzytkownik,
 - structured output ma miec zawsze decision z polami: type, message, missingFields,
   collectedContext, plan, errorCode, retryable,
 - collectedContext wypelniaj jako liste par { key, value }, bez zagniezdzonych obiektow,
@@ -167,6 +173,8 @@ function buildInput(args: AgentRuntimeInput): string {
   return JSON.stringify({
     conversation: args.messages.slice(-10),
     state: args.state,
+    currentPlan: args.currentPlan ?? null,
+    turnMode: args.turnMode ?? "discovery",
     toolContext: args.toolContext ?? null,
     clientState: args.clientState ?? null,
     policy: {

@@ -5,6 +5,7 @@ import type {
   AgentChatResponse,
   AgentErrorCode,
   AgentMessage,
+  AgentPlanDraft,
   AgentRunDetailResponse,
   AgentState,
   AgentStep,
@@ -102,6 +103,72 @@ function parseState(value: unknown): AgentState {
   return parsed.success ? parsed.data : buildInitialState();
 }
 
+function parsePlan(value: unknown): AgentPlanDraft | null {
+  const parsed = AgentPlanDraftSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function buildInitialSteps(args: {
+  includeContextSteps: boolean;
+  startedAt: string;
+}): AgentStep[] {
+  const steps: AgentStep[] = [
+    {
+      key: "session",
+      label: "Sesja Agenta",
+      actor: "chef_orchestrator",
+      status: "running",
+      summary: "Przygotowuję nową turę rozmowy.",
+      startedAt: args.startedAt,
+    },
+  ];
+
+  if (args.includeContextSteps) {
+    steps.push(
+      {
+        key: "preferences",
+        label: "Profil i ograniczenia",
+        actor: "chef_orchestrator",
+        status: "pending",
+        startedAt: args.startedAt,
+      },
+      {
+        key: "history",
+        label: "Historia posiłków",
+        actor: "meal_historian",
+        status: "pending",
+        startedAt: args.startedAt,
+      },
+    );
+  }
+
+  steps.push(
+    {
+      key: "planning",
+      label: "Planowanie",
+      actor: "chef_orchestrator",
+      status: "pending",
+      startedAt: args.startedAt,
+    },
+    {
+      key: "review",
+      label: "Review wykonalności",
+      actor: "feasibility_reviewer",
+      status: "pending",
+      startedAt: args.startedAt,
+    },
+    {
+      key: "final_response",
+      label: "Odpowiedź",
+      actor: "chef_orchestrator",
+      status: "pending",
+      startedAt: args.startedAt,
+    },
+  );
+
+  return steps;
+}
+
 function isRetryableErrorCode(code: string | null): boolean {
   return (
     code === "AGENT_RUNTIME_ERROR" ||
@@ -197,6 +264,87 @@ function buildResponseFromRun(run: AgentRunRecord): AgentChatResponse {
   };
 }
 
+async function updateRunSteps(runId: string, steps: AgentStep[]) {
+  await prisma.$executeRaw`
+    UPDATE "AgentRun"
+    SET
+      "stepsJson" = CAST(${JSON.stringify(steps)} AS JSONB),
+      "updatedAt" = CURRENT_TIMESTAMP
+    WHERE "id" = ${runId}
+  `;
+}
+
+async function finalizeRunTurn(args: {
+  runId: string;
+  userId: string;
+  messagesBeforeAssistant: AgentMessage[];
+  state: AgentState;
+  currentPlan: AgentPlanDraft | null;
+  turnMode: "discovery" | "revision";
+  clientState: AgentChatRequest["clientState"];
+}) {
+  try {
+    const turn = await agentOrchestrator({
+      userId: args.userId,
+      messages: args.messagesBeforeAssistant,
+      state: args.state,
+      currentPlan: args.currentPlan,
+      turnMode: args.turnMode,
+      clientState: args.clientState,
+      onStepsUpdate: (steps) => updateRunSteps(args.runId, steps),
+    });
+    const assistantMessage: AgentMessage = {
+      role: "assistant",
+      content: turn.assistantContent,
+      createdAt: nowIso(),
+    };
+    const messages = [...args.messagesBeforeAssistant, assistantMessage];
+
+    await prisma.$executeRaw`
+      UPDATE "AgentRun"
+      SET
+        "messagesJson" = CAST(${JSON.stringify(messages)} AS JSONB),
+        "stateJson" = CAST(${JSON.stringify(turn.state)} AS JSONB),
+        "stepsJson" = CAST(${JSON.stringify(turn.steps)} AS JSONB),
+        "planJson" = CAST(${turn.plan ? JSON.stringify(turn.plan) : args.currentPlan ? JSON.stringify(args.currentPlan) : null} AS JSONB),
+        "status" = ${turn.status},
+        "model" = ${turn.model},
+        "inputTokens" = ${turn.inputTokens},
+        "outputTokens" = ${turn.outputTokens},
+        "errorCode" = ${turn.errorCode},
+        "errorMessage" = ${turn.errorMessage},
+        "updatedAt" = CURRENT_TIMESTAMP,
+        "completedAt" = CASE
+          WHEN ${turn.status} = 'failed' THEN CURRENT_TIMESTAMP
+          ELSE "completedAt"
+        END
+      WHERE "id" = ${args.runId}
+    `;
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Nie udało się przygotować odpowiedzi Agenta.";
+
+    console.error("[AGENT_SESSION_ASYNC_ERROR]", {
+      scope: "agent-session",
+      runId: args.runId,
+      message,
+    });
+
+    await prisma.$executeRaw`
+      UPDATE "AgentRun"
+      SET
+        "status" = 'failed',
+        "errorCode" = 'AGENT_RUNTIME_ERROR',
+        "errorMessage" = ${message},
+        "updatedAt" = CURRENT_TIMESTAMP,
+        "completedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = ${args.runId}
+    `;
+  }
+}
+
 export function setAgentOrchestratorForTests(
   orchestrator?: AgentOrchestrator,
 ) {
@@ -228,42 +376,41 @@ export async function chatSession(args: {
       throw new AgentRunNotFoundError();
     }
 
+    if (existing.status === "planning") {
+      return buildResponseFromRun(existing);
+    }
+
     const messagesBeforeAssistant = [
       ...parseMessages(existing.messagesJson),
       userMessage,
     ];
     const state = parseState(existing.stateJson);
-    const turn = await agentOrchestrator({
-      userId: args.userId,
-      messages: messagesBeforeAssistant,
-      state,
-      clientState: args.input.clientState,
+    const currentPlan = parsePlan(existing.planJson);
+    const turnMode =
+      currentPlan && state.canExecute ? "revision" : "discovery";
+    const initialSteps = buildInitialSteps({
+      includeContextSteps: false,
+      startedAt,
     });
-    const assistantMessage: AgentMessage = {
-      role: "assistant",
-      content: turn.assistantContent,
-      createdAt: nowIso(),
-    };
-    const messages = [...messagesBeforeAssistant, assistantMessage];
 
     const updatedRows = await prisma.$queryRaw<AgentRunRecord[]>`
       UPDATE "AgentRun"
       SET
-        "messagesJson" = CAST(${JSON.stringify(messages)} AS JSONB),
-        "stateJson" = CAST(${JSON.stringify(turn.state)} AS JSONB),
-        "stepsJson" = CAST(${JSON.stringify(turn.steps)} AS JSONB),
-        "planJson" = CAST(${turn.plan ? JSON.stringify(turn.plan) : null} AS JSONB),
-        "status" = ${turn.status},
-        "model" = ${turn.model},
-        "inputTokens" = ${turn.inputTokens},
-        "outputTokens" = ${turn.outputTokens},
-        "errorCode" = ${turn.errorCode},
-        "errorMessage" = ${turn.errorMessage},
+        "messagesJson" = CAST(${JSON.stringify(messagesBeforeAssistant)} AS JSONB),
+        "stateJson" = CAST(${JSON.stringify({
+          ...state,
+          canExecute: false,
+        })} AS JSONB),
+        "stepsJson" = CAST(${JSON.stringify(initialSteps)} AS JSONB),
+        "planJson" = CAST(${turnMode === "revision" && currentPlan ? JSON.stringify(currentPlan) : null} AS JSONB),
+        "status" = 'planning',
+        "model" = null,
+        "inputTokens" = null,
+        "outputTokens" = null,
+        "errorCode" = null,
+        "errorMessage" = null,
         "updatedAt" = CURRENT_TIMESTAMP,
-        "completedAt" = CASE
-          WHEN ${turn.status} = 'failed' THEN CURRENT_TIMESTAMP
-          ELSE "completedAt"
-        END
+        "completedAt" = null
       WHERE "id" = ${existing.id}
       RETURNING *
     `;
@@ -272,6 +419,16 @@ export async function chatSession(args: {
     if (!updated) {
       throw new AgentRunNotFoundError();
     }
+
+    void finalizeRunTurn({
+      runId: updated.id,
+      userId: args.userId,
+      messagesBeforeAssistant,
+      state,
+      currentPlan,
+      turnMode,
+      clientState: args.input.clientState,
+    });
 
     return buildResponseFromRun(updated);
   }
@@ -291,19 +448,12 @@ export async function chatSession(args: {
     }
   }
 
-  const state = buildInitialState();
-  const turn = await agentOrchestrator({
-    userId: args.userId,
-    messages: [userMessage],
-    state,
-    clientState: args.input.clientState,
-  });
-  const assistantMessage: AgentMessage = {
-    role: "assistant",
-    content: turn.assistantContent,
-    createdAt: nowIso(),
-  };
   const runId = randomUUID();
+  const state = buildInitialState();
+  const initialSteps = buildInitialSteps({
+    includeContextSteps: true,
+    startedAt,
+  });
   const createdRows = await prisma.$queryRaw<AgentRunRecord[]>`
     INSERT INTO "AgentRun" (
       "id",
@@ -327,18 +477,18 @@ export async function chatSession(args: {
       ${runId},
       ${args.userId},
       ${args.input.mode},
-      ${turn.status},
+      'planning',
       ${args.input.idempotencyKey ?? null},
-      CAST(${JSON.stringify([userMessage, assistantMessage])} AS JSONB),
-      CAST(${JSON.stringify(turn.state)} AS JSONB),
-      CAST(${JSON.stringify(turn.steps)} AS JSONB),
-      CAST(${turn.plan ? JSON.stringify(turn.plan) : null} AS JSONB),
-      ${turn.model},
-      ${turn.inputTokens},
-      ${turn.outputTokens},
-      ${turn.errorCode},
-      ${turn.errorMessage},
-      CASE WHEN ${turn.status} = 'failed' THEN CURRENT_TIMESTAMP ELSE NULL END,
+      CAST(${JSON.stringify([userMessage])} AS JSONB),
+      CAST(${JSON.stringify(state)} AS JSONB),
+      CAST(${JSON.stringify(initialSteps)} AS JSONB),
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       CURRENT_TIMESTAMP
     )
     RETURNING *
@@ -348,6 +498,16 @@ export async function chatSession(args: {
   if (!created) {
     throw new Error("Failed to create agent run");
   }
+
+  void finalizeRunTurn({
+    runId,
+    userId: args.userId,
+    messagesBeforeAssistant: [userMessage],
+    state,
+    currentPlan: null,
+    turnMode: "discovery",
+    clientState: args.input.clientState,
+  });
 
   return buildResponseFromRun(created);
 }

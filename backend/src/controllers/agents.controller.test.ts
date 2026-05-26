@@ -27,6 +27,25 @@ async function registerAndGetToken(user: typeof firstUser): Promise<string> {
   return res.body.token as string;
 }
 
+async function getRunAfterProcessing(token: string, runId: string) {
+  let latest = await request(app)
+    .get(`/api/agents/runs/${runId}`)
+    .set("Authorization", `Bearer ${token}`);
+
+  for (
+    let attempt = 0;
+    attempt < 20 && latest.body.status === "planning";
+    attempt += 1
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    latest = await request(app)
+      .get(`/api/agents/runs/${runId}`)
+      .set("Authorization", `Bearer ${token}`);
+  }
+
+  return latest;
+}
+
 function buildAgentTurn(state: {
   collectedContext: Record<string, unknown>;
   missingFields: string[];
@@ -284,10 +303,15 @@ describe("Agent controllers", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.runId).toEqual(expect.any(String));
-    expect(res.body.status).toBe("collecting_context");
+    expect(res.body.status).toBe("planning");
     expect(res.body.message.role).toBe("assistant");
     expect(res.body.steps[0].key).toBe("session");
-    expect(res.body.meta.model).toBe("gpt-5.4-mini");
+    expect(res.body.steps[0].status).toBe("running");
+
+    const detailRes = await getRunAfterProcessing(firstToken, res.body.runId);
+
+    expect(detailRes.body.status).toBe("collecting_context");
+    expect(detailRes.body.meta.model).toBe("gpt-5.4-mini");
   });
 
   it("returns the existing run for repeated idempotency keys", async () => {
@@ -329,9 +353,10 @@ describe("Agent controllers", () => {
       .set("Authorization", `Bearer ${firstToken}`)
       .send({ message: "Chcę szybki obiad." });
 
-    const detailRes = await request(app)
-      .get(`/api/agents/runs/${createRes.body.runId}`)
-      .set("Authorization", `Bearer ${firstToken}`);
+    const detailRes = await getRunAfterProcessing(
+      firstToken,
+      createRes.body.runId,
+    );
 
     expect(detailRes.status).toBe(200);
     expect(detailRes.body.runId).toBe(createRes.body.runId);
@@ -346,6 +371,8 @@ describe("Agent controllers", () => {
       .set("Authorization", `Bearer ${firstToken}`)
       .send({ message: "Mam szybki cel." });
 
+    await getRunAfterProcessing(firstToken, createRes.body.runId);
+
     const continueRes = await request(app)
       .post("/api/agents/chat")
       .set("Authorization", `Bearer ${firstToken}`)
@@ -354,14 +381,94 @@ describe("Agent controllers", () => {
         message: "Mogę dokupić jeden składnik.",
       });
 
-    const detailRes = await request(app)
-      .get(`/api/agents/runs/${createRes.body.runId}`)
-      .set("Authorization", `Bearer ${firstToken}`);
+    const detailRes = await getRunAfterProcessing(
+      firstToken,
+      createRes.body.runId,
+    );
 
     expect(continueRes.status).toBe(200);
     expect(continueRes.body.runId).toBe(createRes.body.runId);
     expect(detailRes.body.messages.length).toBe(4);
     expect(orchestrator).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps an executable plan editable when the user revises it", async () => {
+    process.env.MEALGENIE_AGENT_ENABLED = "true";
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { email: firstUser.email },
+    });
+    const { runId, plan } = await createExecutableRun({ userId: user.id });
+    const revisedPlan = buildExecutablePlan({
+      id: plan.id,
+      usedIngredients: ["ryż"],
+      missingIngredients: ["jajka"],
+      shoppingDraft: [
+        {
+          name: "jajka",
+          quantity: 2,
+          unit: "szt.",
+          category: "Nabiał",
+        },
+      ],
+      revision: {
+        summary: "Zaktualizowałem składniki i listę zakupów.",
+        changedSections: ["ingredients", "shopping"],
+        sourceMessage: "Wolę bez jajek w bazie, dodaj je do zakupów.",
+        createdAt: new Date().toISOString(),
+      },
+    });
+    orchestrator = jest.fn(async ({ state, currentPlan, turnMode }) => {
+      expect(turnMode).toBe("revision");
+      expect(currentPlan?.id).toBe(plan.id);
+
+      return {
+        status: "awaiting_confirmation" as const,
+        assistantContent: "Jasne, zaktualizowałem plan bez jajek w bazie.",
+        state: {
+          ...state,
+          missingFields: [],
+          canExecute: true,
+        },
+        plan: revisedPlan,
+        steps: [
+          {
+            key: "planning" as const,
+            label: "Planowanie",
+            actor: "chef_orchestrator" as const,
+            status: "succeeded" as const,
+            startedAt: new Date().toISOString(),
+            completedAt: new Date().toISOString(),
+          },
+        ],
+        errorCode: null,
+        errorMessage: null,
+        model: "gpt-5.4-mini",
+        inputTokens: 20,
+        outputTokens: 9,
+      };
+    });
+    setAgentOrchestratorForTests(orchestrator as never);
+
+    const res = await request(app)
+      .post("/api/agents/chat")
+      .set("Authorization", `Bearer ${firstToken}`)
+      .send({
+        runId,
+        message: "Wolę bez jajek w bazie, dodaj je do zakupów.",
+      });
+    const detailRes = await getRunAfterProcessing(firstToken, runId);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("planning");
+    expect(detailRes.body.status).toBe("awaiting_confirmation");
+    expect(orchestrator).toHaveBeenCalledTimes(1);
+    expect(detailRes.body.plan.id).toBe(plan.id);
+    expect(detailRes.body.plan.usedIngredients).toEqual(["ryż"]);
+    expect(detailRes.body.plan.shoppingDraft[0].name).toBe("jajka");
+    expect(detailRes.body.plan.revision.changedSections).toEqual([
+      "ingredients",
+      "shopping",
+    ]);
   });
 
   it("does not expose another user's run", async () => {

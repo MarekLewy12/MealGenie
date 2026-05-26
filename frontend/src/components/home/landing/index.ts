@@ -1,4 +1,5 @@
 export { LandingFinalCtaSection } from "./LandingFinalCtaSection";
+export { LandingAgentCanvasSection } from "./LandingAgentCanvasSection";
 export { LandingHeroSection } from "./LandingHeroSection";
 export { LandingMarqueeStrip } from "./LandingMarqueeStrip";
 export { LandingProblemSolutionSection } from "./LandingProblemSolutionSection";

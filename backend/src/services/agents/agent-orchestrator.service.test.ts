@@ -118,6 +118,167 @@ describe("runAgentTurn", () => {
     expect(result.outputTokens).toBe(8);
   });
 
+  it("asks a follow-up on the first turn when a plan lacks enough user context", async () => {
+    const fake = createRuntime([
+      {
+        decision: {
+          type: "show_plan",
+          message: "Mam draft planu.",
+          missingFields: [],
+          plan: createPlan(),
+        },
+        model: "gpt-5.4-mini",
+        inputTokens: 20,
+        outputTokens: 8,
+      },
+    ]);
+
+    const result = await runAgentTurn(
+      { messages, state: createState() },
+      fake.runtime,
+    );
+
+    expect(result.status).toBe("collecting_context");
+    expect(result.assistantContent).toContain("dla ilu osób");
+    expect(result.state.canExecute).toBe(false);
+    expect(result.plan).toBeNull();
+  });
+
+  it("allows a first-turn plan when the user gives servings and style", async () => {
+    const fake = createRuntime([
+      {
+        decision: {
+          type: "show_plan",
+          message: "Mam draft planu.",
+          missingFields: [],
+          plan: createPlan(),
+        },
+        model: "gpt-5.4-mini",
+        inputTokens: 20,
+        outputTokens: 8,
+      },
+    ]);
+
+    const result = await runAgentTurn(
+      {
+        messages: [
+          {
+            role: "user",
+            content:
+              "Mam ryż i jajka, 20 minut, chcę sycące śniadanie dla 2 osób.",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        state: createState(),
+      },
+      fake.runtime,
+    );
+
+    expect(result.status).toBe("awaiting_confirmation");
+    expect(result.plan?.title).toBe("Ryż z jajkiem");
+    expect(result.state.canExecute).toBe(true);
+  });
+
+  it("does not show profile and history steps on follow-up turns", async () => {
+    const fake = createRuntime([
+      {
+        decision: {
+          type: "show_plan",
+          message: "Mam draft planu.",
+          missingFields: [],
+          plan: createPlan(),
+        },
+        model: "gpt-5.4-mini",
+        inputTokens: 20,
+        outputTokens: 8,
+      },
+    ]);
+
+    const result = await runAgentTurn(
+      {
+        messages: [
+          ...messages,
+          {
+            role: "assistant",
+            content: "Dla ilu osób gotujemy?",
+            createdAt: new Date().toISOString(),
+          },
+          {
+            role: "user",
+            content: "Dla 2 osób, wytrawnie.",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        state: createState({ followUpCount: 1 }),
+      },
+      fake.runtime,
+    );
+
+    expect(result.steps.map((step) => step.key)).not.toContain("preferences");
+    expect(result.steps.map((step) => step.key)).not.toContain("history");
+    expect(result.steps.map((step) => step.key)).toEqual([
+      "session",
+      "planning",
+      "review",
+      "final_response",
+    ]);
+  });
+
+  it("passes current plan in revision mode and annotates changed sections", async () => {
+    const currentPlan = createPlan("original-plan");
+    const revisedPlan = {
+      ...createPlan("model-plan-id"),
+      usedIngredients: ["ryż"],
+      missingIngredients: ["jajka"],
+      shoppingDraft: [
+        {
+          name: "jajka",
+          quantity: 2,
+          unit: "szt.",
+          category: "Nabiał",
+        },
+      ],
+    };
+    const fake = createRuntime([
+      {
+        decision: {
+          type: "show_plan",
+          message: "Zaktualizowałem plan.",
+          missingFields: [],
+          plan: revisedPlan,
+        },
+        model: "gpt-5.4-mini",
+        inputTokens: 20,
+        outputTokens: 8,
+      },
+    ]);
+
+    const result = await runAgentTurn(
+      {
+        messages: [
+          {
+            role: "user",
+            content: "Wolę bez jajek w bazie, dodaj je do zakupów.",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        state: createState({ canExecute: true, followUpCount: 1 }),
+        currentPlan,
+        turnMode: "revision",
+      },
+      fake.runtime,
+    );
+
+    expect(fake.calls[0]?.turnMode).toBe("revision");
+    expect(fake.calls[0]?.currentPlan?.id).toBe("original-plan");
+    expect(result.status).toBe("awaiting_confirmation");
+    expect(result.plan?.id).toBe("original-plan");
+    expect(result.plan?.revision?.sourceMessage).toContain("Wolę bez jajek");
+    expect(result.plan?.revision?.changedSections).toEqual(
+      expect.arrayContaining(["ingredients", "shopping"]),
+    );
+  });
+
   it("forces a plan after three follow-up turns", async () => {
     const fake = createRuntime([
       {

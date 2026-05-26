@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Clock3, Leaf } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, Leaf, Sparkles } from "lucide-react";
 import {
   AnimatePresence,
   motion,
@@ -173,7 +173,7 @@ export function LandingHeroSection() {
       >
         <MotionDiv
           variants={contentStagger}
-          className="max-w-3xl lg:pt-4"
+          className="mx-auto max-w-3xl text-center lg:mx-0 lg:pt-4 lg:text-left"
         >
           <MotionDiv
             variants={headingLineEntrance}
@@ -213,11 +213,28 @@ export function LandingHeroSection() {
             className="mt-5 max-w-2xl text-base leading-7 text-ink-soft sm:mt-6 sm:text-lg sm:leading-8"
           >
             {landingHeroCopy.subheadline}
+            <span className="mt-3 block">
+              Po wyborze dostajesz{" "}
+              <span className="font-semibold text-accent-deep dark:text-accent-hover">
+                pełny przepis
+              </span>
+              ,{" "}
+              <span className="font-semibold text-basil">
+                listę braków
+              </span>{" "}
+              i{" "}
+              <span className="relative -top-px inline-flex items-center gap-1.5 rounded-pill border border-accent/25 bg-bg-elevated/80 px-1.5 py-1 pr-2.5 font-semibold leading-none text-accent-deep shadow-[0_10px_24px_-18px_rgba(232,111,69,0.55)] backdrop-blur-md dark:border-accent/30 dark:bg-white/[0.06] dark:text-accent-hover">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 font-brand text-[0.62rem] font-bold uppercase tracking-[0.08em] text-white shadow-xs">
+                  AI
+                </span>
+                obraz dania
+              </span>
+            </span>
           </MotionP>
 
           <MotionDiv
             variants={landingFadeUp}
-            className="mt-6 flex w-fit flex-col items-center sm:mt-8"
+            className="mx-auto mt-6 flex w-fit flex-col items-center sm:mt-8 lg:mx-0 lg:items-start"
           >
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
               <LandingCtaLink
@@ -239,8 +256,8 @@ export function LandingHeroSection() {
               </LandingCtaLink>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-              {["Bez konta", "Po polsku", "Darmowy start"].map((point) => (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:justify-start">
+              {["Bez konta", "Po polsku", "Obraz dania"].map((point) => (
                 <span key={point} className="flex items-center gap-2 text-sm font-medium text-ink-soft">
                   <CheckCircle2 className="h-4 w-4 text-basil" />
                   {point}
@@ -251,15 +268,23 @@ export function LandingHeroSection() {
 
           <MotionDiv
             variants={landingFadeUp}
-            className="mt-7 max-w-lg rounded-xl border border-border/70 bg-bg-elevated/78 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/[0.07] sm:p-5"
+            className="relative mx-auto mt-7 max-w-lg overflow-hidden rounded-2xl border border-white/50 bg-bg-elevated/76 p-5 text-center shadow-[0_18px_48px_-34px_rgba(32,37,31,0.48),0_0_0_1px_rgba(255,255,255,0.42)_inset] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_18px_48px_-34px_rgba(0,0,0,0.78),0_0_0_1px_rgba(255,255,255,0.08)_inset] sm:p-6 lg:mx-0"
           >
-            <p className="font-brand text-lg font-semibold leading-snug text-ink sm:text-xl">
+            <div
+              className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-accent/16 blur-[52px]"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none absolute -bottom-16 left-1/2 h-28 w-52 -translate-x-1/2 rounded-full bg-basil/10 blur-[56px]"
+              aria-hidden="true"
+            />
+            <p className="relative mx-auto max-w-md text-balance font-brand text-lg font-semibold leading-snug text-ink sm:text-xl">
               Dziś pasuje coś{" "}
               <span className="text-bordeaux dark:text-saffron">ciepłego</span>,{" "}
               <span className="text-basil">prostego</span> i{" "}
               <span className="text-accent">bez spiny</span>.
             </p>
-            <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+            <p className="relative mx-auto mt-3 flex max-w-md flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-ink-muted">
               <span>25 minut</span>
               <span aria-hidden="true" className="text-border-strong">·</span>
               <span>mało energii</span>
@@ -343,6 +368,10 @@ export function LandingHeroSection() {
                         <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-pill border border-border bg-bg-elevated/95 px-3 py-1 text-xs font-bold text-ink shadow-xs backdrop-blur">
                           <Clock3 className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
                           {recipe.time}
+                        </div>
+                        <div className="absolute right-3 top-3 flex items-center gap-2 rounded-pill border border-white/55 bg-bg-elevated/90 px-3 py-1 text-xs font-bold text-accent-deep shadow-xs backdrop-blur-md dark:border-white/15 dark:bg-black/45 dark:text-accent-hover">
+                          <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
+                          AI obraz dania
                         </div>
                       </div>
 
