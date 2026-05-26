@@ -226,7 +226,7 @@ export function AgentPage() {
                 }
                 rows={1}
                 disabled={isBusy}
-                className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-3 text-sm text-ink outline-none placeholder:text-ink-muted focus-visible:outline-none focus-visible:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="agent-message-input max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-3 text-sm text-ink outline-none placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
               />
               <button
                 type="submit"

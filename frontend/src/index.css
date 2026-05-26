@@ -409,10 +409,17 @@ button:disabled,
   }
 }
 
-:is(a, button, input, textarea, select, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+:is(a, button, input, textarea:not(.agent-message-input), select, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   box-shadow: 0 0 0 5px var(--focus-ring-soft);
+}
+
+.agent-message-input,
+.agent-message-input:focus,
+.agent-message-input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
