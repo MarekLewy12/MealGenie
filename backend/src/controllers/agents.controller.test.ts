@@ -3,10 +3,14 @@ import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { PrismaClient } from "@prisma/client";
 import { app } from "../index.js";
-import { setAgentRecipeGeneratorForTests } from "../services/agents/agent-execution.service.js";
+import {
+  setAgentImageGeneratorForTests,
+  setAgentRecipeGeneratorForTests,
+} from "../services/agents/agent-execution.service.js";
 import { setAgentOrchestratorForTests } from "../services/agents/agent-session.service.js";
 import type { AgentPlanDraft } from "../schemas/agent.schema.js";
 import type { FullRecipe } from "../schemas/recipe.schema.js";
+import type { generateMealImages } from "../services/image.service.js";
 
 const prisma = new PrismaClient();
 
@@ -105,6 +109,8 @@ function buildExecutablePlan(overrides: Partial<AgentPlanDraft> = {}) {
         { name: "jajka", amount: "2 szt." },
       ],
       stepsSummary: ["Ugotuj ryż.", "Usmaż jajka.", "Połącz składniki."],
+      imagePromptEn:
+        "Photorealistic food photo of rice with fried eggs, chives and sesame, natural window light, ceramic bowl.",
       imageUrl: null,
     },
     servings: 2,
@@ -249,6 +255,7 @@ async function createExecutableRun(args: {
 describe("Agent controllers", () => {
   const previousFlag = process.env.MEALGENIE_AGENT_ENABLED;
   let orchestrator: jest.Mock;
+  let imageGenerator: jest.MockedFunction<typeof generateMealImages>;
   let firstToken: string;
   let secondToken: string;
 
@@ -259,14 +266,17 @@ describe("Agent controllers", () => {
 
   beforeEach(() => {
     orchestrator = jest.fn(async ({ state }) => buildAgentTurn(state));
+    imageGenerator = jest.fn(async () => ["/meal-images/agent-test.jpg"]);
     setAgentOrchestratorForTests(orchestrator as never);
     setAgentRecipeGeneratorForTests(jest.fn(async () => buildFullRecipe()));
+    setAgentImageGeneratorForTests(imageGenerator);
   });
 
   afterAll(async () => {
     process.env.MEALGENIE_AGENT_ENABLED = previousFlag;
     setAgentOrchestratorForTests();
     setAgentRecipeGeneratorForTests();
+    setAgentImageGeneratorForTests();
     await prisma.user.deleteMany({
       where: { email: { in: [firstUser.email, secondUser.email] } },
     });
@@ -581,6 +591,57 @@ describe("Agent controllers", () => {
       res.body.result.mealHistoryId,
     );
     expect(mealCount).toBe(1);
+  });
+
+  it("generates an image for the accepted recipe during execute", async () => {
+    process.env.MEALGENIE_AGENT_ENABLED = "true";
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { email: firstUser.email },
+    });
+    await prisma.preference.upsert({
+      where: { userId: user.id },
+      create: {
+        userId: user.id,
+        diet: "NONE",
+        allergies: [],
+        dislikedIngredients: [],
+        favoriteCuisines: [],
+        cookingSkill: "BEGINNER",
+        equipment: [],
+        budget: "NONE",
+        spiceLevel: 3,
+      },
+      update: {
+        allergies: [],
+        dislikedIngredients: [],
+      },
+    });
+    const { runId, plan } = await createExecutableRun({ userId: user.id });
+
+    const res = await request(app)
+      .post("/api/agents/execute")
+      .set("Authorization", `Bearer ${firstToken}`)
+      .send({
+        runId,
+        acceptedPlanId: plan.id,
+        actions: ["create_recipe"],
+      });
+    const savedMeal = await prisma.mealHistory.findUnique({
+      where: { id: res.body.result.mealHistoryId },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.result.recipe.imageUrl).toBe(
+      "/meal-images/agent-test.jpg",
+    );
+    expect(savedMeal?.imageUrl).toBe("/meal-images/agent-test.jpg");
+    expect(imageGenerator).toHaveBeenCalledWith([
+      expect.objectContaining({
+        name: "Ryż z jajkiem",
+        imagePromptEn:
+          "Photorealistic food photo of rice with fried eggs, chives and sesame, natural window light, ceramic bowl.",
+      }),
+    ]);
   });
 
   it("persists the meal history category from the accepted agent plan", async () => {

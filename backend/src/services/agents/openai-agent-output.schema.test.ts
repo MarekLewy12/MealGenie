@@ -62,6 +62,8 @@ describe("OpenAI agent structured output schema", () => {
               { name: "pomidory", amount: "2 szt." },
             ],
             stepsSummary: ["Ugotuj makaron.", "Zrob sos.", "Polacz."],
+            imagePromptEn:
+              "Photorealistic food photo of tomato pasta with basil, natural light, ceramic plate.",
             imageUrl: null,
           },
           servings: 2,
@@ -90,6 +92,8 @@ describe("OpenAI agent structured output schema", () => {
         mealType: "LUNCH",
         mealTeaser: {
           name: "Makaron z pomidorami",
+          imagePromptEn:
+            "Photorealistic food photo of tomato pasta with basil, natural light, ceramic plate.",
         },
       },
     });

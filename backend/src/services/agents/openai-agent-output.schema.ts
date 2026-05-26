@@ -17,6 +17,7 @@ const OpenAIMealTeaserSchema = z.object({
     }),
   ),
   stepsSummary: z.array(z.string()),
+  imagePromptEn: z.string().max(300),
   imageUrl: z.string().nullable(),
 });
 

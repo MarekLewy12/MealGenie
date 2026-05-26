@@ -17,6 +17,7 @@ import {
   AgentStateSchema,
 } from "../../schemas/agent.schema.js";
 import type { FullRecipe } from "../../schemas/recipe.schema.js";
+import { generateMealImages } from "../image.service.js";
 import { generateFullRecipe } from "../recipe.service.js";
 import {
   checkAllergyAndPreferenceConflicts,
@@ -30,6 +31,9 @@ const prisma = new PrismaClient();
 
 type RecipeGenerator = typeof generateFullRecipe;
 let recipeGenerator: RecipeGenerator = generateFullRecipe;
+
+type ImageGenerator = typeof generateMealImages;
+let imageGenerator: ImageGenerator = generateMealImages;
 
 type AgentRunRecord = {
   id: string;
@@ -81,6 +85,10 @@ export class AgentExecutionError extends Error {
 
 export function setAgentRecipeGeneratorForTests(generator?: RecipeGenerator) {
   recipeGenerator = generator ?? generateFullRecipe;
+}
+
+export function setAgentImageGeneratorForTests(generator?: ImageGenerator) {
+  imageGenerator = generator ?? generateMealImages;
 }
 
 function nowIso(): string {
@@ -393,6 +401,15 @@ async function createRecipe(args: {
   return recipe;
 }
 
+async function createImageUrl(plan: AgentPlanDraft): Promise<string | null> {
+  if (plan.mealTeaser.imageUrl) {
+    return plan.mealTeaser.imageUrl;
+  }
+
+  const [imageUrl] = await imageGenerator([plan.mealTeaser]);
+  return imageUrl ?? null;
+}
+
 export async function executePlan(args: {
   userId: string;
   input: AgentExecuteRequest;
@@ -438,6 +455,7 @@ export async function executePlan(args: {
           preferences,
         })
       : null;
+    const imageUrl = recipe ? await createImageUrl(plan) : null;
     const completed = await prisma.$transaction(async (tx) => {
       const meal = recipe
         ? await tx.mealHistory.create({
@@ -452,7 +470,7 @@ export async function executePlan(args: {
               estimatedTime: recipe.totalTimeMinutes,
               category: plan.mealType ?? null,
               userPrompt: null,
-              imageUrl: plan.mealTeaser.imageUrl ?? null,
+              imageUrl,
               fullRecipeJson: recipe,
               isFavorite: false,
               wasSelected: true,
@@ -518,7 +536,7 @@ export async function executePlan(args: {
         recipe: recipe
           ? {
               ...recipe,
-              imageUrl: plan.mealTeaser.imageUrl ?? null,
+              imageUrl,
             }
           : null,
         mealHistoryId: meal?.id ?? null,

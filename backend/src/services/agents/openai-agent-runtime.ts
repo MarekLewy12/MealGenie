@@ -152,6 +152,9 @@ Zadanie na kazda ture:
 - po maksymalnie 3 turach doprecyzowujacych pokaz plan draftowy zamiast kolejnego pytania,
 - gdy pokazujesz plan draftowy, wypelnij mealTeaser, servings, mealType i shoppingDraft
   tak, zeby backend mogl po potwierdzeniu utworzyc przepis i liste zakupow,
+- w mealTeaser.imagePromptEn wpisz krotki prompt po angielsku do fotografii dania
+  (max 300 znakow): nazwa dania, 2-3 kluczowe skladniki, styl realistycznej
+  fotografii kulinarnej; bez polskich slow i bez pelnej listy skladnikow,
 - w trybie discovery zbieraj kontekst i przygotuj pierwszy plan,
 - w trybie revision aktualizuj currentPlan zgodnie z ostatnia wiadomoscia uzytkownika:
   zachowaj currentPlan.id, nie zaczynaj od zera i zmieniaj tylko to, o co prosi uzytkownik,

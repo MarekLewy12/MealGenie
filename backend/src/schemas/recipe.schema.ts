@@ -13,6 +13,7 @@ export const MealTeaserInputSchema = z.object({
     }),
   ),
   stepsSummary: z.array(z.string()),
+  imagePromptEn: z.string().max(300).optional(),
   imageUrl: z.string().nullable().optional(),
 });
 
