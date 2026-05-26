@@ -450,7 +450,7 @@ export async function executePlan(args: {
                   `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`,
               ),
               estimatedTime: recipe.totalTimeMinutes,
-              category: "LUNCH",
+              category: plan.mealType ?? null,
               userPrompt: null,
               imageUrl: plan.mealTeaser.imageUrl ?? null,
               fullRecipeJson: recipe,

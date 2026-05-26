@@ -111,6 +111,7 @@ describe("AgentPlanDraftSchema", () => {
       title: "Makaron z pomidorami i jogurtem",
       summary: "Szybki obiad z produktów pod ręką.",
       rationale: "Wykorzystuje makaron i pomidory, a jogurt łagodzi sos.",
+      mealType: "BREAKFAST",
       usedIngredients: ["makaron", "pomidory", "jogurt"],
       missingIngredients: ["bazylia"],
       assumptions: ["Masz podstawowe przyprawy."],
@@ -128,6 +129,7 @@ describe("AgentPlanDraftSchema", () => {
     });
 
     expect(parsed.id).toBe("plan-1");
+    expect(parsed.mealType).toBe("BREAKFAST");
     expect(parsed.missingIngredients).toContain("bazylia");
     expect(parsed.mealTeaser.name).toBe("Ryż z jajkiem");
   });
@@ -166,6 +168,7 @@ describe("AgentDecisionSchema", () => {
         title: "Ryż z jajkiem",
         summary: "Prosty, sycący posiłek.",
         rationale: "Pasuje do ograniczonej spiżarni.",
+        mealType: "DINNER",
         usedIngredients: ["ryż", "jajka"],
         missingIngredients: [],
         assumptions: ["Masz sól i pieprz."],
@@ -177,6 +180,9 @@ describe("AgentDecisionSchema", () => {
     });
 
     expect(parsed.type).toBe("show_plan");
+    if (parsed.type === "show_plan") {
+      expect(parsed.plan.mealType).toBe("DINNER");
+    }
   });
 
   it("accepts a fail decision", () => {

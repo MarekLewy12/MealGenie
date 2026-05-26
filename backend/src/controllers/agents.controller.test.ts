@@ -70,6 +70,7 @@ function buildExecutablePlan(overrides: Partial<AgentPlanDraft> = {}) {
     title: "Ryż z jajkiem",
     summary: "Szybki obiad z produktów pod ręką.",
     rationale: "Wykorzystuje proste składniki i krótki czas.",
+    mealType: "DINNER",
     usedIngredients: ["ryż", "jajka"],
     missingIngredients: ["śmietana"],
     assumptions: ["Masz sól i pieprz."],
@@ -473,6 +474,56 @@ describe("Agent controllers", () => {
       res.body.result.mealHistoryId,
     );
     expect(mealCount).toBe(1);
+  });
+
+  it("persists the meal history category from the accepted agent plan", async () => {
+    process.env.MEALGENIE_AGENT_ENABLED = "true";
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { email: firstUser.email },
+    });
+    await prisma.preference.upsert({
+      where: { userId: user.id },
+      create: {
+        userId: user.id,
+        diet: "NONE",
+        allergies: [],
+        dislikedIngredients: [],
+        favoriteCuisines: [],
+        cookingSkill: "BEGINNER",
+        equipment: [],
+        budget: "NONE",
+        spiceLevel: 3,
+      },
+      update: {
+        allergies: [],
+        dislikedIngredients: [],
+      },
+    });
+    const { runId, plan } = await createExecutableRun({
+      userId: user.id,
+      plan: buildExecutablePlan({
+        id: `breakfast-plan-${randomId}`,
+        title: "Śniadaniowy ryż z jajkiem",
+        mealType: "BREAKFAST",
+      }),
+    });
+
+    const res = await request(app)
+      .post("/api/agents/execute")
+      .set("Authorization", `Bearer ${firstToken}`)
+      .send({
+        runId,
+        acceptedPlanId: plan.id,
+        actions: ["create_recipe"],
+      });
+    const savedMeal = await prisma.mealHistory.findUnique({
+      where: { id: res.body.result.mealHistoryId },
+      select: { category: true },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("completed");
+    expect(savedMeal?.category).toBe("BREAKFAST");
   });
 
   it("rejects execute for a mismatched plan id", async () => {

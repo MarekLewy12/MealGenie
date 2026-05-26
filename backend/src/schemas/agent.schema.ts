@@ -102,6 +102,9 @@ export const AgentPlanDraftSchema = z.object({
   title: z.string().min(1).max(120),
   summary: z.string().min(1).max(800),
   rationale: z.string().min(1).max(800),
+  mealType: z
+    .enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK", "DESSERT", "ANY"])
+    .optional(),
   usedIngredients: z.array(z.string().min(1).max(120)),
   missingIngredients: z.array(z.string().min(1).max(120)),
   assumptions: z.array(z.string().min(1).max(200)),

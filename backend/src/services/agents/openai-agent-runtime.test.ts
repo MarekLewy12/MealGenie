@@ -69,6 +69,7 @@ describe("runOpenAIAgentRuntime", () => {
     expect(fake.calls[0]?.body).toEqual(
       expect.objectContaining({
         model: "gpt-5.4-mini",
+        instructions: expect.stringContaining("mealType"),
         store: false,
         reasoning: { effort: "low" },
         text: expect.objectContaining({ verbosity: "low" }),

@@ -241,7 +241,23 @@ Jeśli taka komenda wydaje się potrzebna, najpierw wyjaśnij:
 
 ## Komendy lokalne do walidacji
 
-Dobieraj komendy do zakresu zmiany.
+Dobieraj komendy do zakresu, ryzyka i typu zmiany. Nie uruchamiaj lint/build
+automatycznie po każdej drobnej zmianie UI, np. po korekcie koloru, odstępu,
+tekstu, klasy Tailwind albo jednego wariantu hover, jeśli diff jest mały i nie
+zmienia logiki, kontraktów, routingu ani shared komponentów.
+
+Przy małych zmianach wystarczy przejrzeć diff i opisać sensowny ręczny smoke
+check. Jeśli nie uruchamiasz lint/build, napisz krótko dlaczego.
+
+Uruchom lint/build/testy wtedy, gdy zmiana jest większa albo ma realne ryzyko:
+- dotyka logiki, hooków, store'ów, API, typów, routingu lub guardów,
+- zmienia shared komponenty, layout aplikacji, formularze, loading/error states,
+- obejmuje wiele plików lub szeroki refactor,
+- dotyka backendu, AI, DB, migracji, deploymentu albo produkcyjnych kontraktów,
+- użytkownik wyraźnie prosi o pełną walidację,
+- przed PR-em lub końcowym audytem gotowości.
+
+Typowe komendy, gdy mają sens:
 
 Frontend:
 - `cd frontend && npm run lint`
