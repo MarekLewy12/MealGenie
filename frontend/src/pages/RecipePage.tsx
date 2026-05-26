@@ -562,25 +562,42 @@ export function RecipePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div className="mx-auto max-w-[1760px] px-4 pt-6 sm:px-6 lg:px-8 lg:pt-10">
-              <RecipeHero
-                title={headerData.name || recipe.name}
-                description={headerData.description}
-                imageUrl={imageUrl}
-                badgeLabel={
-                  isHistoryView ? "Zapisany przepis" : "Świeżo wygenerowany"
-                }
-                badgeVariant={isHistoryView ? "neutral" : "accent"}
-                stats={{
-                  totalTime,
-                  difficultyLabel,
-                  calories: recipe?.nutrition?.calories || headerData.calories,
-                  portionLabel: portionStatLabel,
-                  portionValue: portionStatValue,
-                  PortionIcon: PortionStatIcon,
+            <section className="relative isolate">
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[45rem] overflow-hidden"
+                aria-hidden="true"
+                style={{
+                  maskImage:
+                    "linear-gradient(to bottom, black 0%, black 30%, transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, black 0%, black 30%, transparent 100%)",
                 }}
-              />
-            </motion.div>
+              >
+                <div className="absolute -left-[10%] top-[-5%] h-[30rem] w-[50%] rounded-[100%] bg-accent/[0.22] blur-[120px] mix-blend-multiply dark:bg-accent/[0.18] dark:mix-blend-screen" />
+                <div className="absolute -right-[5%] top-[5%] h-[35rem] w-[45%] rounded-[100%] bg-saffron/[0.2] blur-[130px] mix-blend-multiply dark:bg-saffron/[0.15] dark:mix-blend-screen" />
+                <div className="absolute left-[15%] top-[15%] h-[25rem] w-[60%] rounded-[100%] bg-basil/[0.15] blur-[120px] mix-blend-multiply dark:bg-basil/[0.12] dark:mix-blend-screen" />
+              </div>
+
+              <motion.div className="relative z-10 mx-auto max-w-[1760px] px-4 pt-6 sm:px-6 lg:px-8 lg:pt-10">
+                <RecipeHero
+                  title={headerData.name || recipe.name}
+                  description={headerData.description}
+                  imageUrl={imageUrl}
+                  badgeLabel={
+                    isHistoryView ? "Zapisany przepis" : "Świeżo wygenerowany"
+                  }
+                  badgeVariant={isHistoryView ? "neutral" : "accent"}
+                  stats={{
+                    totalTime,
+                    difficultyLabel,
+                    calories: recipe?.nutrition?.calories || headerData.calories,
+                    portionLabel: portionStatLabel,
+                    portionValue: portionStatValue,
+                    PortionIcon: PortionStatIcon,
+                  }}
+                />
+              </motion.div>
+            </section>
             <RecipeHeroSeparator />
 
             <div className="mx-auto max-w-[1760px] px-4 pb-16 pt-2 sm:px-6 lg:px-8 lg:pt-4">

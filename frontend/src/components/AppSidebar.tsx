@@ -139,6 +139,11 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                 >
                   {item.label}
                 </span>
+                {item.to === "/agent" ? (
+                  <span className="ml-auto rounded-full border border-accent/25 bg-accent-soft/80 px-2 py-0.5 font-brand text-[0.62rem] font-bold uppercase tracking-[0.12em] text-accent-deep shadow-xs dark:border-accent/30 dark:bg-accent/15 dark:text-accent-hover">
+                    Beta
+                  </span>
+                ) : null}
               </NavLink>
             ))}
           </div>

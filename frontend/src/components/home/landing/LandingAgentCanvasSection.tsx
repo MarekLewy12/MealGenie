@@ -86,9 +86,12 @@ export function LandingAgentCanvasSection() {
       >
         <motion.div variants={contentStagger} className="max-w-2xl">
           <motion.div variants={headingLineEntrance}>
-            <HandwrittenKicker className="text-accent/85">
-              nowy wymiar gotowania
-            </HandwrittenKicker>
+            <div className="flex flex-wrap items-center gap-3">
+              <HandwrittenKicker className="text-accent/85">
+                nowy wymiar gotowania
+              </HandwrittenKicker>
+              <Badge variant="accent">Agent Beta</Badge>
+            </div>
           </motion.div>
 
           <motion.h2
@@ -114,6 +117,14 @@ export function LandingAgentCanvasSection() {
             MealGenie Agent działa jak rozmowa z osobistym planerem. Dopyta o
             ważne szczegóły, pokaże plan na Canvasie i pozwoli zmienić go
             jednym zdaniem, zanim zapiszesz przepis.
+          </motion.p>
+
+          <motion.p
+            variants={landingFadeUp}
+            className="mt-4 max-w-xl rounded-2xl border border-accent/20 bg-bg-elevated/65 px-4 py-3 text-sm font-medium leading-6 text-ink-soft shadow-sm backdrop-blur-md dark:border-accent/25 dark:bg-white/[0.05]"
+          >
+            Nowy tryb rozmowy i Canvas planu. Funkcja jest w becie, więc może
+            się szybko zmieniać.
           </motion.p>
 
           <motion.div
