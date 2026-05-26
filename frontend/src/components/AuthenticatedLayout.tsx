@@ -74,7 +74,7 @@ export function AuthenticatedLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <TopContextBar onOpenMobileNav={openMobileNav} />
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           <Outlet />
         </div>
       </div>

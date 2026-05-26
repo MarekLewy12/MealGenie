@@ -20,7 +20,9 @@ import {
   ListChecks,
   Loader2,
   MessageSquareText,
+  Scale,
   Send,
+  ShieldCheck,
   ShoppingBasket,
   Sparkles,
   Wand2,
@@ -28,6 +30,7 @@ import {
 
 import { Badge, Button, HandwrittenKicker } from "../components/ui";
 import { useAgentSession } from "../hooks/useAgentSession";
+import { useAuthStore } from "../store/authStore";
 import { notify } from "../store/notificationStore";
 import type { AgentStep } from "../types/agent";
 import { cn } from "../utils/cn";
@@ -98,31 +101,33 @@ export function AgentPage() {
   };
 
   return (
-    <section className="relative flex min-h-full flex-col bg-bg text-ink">
+    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-bg text-ink">
+      {/* MAGIA AI W TLE - AURORA */}
       <div
         className="pointer-events-none absolute inset-0 z-0 flex justify-center overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute top-[10%] h-[40rem] w-[40rem] rounded-full bg-accent/5 blur-[120px] dark:bg-accent/[0.03]" />
-        <div className="absolute right-[15%] top-[30%] h-[30rem] w-[30rem] rounded-full bg-saffron/5 blur-[100px] dark:bg-saffron/[0.02]" />
+        <div className="absolute left-[-10%] top-[-5%] h-[40rem] w-[40rem] rounded-full bg-accent/15 blur-[100px] dark:bg-accent/10" />
+        <div className="absolute right-[-5%] top-[20%] h-[35rem] w-[35rem] rounded-full bg-saffron/15 blur-[100px] dark:bg-saffron/10" />
+        <div className="absolute bottom-[-10%] left-[20%] h-[40rem] w-[40rem] rounded-full bg-basil/15 blur-[100px] dark:bg-basil/10" />
       </div>
 
       <div
         className={cn(
-          "mx-auto flex w-full flex-1 flex-col gap-6 px-4 pb-8 pt-6 sm:px-6 sm:pb-12 lg:px-8 lg:pt-8",
+          "mx-auto flex min-h-0 w-full flex-1 flex-col gap-6 px-4 pb-0 pt-4 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6",
           shouldShowCanvas
-            ? "max-w-screen-2xl lg:flex-row lg:items-start lg:gap-8"
+            ? "max-w-screen-2xl lg:flex-row lg:items-stretch lg:gap-8"
             : "max-w-7xl 2xl:max-w-[92rem]",
         )}
       >
-        <main className="relative z-10 flex min-h-[35rem] flex-1 flex-col lg:h-[calc(100vh-6rem)] lg:min-h-[32rem]">
+        <main className="relative z-10 flex min-h-0 flex-1 flex-col lg:h-full">
           <div
-            className="flex-1 overflow-y-auto px-1 pb-36 pt-6 sm:px-2 lg:px-4"
+            className="flex-1 overflow-y-auto px-1 pt-6 sm:px-2 lg:px-4"
             style={{
               maskImage:
-                "linear-gradient(to bottom, transparent, black 3%, black 95%, transparent)",
+                "linear-gradient(to bottom, transparent, black 2%, black 98%, transparent)",
               WebkitMaskImage:
-                "linear-gradient(to bottom, transparent, black 3%, black 95%, transparent)",
+                "linear-gradient(to bottom, transparent, black 2%, black 98%, transparent)",
             }}
           >
             {!hasConversation ? (
@@ -153,8 +158,8 @@ export function AgentPage() {
                         className={cn(
                           "px-5 py-3.5 text-sm leading-relaxed shadow-sm",
                           message.role === "user"
-                            ? "rounded-2xl rounded-br-sm bg-accent text-ink-inverse shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)]"
-                            : "rounded-2xl rounded-bl-sm border border-border/50 bg-bg-elevated/90 text-ink shadow-sm backdrop-blur-sm",
+                            ? "rounded-2xl rounded-br-sm bg-accent text-white shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)]"
+                            : "rounded-2xl rounded-bl-sm border border-border/50 bg-bg-elevated/80 text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/[0.05]",
                         )}
                       >
                         {message.role === "user" ? (
@@ -208,10 +213,10 @@ export function AgentPage() {
             )}
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 flex justify-center px-4">
+          <div className="shrink-0 px-4 pb-6 pt-4 sm:px-6 sm:pt-5 lg:px-8">
             <form
               onSubmit={handleSubmit}
-              className="pointer-events-auto relative flex w-full max-w-3xl items-end gap-2 rounded-[2rem] border border-border/80 bg-bg-elevated/80 p-2 shadow-lg backdrop-blur-xl transition-all focus-within:border-accent/60 focus-within:shadow-[0_8px_32px_-12px_rgba(232,111,69,0.25),0_0_0_4px_rgba(232,111,69,0.15)] dark:border-white/10 dark:bg-bg-elevated/40 xl:max-w-4xl"
+              className="relative mx-auto flex w-full max-w-3xl items-center gap-2 rounded-[2rem] border border-accent/45 bg-bg-elevated/90 p-2 shadow-[0_16px_42px_-24px_rgba(32,37,31,0.34),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_0_34px_-24px_rgba(232,111,69,0.5)] backdrop-blur-xl transition-all focus-within:border-accent/80 focus-within:shadow-[0_18px_46px_-24px_rgba(32,37,31,0.38),0_0_0_1px_rgba(255,255,255,0.68)_inset,0_0_0_4px_rgba(232,111,69,0.16),0_0_40px_-22px_rgba(232,111,69,0.75)] dark:border-accent/35 dark:bg-black/55 dark:shadow-[0_16px_42px_-24px_rgba(0,0,0,0.78),0_0_0_1px_rgba(255,255,255,0.08)_inset,0_0_34px_-24px_rgba(232,138,74,0.55)] xl:max-w-4xl"
             >
               <label htmlFor="agent-message" className="sr-only">
                 Wiadomość do Agenta
@@ -226,17 +231,17 @@ export function AgentPage() {
                 }
                 rows={1}
                 disabled={isBusy}
-                className="agent-message-input max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-3 text-sm text-ink outline-none placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
+                className="agent-message-input max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-2.5 text-sm leading-6 text-ink outline-none placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={!draft.trim() || isBusy}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-ink-inverse shadow-accent transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-border-strong disabled:text-ink-disabled disabled:shadow-none"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent p-0 text-ink-inverse shadow-accent transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-border-strong disabled:text-ink-disabled disabled:shadow-none"
               >
                 {agent.isSending ? (
                   <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Send className="h-5 w-5" aria-hidden="true" />
+                  <Send className="h-5 w-5 translate-x-px" aria-hidden="true" />
                 )}
                 <span className="sr-only">Wyślij</span>
               </button>
@@ -245,7 +250,7 @@ export function AgentPage() {
         </main>
 
         {shouldShowCanvas ? (
-          <div className="w-full shrink-0 lg:w-[26rem] xl:w-[28rem]">
+          <div className="w-full shrink-0 lg:h-full lg:w-[26rem] xl:w-[28rem]">
             <AnimatePresence mode="wait" initial={false}>
               {agent.plan ? (
                 <PlanCanvas
@@ -277,6 +282,9 @@ function AgentEmptyState({
 }: {
   onSelectPrompt: (prompt: string) => void;
 }) {
+  const user = useAuthStore((state) => state.user);
+  const firstName = user?.name?.split(" ")[0] || "";
+
   return (
     <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center py-10 text-center 2xl:max-w-[86rem]">
       <div className="pointer-events-none absolute inset-y-4 left-0 right-0 -z-10 hidden xl:block">
@@ -358,13 +366,26 @@ function AgentEmptyState({
           <Sparkles className="h-8 w-8" aria-hidden="true" />
         </div>
 
+        {/* PERSONALIZOWANE POWITANIE */}
         <h2 className="text-balance font-serif text-4xl font-medium leading-tight sm:text-5xl">
-          W czym mogę Ci dziś{" "}
-          <span className="text-summary-gradient">pomóc?</span>
+          Cześć
+          {firstName ? (
+            <>
+              {" "}
+              <span className="text-summary-gradient">{firstName}</span>
+            </>
+          ) : null}
+          , w czym mogę Ci dziś pomóc?
         </h2>
-        <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-ink-soft">
-          Nie musisz wypełniać formularzy. Powiedz mi, co masz w lodówce, ile
-          masz czasu albo na co masz ochotę.
+        <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
+          <span className="font-brand text-lg font-semibold text-accent-deep dark:text-accent-hover">
+            Nie musisz wypełniać formularzy.
+          </span>
+          <br />
+          <span>
+            Powiedz mi, co masz w lodówce, ile masz czasu albo na co masz
+            ochotę.
+          </span>
         </p>
 
         <div className="mx-auto mt-10 grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
@@ -373,21 +394,39 @@ function AgentEmptyState({
               key={prompt}
               type="button"
               onClick={() => onSelectPrompt(prompt)}
-              className="group flex min-h-[7.5rem] flex-col justify-between rounded-2xl border border-border/50 bg-bg-elevated/80 p-5 shadow-sm backdrop-blur-md transition-all hover:-translate-y-1 hover:border-accent/40 hover:shadow-md focus-visible:outline-2 focus-visible:outline-accent"
+              className="group flex items-center justify-between rounded-2xl border border-border/50 bg-bg-elevated/60 p-4 text-left shadow-sm backdrop-blur-md transition-all hover:-translate-y-1 hover:border-accent/50 hover:bg-bg-elevated hover:shadow-md focus-visible:outline-2 focus-visible:outline-accent dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
             >
-              <span className="line-clamp-3 text-sm font-medium leading-relaxed text-ink transition-colors group-hover:text-accent-deep">
+              <span className="pr-4 text-sm font-medium leading-relaxed text-ink transition-colors group-hover:text-accent-deep dark:group-hover:text-accent-hover">
                 {prompt}
               </span>
-              <div className="mt-4 flex w-full justify-end">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-sunken transition-colors group-hover:bg-accent-soft">
-                  <ArrowRight
-                    className="h-4 w-4 text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
-                    aria-hidden="true"
-                  />
-                </div>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-sunken transition-colors group-hover:bg-accent-soft dark:bg-white/5 dark:group-hover:bg-accent/20">
+                <ArrowRight
+                  className="h-4 w-4 text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent dark:text-ink-soft dark:group-hover:text-accent-hover"
+                  aria-hidden="true"
+                />
               </div>
             </button>
           ))}
+        </div>
+
+        <div className="mt-16 flex w-full max-w-3xl flex-col items-center border-t border-border/50 pb-3 pt-8 sm:pb-5">
+          <p className="mb-6 font-brand text-xs font-bold uppercase tracking-[0.16em] text-ink-muted">
+            Co potrafię dla Ciebie zrobić
+          </p>
+          <div className="flex flex-wrap justify-center gap-6">
+            <div className="flex items-center gap-2 rounded-full border border-accent/25 bg-bg-elevated/70 px-4 py-2 text-sm font-medium text-ink-soft shadow-[0_10px_26px_-20px_rgba(32,37,31,0.35)] backdrop-blur-md dark:border-white/12 dark:bg-black/25 dark:text-ink-soft">
+              <ShoppingBasket className="h-4 w-4 text-accent" aria-hidden="true" />
+              Zrobię listę brakujących zakupów
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-basil/25 bg-bg-elevated/70 px-4 py-2 text-sm font-medium text-ink-soft shadow-[0_10px_26px_-20px_rgba(32,37,31,0.35)] backdrop-blur-md dark:border-white/12 dark:bg-black/25 dark:text-ink-soft">
+              <ShieldCheck className="h-4 w-4 text-basil" aria-hidden="true" />
+              Dopilnuję Twoich alergii
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-saffron/35 bg-bg-elevated/70 px-4 py-2 text-sm font-medium text-ink-soft shadow-[0_10px_26px_-20px_rgba(32,37,31,0.35)] backdrop-blur-md dark:border-white/12 dark:bg-black/25 dark:text-ink-soft">
+              <Scale className="h-4 w-4 text-saffron" aria-hidden="true" />
+              Przeliczę każdą gramaturę
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -473,7 +512,7 @@ function PlanCanvas({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="relative flex min-h-[32rem] flex-col overflow-hidden rounded-[24px] border border-border bg-bg-elevated shadow-[0_12px_32px_-12px_rgba(32,37,31,0.1)] lg:h-[calc(100vh-6rem)]"
+      className="relative flex min-h-[32rem] flex-col overflow-hidden rounded-[24px] border border-border bg-bg-elevated shadow-[0_12px_32px_-12px_rgba(32,37,31,0.1)] lg:h-full"
       aria-label="Plan Agenta"
     >
       <div
