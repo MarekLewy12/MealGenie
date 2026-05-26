@@ -132,7 +132,12 @@ export function AgentPage() {
         <div className="absolute bottom-[-10%] left-[20%] h-[40rem] w-[40rem] rounded-full bg-basil/15 blur-[100px] dark:bg-basil/10" />
       </div>
 
-      <div
+      <motion.div
+        layout
+        transition={{
+          duration: shouldReduceMotion ? 0.01 : 0.36,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         className={cn(
           "mx-auto flex min-h-0 w-full flex-1 flex-col gap-6 px-4 pb-0 pt-4 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6",
           shouldShowCanvas
@@ -142,7 +147,10 @@ export function AgentPage() {
       >
         <main className="relative z-10 flex min-h-0 flex-1 flex-col lg:h-full">
           <div
-            className="flex-1 overflow-y-auto px-1 pt-6 sm:px-2 lg:px-4"
+            className={cn(
+              "flex-1 overflow-y-auto px-1 sm:px-2 lg:px-4",
+              hasConversation ? "pt-6" : "pt-0",
+            )}
             style={{
               maskImage:
                 "linear-gradient(to bottom, transparent, black 2%, black 98%, transparent)",
@@ -150,10 +158,33 @@ export function AgentPage() {
                 "linear-gradient(to bottom, transparent, black 2%, black 98%, transparent)",
             }}
           >
-            {!hasConversation ? (
-              <AgentEmptyState onSelectPrompt={handleStarterPrompt} />
-            ) : (
-              <div className="flex flex-col gap-6 pb-6">
+            <AnimatePresence mode="wait" initial={false}>
+              {!hasConversation ? (
+                <motion.div
+                  key="agent-empty-state"
+                  className="h-full"
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={
+                    shouldReduceMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, y: -12, scale: 0.98 }
+                  }
+                  transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <AgentEmptyState onSelectPrompt={handleStarterPrompt} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="agent-conversation"
+                  className="flex flex-col gap-6 pb-6"
+                  initial={
+                    shouldReduceMotion ? false : { opacity: 0, y: 12 }
+                  }
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0 }}
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                >
                 {agent.messages.map((message, index) => (
                   <motion.div
                     key={`${message.createdAt}-${index}`}
@@ -229,8 +260,9 @@ export function AgentPage() {
                 ) : null}
 
                 <div ref={messagesEndRef} className="h-2" />
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="shrink-0 px-4 pb-8 pt-6 sm:px-6 sm:pt-7 lg:px-8">
@@ -270,30 +302,46 @@ export function AgentPage() {
           </div>
         </main>
 
-        {shouldShowCanvas ? (
-          <div className="w-full shrink-0 lg:h-full lg:w-[26rem] xl:w-[28rem]">
-            <AnimatePresence mode="wait" initial={false}>
-              {agent.plan ? (
-                <PlanCanvas
-                  canExecute={agent.canExecute}
-                  error={agent.isExecuting ? agent.error?.message : null}
-                  isExecuting={agent.isExecuting}
-                  plan={agent.plan}
-                  shouldReduceMotion={shouldReduceMotion}
-                  onExecute={() =>
-                    void agent.executePlan([
-                      "create_recipe",
-                      "populate_shopping_list",
-                    ])
-                  }
-                />
-              ) : (
-                <PlanPlaceholder shouldReduceMotion={shouldReduceMotion} />
-              )}
-            </AnimatePresence>
-          </div>
-        ) : null}
-      </div>
+        <AnimatePresence initial={false}>
+          {shouldShowCanvas ? (
+            <motion.div
+              key="agent-canvas-column"
+              layout
+              initial={
+                shouldReduceMotion ? false : { opacity: 0, x: 28, scale: 0.98 }
+              }
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={
+                shouldReduceMotion
+                  ? { opacity: 0 }
+                  : { opacity: 0, x: 18, scale: 0.98 }
+              }
+              transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full shrink-0 lg:h-full lg:w-[26rem] xl:w-[28rem]"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {agent.plan ? (
+                  <PlanCanvas
+                    canExecute={agent.canExecute}
+                    error={agent.isExecuting ? agent.error?.message : null}
+                    isExecuting={agent.isExecuting}
+                    plan={agent.plan}
+                    shouldReduceMotion={shouldReduceMotion}
+                    onExecute={() =>
+                      void agent.executePlan([
+                        "create_recipe",
+                        "populate_shopping_list",
+                      ])
+                    }
+                  />
+                ) : (
+                  <PlanPlaceholder shouldReduceMotion={shouldReduceMotion} />
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.div>
     </section>
   );
 }
@@ -307,7 +355,7 @@ function AgentEmptyState({
   const firstName = user?.name?.split(" ")[0] || "";
 
   return (
-    <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center py-10 text-center 2xl:max-w-[86rem]">
+    <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center pb-6 pt-2 text-center sm:pb-8 2xl:max-w-[86rem]">
       <div className="pointer-events-none absolute inset-y-4 left-0 right-0 -z-10 hidden xl:block">
         <motion.div
           animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
