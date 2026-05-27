@@ -158,6 +158,8 @@ Zadanie na kazda ture:
 - w trybie discovery zbieraj kontekst i przygotuj pierwszy plan,
 - w trybie revision aktualizuj currentPlan zgodnie z ostatnia wiadomoscia uzytkownika:
   zachowaj currentPlan.id, nie zaczynaj od zera i zmieniaj tylko to, o co prosi uzytkownik,
+- jesli uzytkownik mowi "dla mnie", "dla siebie" albo "dla 1 osoby",
+  przyjmij servings: 1 i nie pytaj ponownie o liczbe osob,
 - structured output ma miec zawsze decision z polami: type, message, missingFields,
   collectedContext, plan, errorCode, retryable,
 - collectedContext wypelniaj jako liste par { key, value }, bez zagniezdzonych obiektow,

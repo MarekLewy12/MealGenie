@@ -4,6 +4,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Bot,
+  ChevronRight,
   Home,
   LogOut,
   MessageSquare,
@@ -214,6 +215,20 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
               transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className="absolute bottom-full left-0 right-0 mb-3 origin-bottom rounded-lg border border-border bg-bg-elevated p-2 shadow-lg"
             >
+              <div className="mb-2 flex items-center gap-3 rounded-md bg-bg-sunken/60 px-3 py-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-accent-soft font-brand text-[0.95rem] font-bold text-accent-deep">
+                  {initials}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate font-brand text-sm font-semibold text-ink">
+                    {displayName}
+                  </span>
+                  <span className="block truncate text-xs text-ink-muted">
+                    Profil kulinarny
+                  </span>
+                </span>
+              </div>
+
               <Link
                 to="/settings"
                 role="menuitem"
@@ -221,19 +236,24 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                   setIsProfileMenuOpen(false);
                   onNavigate?.();
                 }}
-                className="flex min-h-10 items-center rounded-md px-3 py-2 text-[0.95rem] font-semibold text-ink-soft transition hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                className="flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-[0.95rem] font-semibold text-ink-soft transition hover:bg-bg-sunken hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
               >
-                Preferencje gotowania
+                <Settings className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate">Ustawienia</span>
+                <ChevronRight
+                  className="h-4 w-4 shrink-0 text-ink-muted"
+                  aria-hidden="true"
+                />
               </Link>
 
               <button
                 type="button"
                 role="menuitem"
                 onClick={handleLogout}
-                className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[0.95rem] font-semibold text-bordeaux transition hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+                className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[0.95rem] font-semibold text-bordeaux transition hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
               >
-                <LogOut className="h-4 w-4" aria-hidden="true" />
-                Wyloguj się
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate">Wyloguj się</span>
               </button>
             </motion.div>
           ) : null}

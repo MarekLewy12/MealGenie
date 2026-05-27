@@ -76,7 +76,9 @@ describe("runOpenAIAgentRuntime", () => {
     expect(fake.calls[0]?.body).toEqual(
       expect.objectContaining({
         model: "gpt-5.4-mini",
-        instructions: expect.stringContaining("mealType"),
+        instructions: expect.stringContaining(
+          'jesli uzytkownik mowi "dla mnie", "dla siebie" albo "dla 1 osoby"',
+        ),
         store: false,
         reasoning: { effort: "low" },
         text: expect.objectContaining({ verbosity: "low" }),
