@@ -49,6 +49,15 @@ const starterPrompts = [
 
 const STEP_PACE_MS = 680;
 
+const EXECUTE_MESSAGES = [
+  "Gotuję przepis...",
+  "Przeliczam idealne proporcje...",
+  "Układam instrukcje krok po kroku...",
+  "Aktualizuję listę zakupów...",
+  "Generuję zdjęcie Twojego dania...",
+  "Ostatnie szlify, wykładam na talerz...",
+];
+
 const shoppingUnitLabels: Record<string, string> = {
   tbsp: "łyżka",
   "tbsp.": "łyżka",
@@ -937,6 +946,22 @@ function PlanCanvas({
     plan.revision?.changedSections ?? [],
   );
   const hasRevision = Boolean(plan.revision);
+  const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isExecuting) {
+      setLoadingMsgIndex(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setLoadingMsgIndex((current) =>
+        Math.min(current + 1, EXECUTE_MESSAGES.length - 1),
+      );
+    }, 3500);
+
+    return () => window.clearInterval(interval);
+  }, [isExecuting]);
 
   return (
     <motion.aside
@@ -985,7 +1010,12 @@ function PlanCanvas({
         </motion.div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-8 xl:px-10">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto px-6 py-5 transition-all duration-700 ease-out sm:px-8 xl:px-10",
+          isExecuting && "pointer-events-none opacity-40 grayscale-[30%]",
+        )}
+      >
         {isUpdating && steps.length > 0 ? (
           <div className="mb-5">
             <AgentTimeline steps={steps} />
@@ -1082,14 +1112,31 @@ function PlanCanvas({
               <ArrowRight className="h-4 w-4" />
             )
           }
-          className="w-full py-3.5 shadow-accent"
+          className="relative w-full overflow-hidden py-3.5 shadow-accent"
           onClick={onExecute}
         >
-          {isExecuting
-            ? "Gotuję przepis..."
-            : isUpdating
-              ? "Aktualizuję plan..."
-              : "Akceptuję - przygotuj przepis"}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={
+                isExecuting
+                  ? `executing-${loadingMsgIndex}`
+                  : isUpdating
+                    ? "updating"
+                    : "idle"
+              }
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? false : { opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+              className="inline-block"
+            >
+              {isExecuting
+                ? EXECUTE_MESSAGES[loadingMsgIndex]
+                : isUpdating
+                  ? "Aktualizuję plan..."
+                  : "Akceptuję - przygotuj przepis"}
+            </motion.span>
+          </AnimatePresence>
         </Button>
       </div>
     </motion.aside>
