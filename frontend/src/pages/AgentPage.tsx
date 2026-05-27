@@ -137,16 +137,20 @@ function usePacedAgentSteps({
 
 export function AgentPage() {
   const [draft, setDraft] = useState("");
+  const [mobileTab, setMobileTab] = useState<"chat" | "plan">("chat");
   const agent = useAgentSession();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
   const redirectedMealIdRef = useRef<string | null>(null);
+  const prevPlanRef = useRef<boolean>(false);
   const shouldReduceMotion = useReducedMotion();
 
   const hasConversation = agent.messages.length > 0;
   const isBusy = agent.isBusy;
-  const shouldShowCanvas = hasConversation || Boolean(agent.plan);
+  const quickReplyActions = agent.nextActions.filter(
+    (action) => action.type !== "execute_plan",
+  );
   const { isPacing: isPacingSteps, steps: pacedSteps } = usePacedAgentSteps({
     runId: agent.runId,
     steps: agent.steps,
@@ -156,6 +160,13 @@ export function AgentPage() {
   const layoutTransition = shouldReduceMotion
     ? { duration: 0.01 }
     : { duration: 0.72, ease: premiumEase };
+
+  useEffect(() => {
+    if (agent.plan && !prevPlanRef.current) {
+      prevPlanRef.current = true;
+      setMobileTab("plan");
+    }
+  }, [agent.plan]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -243,17 +254,83 @@ export function AgentPage() {
         <div className="absolute bottom-[-10%] left-[20%] h-[40rem] w-[40rem] rounded-full bg-basil/15 blur-[100px] dark:bg-basil/10" />
       </div>
 
+      {hasConversation ? (
+        <div className="relative z-20 shrink-0 border-b border-border bg-bg-elevated/80 backdrop-blur-md lg:hidden">
+          <div className="mx-auto flex max-w-lg px-4">
+            {[
+              { key: "chat", label: "Rozmowa", icon: MessageSquareText },
+              { key: "plan", label: "Plan", icon: Sparkles },
+            ].map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setMobileTab(key as "chat" | "plan")}
+                className={cn(
+                  "relative flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors",
+                  mobileTab === key
+                    ? "text-accent"
+                    : "text-ink-muted hover:text-ink-soft",
+                )}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                {label}
+                {mobileTab === key ? (
+                  <motion.div
+                    layoutId="agent-tab-indicator"
+                    className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-accent"
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                ) : null}
+                {key === "plan" && agent.plan && mobileTab !== "plan" ? (
+                  <span className="absolute right-6 top-2.5 h-2 w-2 rounded-full bg-accent" />
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <motion.div
         layout
         transition={{ layout: layoutTransition }}
-        className={cn(
-          "mx-auto flex min-h-0 w-full flex-1 flex-col gap-6 px-4 pb-0 pt-4 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6",
-          shouldShowCanvas
-            ? "max-w-screen-2xl lg:flex-row lg:items-stretch lg:gap-8"
-            : "max-w-7xl 2xl:max-w-[92rem]",
-        )}
+        className="mx-auto flex min-h-0 w-full max-w-screen-2xl flex-1 flex-col gap-6 px-4 pb-0 pt-4 sm:px-6 sm:pt-5 lg:flex-row lg:items-stretch lg:gap-8 lg:px-8 lg:pt-6"
       >
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col lg:h-full">
+        <main
+          className={cn(
+            "relative z-10 min-h-0 flex-1 flex-col lg:flex lg:h-full lg:border-r lg:border-border/40 lg:pr-2",
+            mobileTab === "plan" ? "hidden lg:flex" : "flex",
+          )}
+        >
+          {hasConversation ? (
+            <div className="relative z-10 shrink-0 border-b border-border/40 px-4 pb-3 pt-0 sm:px-6 lg:px-4 lg:pt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-soft text-accent">
+                    <Bot className="h-3.5 w-3.5" aria-hidden="true" />
+                  </div>
+                  <span className="font-brand text-xs font-bold uppercase tracking-[0.14em] text-ink-muted">
+                    Rozmowa
+                  </span>
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full transition-colors",
+                      agent.isBusy ? "animate-pulse bg-accent" : "bg-basil",
+                    )}
+                    aria-hidden="true"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => agent.resetSession()}
+                  disabled={agent.isBusy}
+                  className="rounded-full border border-border/60 bg-bg-elevated/60 px-3 py-1 font-brand text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink-muted shadow-xs transition-all hover:border-border hover:text-ink-soft disabled:opacity-40"
+                >
+                  Nowa rozmowa
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           <div
             className={cn(
               "flex-1 overflow-y-auto px-1 sm:px-2 lg:px-4",
@@ -390,13 +467,36 @@ export function AgentPage() {
                     </div>
                   ) : null}
 
+                  {quickReplyActions.length > 0 && !agent.isBusy ? (
+                    <motion.div
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: shouldReduceMotion ? 0.01 : 0.22,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className="flex flex-wrap gap-2 sm:ml-11"
+                    >
+                      {quickReplyActions.map((action) => (
+                        <button
+                          key={action.label}
+                          type="button"
+                          onClick={() => void agent.submitMessage(action.label)}
+                          className="rounded-full border border-border/60 bg-bg-elevated/70 px-3.5 py-2 text-xs font-semibold text-ink-soft shadow-xs backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-accent/40 hover:bg-bg-elevated hover:text-ink hover:shadow-sm focus-visible:outline-2 focus-visible:outline-accent"
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  ) : null}
+
                   <div ref={messagesEndRef} className="h-2" />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          <div className="shrink-0 px-4 pb-8 pt-6 sm:px-6 sm:pt-7 lg:px-8">
+          <div className="shrink-0 px-4 pb-5 pt-4 sm:px-6 sm:pb-8 sm:pt-6 lg:px-8">
             <form
               onSubmit={handleSubmit}
               className="relative mx-auto flex w-full max-w-3xl items-center gap-2 rounded-[2rem] border border-accent/45 bg-bg-elevated/90 p-2 shadow-[0_16px_42px_-24px_rgba(32,37,31,0.34),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_0_34px_-24px_rgba(232,111,69,0.5)] backdrop-blur-xl transition-all focus-within:border-accent/80 focus-within:shadow-[0_18px_46px_-24px_rgba(32,37,31,0.38),0_0_0_1px_rgba(255,255,255,0.68)_inset,0_0_0_4px_rgba(232,111,69,0.16),0_0_40px_-22px_rgba(232,111,69,0.75)] dark:border-accent/35 dark:bg-black/55 dark:shadow-[0_16px_42px_-24px_rgba(0,0,0,0.78),0_0_0_1px_rgba(255,255,255,0.08)_inset,0_0_34px_-24px_rgba(232,138,74,0.55)] xl:max-w-4xl"
@@ -433,81 +533,42 @@ export function AgentPage() {
           </div>
         </main>
 
-        <AnimatePresence initial={false}>
-          {shouldShowCanvas ? (
-            <motion.div
-              key="agent-canvas-column"
-              layout
-              initial={
-                shouldReduceMotion
-                  ? false
-                  : { opacity: 0, x: 44, scale: 0.965, filter: "blur(10px)" }
-              }
-              animate={
-                shouldReduceMotion
-                  ? { opacity: 1 }
-                  : { opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }
-              }
-              exit={
-                shouldReduceMotion
-                  ? { opacity: 0 }
-                  : { opacity: 0, x: 24, scale: 0.985, filter: "blur(6px)" }
-              }
-              transition={{
-                layout: layoutTransition,
-                opacity: {
-                  delay: shouldReduceMotion ? 0 : 0.16,
-                  duration: shouldReduceMotion ? 0.01 : 0.5,
-                  ease: premiumEase,
-                },
-                x: {
-                  delay: shouldReduceMotion ? 0 : 0.16,
-                  duration: shouldReduceMotion ? 0.01 : 0.66,
-                  ease: premiumEase,
-                },
-                scale: {
-                  delay: shouldReduceMotion ? 0 : 0.16,
-                  duration: shouldReduceMotion ? 0.01 : 0.66,
-                  ease: premiumEase,
-                },
-                filter: {
-                  delay: shouldReduceMotion ? 0 : 0.16,
-                  duration: shouldReduceMotion ? 0.01 : 0.5,
-                  ease: premiumEase,
-                },
-              }}
-              className="w-full shrink-0 lg:h-[calc(100%-2rem)] lg:w-[26rem] xl:w-[28rem]"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {agent.plan ? (
-                  <PlanCanvas
-                    canExecute={agent.canExecute}
-                    error={agent.isExecuting ? agent.error?.message : null}
-                    isExecuting={agent.isExecuting}
-                    isUpdating={agent.status === "planning" || isPacingSteps}
-                    plan={agent.plan}
-                    shouldReduceMotion={shouldReduceMotion}
-                    steps={pacedSteps}
-                    onExecute={() =>
-                      void agent.executePlan([
-                        "create_recipe",
-                        "populate_shopping_list",
-                      ])
-                    }
-                  />
-                ) : hasConversation ? (
-                  <AgentProcessCanvas
-                    error={agent.error?.message ?? null}
-                    shouldReduceMotion={shouldReduceMotion}
-                    steps={pacedSteps}
-                  />
-                ) : (
-                  <PlanPlaceholder shouldReduceMotion={shouldReduceMotion} />
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        <div
+          className={cn(
+            "min-h-0 lg:flex lg:w-[26rem] lg:shrink-0 lg:pb-6 xl:w-[28rem]",
+            mobileTab === "plan"
+              ? "flex flex-1 flex-col px-4 pb-6 lg:px-0"
+              : "hidden lg:flex",
+          )}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {agent.plan ? (
+              <PlanCanvas
+                canExecute={agent.canExecute}
+                error={agent.isExecuting ? agent.error?.message : null}
+                isExecuting={agent.isExecuting}
+                isUpdating={agent.status === "planning" || isPacingSteps}
+                plan={agent.plan}
+                shouldReduceMotion={shouldReduceMotion}
+                steps={pacedSteps}
+                onExecute={() =>
+                  void agent.executePlan([
+                    "create_recipe",
+                    "populate_shopping_list",
+                  ])
+                }
+              />
+            ) : hasConversation ? (
+              <AgentProcessCanvas
+                error={agent.error?.message ?? null}
+                shouldReduceMotion={shouldReduceMotion}
+                steps={pacedSteps}
+              />
+            ) : (
+              <PlanPlaceholder shouldReduceMotion={shouldReduceMotion} />
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
     </section>
   );
@@ -523,11 +584,11 @@ function AgentEmptyState({
 
   return (
     <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center pb-6 pt-2 text-center sm:pb-8 2xl:max-w-[86rem]">
-      <div className="pointer-events-none absolute inset-y-4 left-0 right-0 -z-10 hidden xl:block">
+      <div className="pointer-events-none absolute inset-y-4 left-0 right-0 -z-10 hidden overflow-hidden 2xl:block">
         <motion.div
           animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-8 top-[8%] text-accent/30 dark:text-accent/30 2xl:left-12"
+          className="absolute left-2 top-[6%] text-accent/[0.18] dark:text-accent/[0.16]"
         >
           <Sparkles className="h-10 w-10" aria-hidden="true" />
         </motion.div>
@@ -539,7 +600,7 @@ function AgentEmptyState({
             ease: "easeInOut",
             delay: 1,
           }}
-          className="absolute right-8 top-[14%] text-saffron/40 dark:text-saffron/40 2xl:right-12"
+          className="absolute right-2 top-[10%] text-saffron/20 dark:text-saffron/[0.18]"
         >
           <Bot className="h-12 w-12" aria-hidden="true" />
         </motion.div>
@@ -551,7 +612,7 @@ function AgentEmptyState({
             ease: "easeInOut",
             delay: 2,
           }}
-          className="absolute bottom-[8%] left-12 text-basil/30 dark:text-basil/30 2xl:left-20"
+          className="absolute bottom-[8%] left-3 text-basil/[0.18] dark:text-basil/[0.16]"
         >
           <Wand2 className="h-8 w-8" aria-hidden="true" />
         </motion.div>
@@ -563,33 +624,9 @@ function AgentEmptyState({
             ease: "easeInOut",
             delay: 0.4,
           }}
-          className="absolute bottom-[14%] right-12 text-accent/30 dark:text-accent/30 2xl:right-20"
+          className="absolute bottom-[10%] right-3 text-accent/[0.18] dark:text-accent/[0.16]"
         >
           <ChefHat className="h-9 w-9" aria-hidden="true" />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, -12, 0], x: [0, 8, 0] }}
-          transition={{
-            duration: 9,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1.6,
-          }}
-          className="absolute left-6 top-[46%] text-saffron/30 dark:text-saffron/30 2xl:left-16"
-        >
-          <ListChecks className="h-7 w-7" aria-hidden="true" />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, 10, 0], scale: [1, 0.94, 1] }}
-          transition={{
-            duration: 6.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2.2,
-          }}
-          className="absolute right-6 top-[50%] text-basil/30 dark:text-basil/30 2xl:right-16"
-        >
-          <ShoppingBasket className="h-8 w-8" aria-hidden="true" />
         </motion.div>
       </div>
 
@@ -765,15 +802,36 @@ function AgentProcessCanvas({
           {hasRunningStep ? "Agent pracuje" : "Analiza gotowa"}
         </Badge>
         <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-ink">
-          Układam kierunek
+          {hasRunningStep ? "Układam kierunek" : "Analiza gotowa"}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-          Zbieram kontekst, sprawdzam ograniczenia i przygotowuję następny ruch
-          w rozmowie.
+          {hasRunningStep
+            ? "Zbieram kontekst, sprawdzam ograniczenia i przygotowuję następny ruch."
+            : "Wszystko sprawdzone. Odpowiedź zaraz się pojawi."}
         </p>
       </div>
 
       <div className="relative mt-6">
+        {steps.length > 0 ? (
+          (() => {
+            const done = steps.filter(
+              (step) =>
+                step.status === "succeeded" || step.status === "skipped",
+            ).length;
+            const pct = Math.round((done / steps.length) * 100);
+
+            return (
+              <div className="mb-4 h-1 w-full overflow-hidden rounded-full bg-border/40">
+                <motion.div
+                  className="h-full rounded-full bg-accent"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                />
+              </div>
+            );
+          })()
+        ) : null}
         <AgentTimeline steps={steps} />
       </div>
 
@@ -962,24 +1020,69 @@ function PlanPlaceholder({
   return (
     <motion.aside
       key="plan-placeholder"
-      initial={shouldReduceMotion ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex min-h-[24rem] flex-col items-center justify-center rounded-[24px] border border-transparent bg-gradient-to-br from-bg-elevated/40 to-transparent p-8 text-center shadow-[0_1px_0_rgba(255,255,255,0.4)_inset] backdrop-blur-sm dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset] lg:min-h-[32rem]"
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex h-full min-h-[32rem] flex-col overflow-hidden rounded-[24px] border border-border/75 bg-gradient-to-br from-bg-elevated/95 via-bg-elevated/85 to-bg-sunken/55 shadow-[0_18px_46px_-28px_rgba(32,37,31,0.5),0_0_0_1px_rgba(255,255,255,0.62)_inset] backdrop-blur-md dark:border-white/[0.14] dark:from-white/[0.08] dark:via-white/[0.05] dark:to-black/35 dark:shadow-[0_20px_52px_-30px_rgba(0,0,0,0.86),0_0_0_1px_rgba(255,255,255,0.1)_inset]"
+      aria-label="Canvas planu - oczekiwanie"
     >
-      <div className="relative mb-5 flex h-16 w-16 items-center justify-center">
-        <div className="absolute inset-0 animate-pulse rounded-full bg-accent/15 blur-xl" />
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/20 bg-bg-elevated text-accent shadow-sm">
-          <Sparkles className="h-6 w-6" aria-hidden="true" />
+      <div
+        className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-accent/10 blur-[80px]"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -bottom-20 left-4 h-48 w-48 rounded-full bg-saffron/[0.08] blur-[70px]"
+        aria-hidden="true"
+      />
+
+      <div className="relative border-b border-border/60 bg-bg-elevated/55 px-6 py-4 dark:border-white/[0.08] dark:bg-white/[0.03]">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-border/70 bg-bg-elevated text-accent shadow-xs dark:border-white/10 dark:bg-white/[0.06]">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          </div>
+          <span className="font-brand text-xs font-bold uppercase tracking-[0.14em] text-ink-soft">
+            Canvas planu
+          </span>
         </div>
       </div>
-      <h3 className="font-brand text-lg font-semibold text-ink">
-        Canvas planu
-      </h3>
-      <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-soft">
-        Porozmawiaj z Agentem. Gdy zbierze wystarczająco dużo informacji,
-        przygotuje tutaj dla Ciebie konkretny plan do akceptacji.
-      </p>
+
+      <div className="relative flex flex-1 flex-col items-center justify-center p-8 text-center">
+        <div className="relative mb-6 flex h-20 w-20 items-center justify-center">
+          <div className="absolute inset-0 animate-pulse rounded-full bg-accent/10 blur-xl" />
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-bg-elevated text-accent shadow-[0_12px_28px_-18px_rgba(232,111,69,0.55)]">
+            <Sparkles className="h-7 w-7" aria-hidden="true" />
+          </div>
+        </div>
+
+        <h3 className="font-serif text-xl font-semibold leading-tight text-ink">
+          Tutaj pojawi się Twój plan
+        </h3>
+        <p className="mt-3 max-w-[22rem] text-sm leading-relaxed text-ink-soft">
+          Zacznij rozmowę z Agentem po lewej. Gdy zbierze wystarczająco dużo
+          informacji, skomponuje tutaj konkretny plan do akceptacji.
+        </p>
+
+        <div className="mt-8 w-full space-y-3 opacity-65">
+          <div className="mx-auto h-4 w-3/4 rounded-full bg-border-strong/60 dark:bg-white/[0.18]" />
+          <div className="h-3 w-full rounded-full bg-border/70 dark:bg-white/[0.12]" />
+          <div className="h-3 w-5/6 rounded-full bg-border/70 dark:bg-white/[0.12]" />
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {["Składniki", "Zakupy", "Czas"].map((label) => (
+              <div
+                key={label}
+                className="h-6 w-16 rounded-full bg-border/70 dark:bg-white/[0.12]"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative border-t border-border/60 bg-bg-elevated/45 px-6 py-4 dark:border-white/[0.08] dark:bg-white/[0.03]">
+        <p className="text-center text-xs leading-relaxed text-ink-soft">
+          Po akceptacji planu Agent automatycznie wygeneruje pełny przepis.
+        </p>
+      </div>
     </motion.aside>
   );
 }
@@ -1005,7 +1108,13 @@ function PlanSection({
       )}
     >
       <div className="mb-2 flex items-center gap-2">
-        <Icon className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+        <Icon
+          className={cn(
+            "h-4 w-4 transition-colors",
+            changed ? "text-accent" : "text-ink-muted",
+          )}
+          aria-hidden="true"
+        />
         <h3 className="font-brand text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
           {title}
         </h3>
