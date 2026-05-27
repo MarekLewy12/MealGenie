@@ -49,8 +49,44 @@ const starterPrompts = [
 
 const STEP_PACE_MS = 680;
 
+const shoppingUnitLabels: Record<string, string> = {
+  tbsp: "łyżka",
+  "tbsp.": "łyżka",
+  tbs: "łyżka",
+  tablespoon: "łyżka",
+  tablespoons: "łyżka",
+  tsp: "łyżeczka",
+  "tsp.": "łyżeczka",
+  teaspoon: "łyżeczka",
+  teaspoons: "łyżeczka",
+  pinch: "szczypta",
+  pinches: "szczypta",
+  pcs: "szt.",
+  "pcs.": "szt.",
+  pc: "szt.",
+  "pc.": "szt.",
+  piece: "szt.",
+  pieces: "szt.",
+  pack: "opak.",
+  package: "opak.",
+  packages: "opak.",
+};
+
 function getMessageKey(message: AgentMessage, index: number) {
   return `${message.role}-${index}-${message.content}`;
+}
+
+function formatShoppingUnit(unit?: string | null) {
+  if (!unit) {
+    return "";
+  }
+
+  const normalized = unit.trim().toLowerCase().replace(/\s+/g, " ");
+  return shoppingUnitLabels[normalized] ?? unit;
+}
+
+function formatShoppingAmount(quantity: number, unit?: string | null) {
+  return [quantity, formatShoppingUnit(unit)].filter(Boolean).join(" ");
 }
 
 function usePacedAgentSteps({
@@ -308,21 +344,41 @@ export function AgentPage() {
           )}
         >
           {hasConversation ? (
-            <div className="relative z-10 flex shrink-0 items-center justify-end border-b border-border/40 px-4 py-2.5 sm:px-6 lg:px-4">
+            <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-border/40 px-4 py-3 sm:px-6 lg:px-8">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-accent/20 bg-accent-soft text-accent shadow-sm">
+                  <Bot className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div>
+                  <h1 className="font-serif text-xl font-semibold text-ink sm:text-2xl">
+                    Rozmowa z Agentem
+                  </h1>
+                  <p className="text-sm text-ink-muted">
+                    Wspólnie planujemy posiłek
+                  </p>
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={() => agent.resetSession()}
                 disabled={agent.isBusy}
-                className="flex items-center gap-1.5 rounded-full border border-border/60 bg-bg-elevated/60 px-3 py-1 font-brand text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink-muted shadow-xs transition-all hover:border-border hover:text-ink-soft disabled:opacity-40"
+                className="group flex items-center gap-2 rounded-lg border border-border/60 bg-bg-elevated px-3 py-1.5 text-sm font-semibold text-ink-soft shadow-xs transition duration-fast hover:border-accent/40 hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent disabled:opacity-50"
               >
-                <span
+                <Loader2
                   className={cn(
-                    "h-1.5 w-1.5 rounded-full transition-colors",
-                    agent.isBusy ? "animate-pulse bg-accent" : "bg-basil",
+                    "h-4 w-4",
+                    agent.isBusy ? "animate-spin text-accent" : "hidden",
                   )}
                   aria-hidden="true"
                 />
-                Nowa rozmowa
+                {!agent.isBusy ? (
+                  <Sparkles
+                    className="h-4 w-4 text-ink-muted group-hover:text-accent"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                <span className="hidden sm:inline-block">Nowa rozmowa</span>
               </button>
             </div>
           ) : null}
@@ -370,119 +426,121 @@ export function AgentPage() {
               ) : (
                 <motion.div
                   key="agent-conversation"
-                  className="flex flex-col gap-6 pb-6"
+                  className="flex flex-col pb-6"
                   initial={shouldReduceMotion ? false : { opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0 }}
                   transition={{ duration: shouldReduceMotion ? 0.01 : 0.22 }}
                 >
-                  {agent.messages.map((message, index) => (
-                    <motion.div
-                      key={getMessageKey(message, index)}
-                      layout
-                      initial={
-                        shouldReduceMotion
-                          ? false
-                          : { opacity: 0, y: 16, scale: 0.98 }
-                      }
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        duration: shouldReduceMotion ? 0.01 : 0.35,
-                        ease: premiumEase,
-                        layout: { duration: 0.35, ease: premiumEase },
-                      }}
-                      className={cn(
-                        "flex w-full",
-                        message.role === "user" ? "justify-end" : "justify-start",
-                      )}
-                    >
-                      <div className="flex max-w-[88%] items-end gap-3 sm:max-w-[80%] lg:max-w-[85%]">
-                        {message.role === "assistant" ? (
-                          <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent sm:flex">
-                            <Bot className="h-4 w-4" aria-hidden="true" />
-                          </div>
-                        ) : null}
-
-                        <div
-                          className={cn(
-                            "px-5 py-4 text-sm leading-relaxed shadow-sm",
-                            message.role === "user"
-                              ? "rounded-2xl rounded-br-sm bg-accent text-white shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)] transition-shadow duration-200 hover:shadow-[0_10px_30px_-10px_rgba(232,111,69,0.65)]"
-                              : "rounded-2xl rounded-bl-sm border border-border/50 bg-gradient-to-br from-bg-elevated/90 to-bg-elevated/70 text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:from-white/[0.07] dark:to-white/[0.04]",
-                          )}
-                        >
-                          {message.role === "user" ? (
-                            <p className="whitespace-pre-wrap">
-                              {message.content}
-                            </p>
-                          ) : (
-                            <div className="prose prose-sm max-w-none prose-p:my-0 prose-p:leading-relaxed prose-strong:text-ink prose-ul:my-2 prose-li:my-0 dark:prose-invert">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm, remarkBreaks]}
-                              >
-                                {message.content}
-                              </ReactMarkdown>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  <AnimatePresence>
-                    {agent.isSending ? (
+                  <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 xl:max-w-4xl">
+                    {agent.messages.map((message, index) => (
                       <motion.div
-                        key="typing-indicator"
+                        key={getMessageKey(message, index)}
                         layout
                         initial={
                           shouldReduceMotion
                             ? false
-                            : { opacity: 0, y: 6, scale: 0.95 }
+                            : { opacity: 0, y: 16, scale: 0.98 }
                         }
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{
-                          opacity: 0,
-                          y: -4,
-                          scale: 0.96,
-                          transition: { duration: 0.15 },
-                        }}
                         transition={{
-                          duration: 0.2,
-                          ease: [0.22, 1, 0.36, 1],
+                          duration: shouldReduceMotion ? 0.01 : 0.35,
+                          ease: premiumEase,
+                          layout: { duration: 0.35, ease: premiumEase },
                         }}
-                        className="flex justify-start sm:ml-11"
+                        className={cn(
+                          "flex w-full",
+                          message.role === "user" ? "justify-end" : "justify-start",
+                        )}
                       >
-                        <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border/50 bg-gradient-to-br from-bg-elevated/90 to-bg-elevated/70 px-4 py-3.5 shadow-sm backdrop-blur-md">
-                          {[0, 160, 320].map((delay) => (
-                            <span
-                              key={delay}
-                              className="h-2 w-2 rounded-full bg-ink-muted/60"
-                              style={{
-                                animation: shouldReduceMotion
-                                  ? "none"
-                                  : `agentTypingBounce 1.2s ease-in-out ${delay}ms infinite`,
-                              }}
-                            />
-                          ))}
+                        <div className="flex max-w-[88%] items-end gap-3 sm:max-w-[80%] lg:max-w-[85%]">
+                          {message.role === "assistant" ? (
+                            <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent sm:flex">
+                              <Bot className="h-4 w-4" aria-hidden="true" />
+                            </div>
+                          ) : null}
+
+                          <div
+                            className={cn(
+                              "px-5 py-4 text-base leading-relaxed shadow-sm",
+                              message.role === "user"
+                                ? "rounded-2xl rounded-br-sm bg-accent text-white shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)] transition-shadow duration-200 hover:shadow-[0_10px_30px_-10px_rgba(232,111,69,0.65)]"
+                                : "rounded-2xl rounded-bl-sm border border-border/50 bg-gradient-to-br from-bg-elevated/90 to-bg-elevated/70 text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:from-white/[0.07] dark:to-white/[0.04]",
+                            )}
+                          >
+                            {message.role === "user" ? (
+                              <p className="whitespace-pre-wrap">
+                                {message.content}
+                              </p>
+                            ) : (
+                              <div className="prose prose-base max-w-none prose-p:my-0 prose-p:leading-relaxed prose-strong:text-ink prose-ul:my-2 prose-li:my-0 dark:prose-invert">
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm, remarkBreaks]}
+                                >
+                                  {message.content}
+                                </ReactMarkdown>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
-                    ) : null}
-                  </AnimatePresence>
+                    ))}
 
-                  {agent.error && !agent.isExecuting ? (
-                    <div className="ml-0 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux sm:ml-11">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <span>{agent.error.message}</span>
-                        <button
-                          type="button"
-                          onClick={handleRestartFromError}
-                          className="inline-flex shrink-0 items-center justify-center rounded-full border border-bordeaux/20 bg-bg-elevated/80 px-3 py-1.5 font-brand text-xs font-semibold uppercase tracking-[0.12em] text-bordeaux shadow-sm transition-all hover:-translate-y-0.5 hover:border-bordeaux/35 hover:bg-bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux"
+                    <AnimatePresence>
+                      {agent.isSending ? (
+                        <motion.div
+                          key="typing-indicator"
+                          layout
+                          initial={
+                            shouldReduceMotion
+                              ? false
+                              : { opacity: 0, y: 6, scale: 0.95 }
+                          }
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{
+                            opacity: 0,
+                            y: -4,
+                            scale: 0.96,
+                            transition: { duration: 0.15 },
+                          }}
+                          transition={{
+                            duration: 0.2,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="flex justify-start sm:ml-11"
                         >
-                          Popraw prompt
-                        </button>
+                          <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border/50 bg-gradient-to-br from-bg-elevated/90 to-bg-elevated/70 px-4 py-3.5 shadow-sm backdrop-blur-md">
+                            {[0, 160, 320].map((delay) => (
+                              <span
+                                key={delay}
+                                className="h-2 w-2 rounded-full bg-ink-muted/60"
+                                style={{
+                                  animation: shouldReduceMotion
+                                    ? "none"
+                                    : `agentTypingBounce 1.2s ease-in-out ${delay}ms infinite`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+
+                    {agent.error && !agent.isExecuting ? (
+                      <div className="ml-0 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux sm:ml-11">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <span>{agent.error.message}</span>
+                          <button
+                            type="button"
+                            onClick={handleRestartFromError}
+                            className="inline-flex shrink-0 items-center justify-center rounded-full border border-bordeaux/20 bg-bg-elevated/80 px-3 py-1.5 font-brand text-xs font-semibold uppercase tracking-[0.12em] text-bordeaux shadow-sm transition-all hover:-translate-y-0.5 hover:border-bordeaux/35 hover:bg-bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux"
+                          >
+                            Popraw prompt
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
+                    ) : null}
+                  </div>
 
                   <div ref={messagesEndRef} className="h-2" />
                 </motion.div>
@@ -494,7 +552,7 @@ export function AgentPage() {
             <form
               onSubmit={handleSubmit}
               className={cn(
-                "relative mx-auto flex w-full max-w-3xl items-center gap-2 rounded-[2rem] border border-accent/45 bg-bg-elevated/90 p-2 shadow-[0_16px_42px_-24px_rgba(32,37,31,0.34),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_0_34px_-24px_rgba(232,111,69,0.5)] backdrop-blur-xl transition-all focus-within:border-accent/80 focus-within:shadow-[0_18px_46px_-24px_rgba(32,37,31,0.38),0_0_0_1px_rgba(255,255,255,0.68)_inset,0_0_0_4px_rgba(232,111,69,0.16),0_0_40px_-22px_rgba(232,111,69,0.75)] dark:border-accent/35 dark:bg-black/55 dark:shadow-[0_16px_42px_-24px_rgba(0,0,0,0.78),0_0_0_1px_rgba(255,255,255,0.08)_inset,0_0_34px_-24px_rgba(232,138,74,0.55)] xl:max-w-4xl",
+                "relative mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[2rem] border border-accent/45 bg-bg-elevated/90 p-2 shadow-[0_16px_42px_-24px_rgba(32,37,31,0.34),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_0_34px_-24px_rgba(232,111,69,0.5)] backdrop-blur-xl transition-all focus-within:border-accent/80 focus-within:shadow-[0_18px_46px_-24px_rgba(32,37,31,0.38),0_0_0_1px_rgba(255,255,255,0.68)_inset,0_0_0_4px_rgba(232,111,69,0.16),0_0_40px_-22px_rgba(232,111,69,0.75)] dark:border-accent/35 dark:bg-black/55 dark:shadow-[0_16px_42px_-24px_rgba(0,0,0,0.78),0_0_0_1px_rgba(255,255,255,0.08)_inset,0_0_34px_-24px_rgba(232,138,74,0.55)] xl:max-w-4xl",
                 isBusy &&
                   "border-accent/70 shadow-[0_16px_42px_-24px_rgba(32,37,31,0.34),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_0_0_3px_rgba(232,111,69,0.12),0_0_34px_-20px_rgba(232,111,69,0.65)]",
               )}
@@ -513,7 +571,7 @@ export function AgentPage() {
                 }
                 rows={1}
                 disabled={isBusy}
-                className="agent-message-input min-h-11 flex-1 resize-none overflow-hidden bg-transparent px-3 py-2.5 text-sm leading-6 text-ink outline-none transition-[height] duration-200 ease-out placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                className="agent-message-input min-h-12 flex-1 resize-none overflow-hidden bg-transparent px-4 py-3 text-base leading-6 text-ink outline-none transition-[height] duration-200 ease-out placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
               />
               <button
                 type="submit"
@@ -536,7 +594,11 @@ export function AgentPage() {
           transition={{ layout: layoutTransition }}
           className={cn(
             "min-h-0 lg:shrink-0 lg:pb-6",
-            agent.plan ? "lg:w-[32rem] xl:w-[36rem]" : "lg:w-[24rem] xl:w-[26rem]",
+            agent.plan
+              ? "lg:w-[32rem] xl:w-[36rem] 2xl:w-[42rem]"
+              : hasConversation
+                ? "lg:w-[24rem] xl:w-[26rem] 2xl:w-[28rem]"
+                : "lg:w-[30rem] xl:w-[34rem] 2xl:w-[38rem]",
             mobileTab === "plan"
               ? "flex flex-1 flex-col px-4 pb-6 lg:flex lg:px-0"
               : "hidden lg:flex",
@@ -893,7 +955,7 @@ function PlanCanvas({
 
       <div
         className={cn(
-          "relative border-b border-border bg-bg-sunken/40 px-6 py-5 transition-colors",
+          "relative border-b border-border bg-bg-sunken/40 px-6 py-5 transition-colors sm:px-8 xl:px-10",
           changedSections.has("overview") ? "bg-accent-soft/50" : null,
         )}
       >
@@ -909,10 +971,10 @@ function PlanCanvas({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-ink">
+          <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-ink sm:text-3xl">
             {plan.title}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+          <p className="mt-2 text-base leading-relaxed text-ink-soft">
             {plan.summary}
           </p>
           {plan.revision ? (
@@ -923,14 +985,14 @@ function PlanCanvas({
         </motion.div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-8 xl:px-10">
         {isUpdating && steps.length > 0 ? (
           <div className="mb-5">
             <AgentTimeline steps={steps} />
           </div>
         ) : null}
 
-        <div className="grid gap-6 text-sm">
+        <div className="grid gap-7 text-base">
           <PlanSection
             changed={changedSections.has("details")}
             title="Uzasadnienie"
@@ -945,16 +1007,20 @@ function PlanCanvas({
             icon={ChefHat}
           >
             {plan.usedIngredients.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
                 {plan.usedIngredients.map((item) => (
-                  <span
+                  <li
                     key={item}
-                    className="rounded-full border border-basil/20 bg-basil-soft px-3 py-1 text-xs font-semibold text-basil"
+                    className="flex items-center gap-2.5 text-[0.95rem] text-ink"
                   >
-                    {item}
-                  </span>
+                    <div
+                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-basil/60"
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">{item}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : (
               <p className="italic text-ink-muted">Agent nie wskazał bazy dania.</p>
             )}
@@ -966,24 +1032,34 @@ function PlanCanvas({
             icon={ShoppingBasket}
           >
             {plan.shoppingDraft.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="grid gap-3 sm:grid-cols-2">
                 {plan.shoppingDraft.map((item) => (
                   <li
                     key={`${item.name}-${item.unit ?? ""}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-bg-sunken px-3 py-2.5 shadow-xs"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-bg-sunken px-4 py-3 shadow-xs"
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-accent" />
-                      <span className="font-medium text-ink">{item.name}</span>
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <div
+                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate font-medium text-ink">
+                        {item.name}
+                      </span>
                     </div>
-                    <span className="text-xs font-semibold text-ink-muted">
-                      {item.quantity} {item.unit ?? ""}
+                    <span className="shrink-0 text-sm font-semibold text-ink-muted">
+                      {formatShoppingAmount(item.quantity, item.unit)}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="italic text-ink-muted">Masz wszystko, co potrzebne!</p>
+              <div className="flex items-center gap-2 rounded-xl border border-basil/20 bg-basil-soft/40 px-4 py-3 text-basil">
+                <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="text-[0.95rem] font-medium">
+                  Masz wszystko, co potrzebne!
+                </span>
+              </div>
             )}
           </PlanSection>
         </div>
@@ -995,7 +1071,7 @@ function PlanCanvas({
         ) : null}
       </div>
 
-      <div className="border-t border-border bg-bg-elevated p-5">
+      <div className="border-t border-border bg-bg-elevated px-6 py-5 sm:px-8 xl:px-10">
         <Button
           type="button"
           disabled={!canExecute || isExecuting || isUpdating}
@@ -1125,7 +1201,7 @@ function PlanSection({
           )}
           aria-hidden="true"
         />
-        <h3 className="font-brand text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
+        <h3 className="font-brand text-sm font-bold uppercase tracking-[0.12em] text-ink-muted">
           {title}
         </h3>
         {changed ? (

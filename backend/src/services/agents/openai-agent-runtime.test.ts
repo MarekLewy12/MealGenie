@@ -73,12 +73,19 @@ describe("runOpenAIAgentRuntime", () => {
     expect(result.decision.type).toBe("ask_follow_up");
     expect(result.model).toBe("gpt-5.4-mini");
     expect(result.inputTokens).toBe(123);
+    const requestBody = fake.calls[0]?.body as { instructions?: string };
+
+    expect(requestBody.instructions).toEqual(
+      expect.stringContaining(
+        'jesli uzytkownik mowi "dla mnie", "dla siebie" albo "dla 1 osoby"',
+      ),
+    );
+    expect(requestBody.instructions).toEqual(
+      expect.stringContaining("shoppingDraft.unit"),
+    );
     expect(fake.calls[0]?.body).toEqual(
       expect.objectContaining({
         model: "gpt-5.4-mini",
-        instructions: expect.stringContaining(
-          'jesli uzytkownik mowi "dla mnie", "dla siebie" albo "dla 1 osoby"',
-        ),
         store: false,
         reasoning: { effort: "low" },
         text: expect.objectContaining({ verbosity: "low" }),

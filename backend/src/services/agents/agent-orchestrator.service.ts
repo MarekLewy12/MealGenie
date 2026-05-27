@@ -219,27 +219,6 @@ function buildStepsForDecision(args: {
   });
 }
 
-function getLatestUserMessage(messages: AgentMessage[]): string {
-  return (
-    [...messages]
-      .reverse()
-      .find((message) => message.role === "user")
-      ?.content.toLowerCase() ?? ""
-  );
-}
-
-function hasServingSignal(message: string): boolean {
-  return /\b(\d+\s*(osób|osoby|osobe|osoba|porcje|porcji|porcja)|dla\s+\d+|samemu|sam|sama|we\s+dwoje|dla\s+rodziny)\b/u.test(
-    message,
-  );
-}
-
-function hasStyleSignal(message: string): boolean {
-  return /(wytrawn|słodk|slodk|lekki|lekka|sycąc|sycac|fit|protein|bez mięsa|bez miesa|ostry|łagodn|lagodn|kremow|chrup|jajecznic|omlet|szakszuk|kanapk|sałat|salat)/u.test(
-    message,
-  );
-}
-
 function shouldPreferFollowUpOnFirstTurn(args: {
   decision: AgentDecision;
   forcePlan: boolean;
@@ -261,8 +240,7 @@ function shouldPreferFollowUpOnFirstTurn(args: {
     return false;
   }
 
-  const message = getLatestUserMessage(args.messages);
-  return !hasServingSignal(message) || !hasStyleSignal(message);
+  return args.decision.missingFields.length > 0;
 }
 
 function buildFirstTurnFollowUp(

@@ -106,4 +106,67 @@ describe("OpenAI agent structured output schema", () => {
     expect(decision.plan.mealTeaser.calories).toBeUndefined();
     expect(decision.plan.shoppingDraft[0]?.unit).toBeUndefined();
   });
+
+  it("normalizes English shopping draft units into Polish display units", () => {
+    const decision = parseOpenAIAgentDecisionOutput({
+      decision: {
+        type: "show_plan",
+        message: "Mam plan na szybki obiad.",
+        missingFields: [],
+        collectedContext: [],
+        plan: {
+          id: "plan-1",
+          title: "Jajka z ziołami",
+          summary: "Szybkie danie z jajek.",
+          rationale: "Pasuje do krótkiego czasu.",
+          mealType: "BREAKFAST",
+          usedIngredients: ["jajka"],
+          missingIngredients: ["szczypiorek"],
+          assumptions: [],
+          warnings: [],
+          mealTeaser: {
+            name: "Jajka z ziołami",
+            description: "Prosty posiłek.",
+            difficulty: "Easy",
+            cookingTimeMinutes: 10,
+            calories: null,
+            ingredients: [{ name: "jajka", amount: "2 szt." }],
+            stepsSummary: ["Usmaż jajka."],
+            imagePromptEn:
+              "Photorealistic food photo of eggs with herbs, natural light.",
+            imageUrl: null,
+          },
+          servings: 1,
+          recipeContext: null,
+          shoppingDraft: [
+            {
+              name: "oliwa",
+              quantity: 1,
+              unit: "tbsp",
+              category: null,
+            },
+            {
+              name: "sól",
+              quantity: 1,
+              unit: "pinch",
+              category: null,
+            },
+          ],
+        },
+        errorCode: "",
+        retryable: false,
+      },
+    });
+
+    if (decision.type !== "show_plan") {
+      throw new Error("Expected show_plan decision");
+    }
+
+    expect(decision.plan.shoppingDraft).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "oliwa", unit: "łyżka" }),
+        expect.objectContaining({ name: "sól", unit: "szczypta" }),
+      ]),
+    );
+  });
 });

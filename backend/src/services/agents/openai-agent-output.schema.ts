@@ -72,6 +72,38 @@ export const OpenAIAgentDecisionOutputSchema = z.object({
 
 type OpenAIDecision = z.infer<typeof OpenAIDecisionSchema>;
 
+const SHOPPING_UNIT_ALIASES: Record<string, string> = {
+  tbsp: "łyżka",
+  "tbsp.": "łyżka",
+  tbs: "łyżka",
+  tablespoon: "łyżka",
+  tablespoons: "łyżka",
+  tsp: "łyżeczka",
+  "tsp.": "łyżeczka",
+  teaspoon: "łyżeczka",
+  teaspoons: "łyżeczka",
+  pinch: "szczypta",
+  pinches: "szczypta",
+  pcs: "szt.",
+  "pcs.": "szt.",
+  pc: "szt.",
+  "pc.": "szt.",
+  piece: "szt.",
+  pieces: "szt.",
+  pack: "opak.",
+  package: "opak.",
+  packages: "opak.",
+};
+
+function normalizeShoppingUnit(unit: string | null | undefined) {
+  if (unit == null) {
+    return unit;
+  }
+
+  const normalized = unit.trim().toLowerCase().replace(/\s+/g, " ");
+  return SHOPPING_UNIT_ALIASES[normalized] ?? unit;
+}
+
 function stripNullProperties(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(stripNullProperties);
@@ -86,6 +118,51 @@ function stripNullProperties(value: unknown): unknown {
       .filter(([, entryValue]) => entryValue !== null)
       .map(([key, entryValue]) => [key, stripNullProperties(entryValue)]),
   );
+}
+
+function normalizeShoppingDraftUnits(plan: unknown): unknown {
+  if (!plan || typeof plan !== "object") {
+    return plan;
+  }
+
+  const planRecord = plan as Record<string, unknown>;
+  if (!Array.isArray(planRecord.shoppingDraft)) {
+    return plan;
+  }
+
+  return {
+    ...planRecord,
+    shoppingDraft: planRecord.shoppingDraft.map((item) => {
+      if (!item || typeof item !== "object") {
+        return item;
+      }
+
+      const itemRecord = item as Record<string, unknown>;
+      const unit = itemRecord.unit;
+      const normalizedUnit =
+        typeof unit === "string"
+          ? normalizeShoppingUnit(unit)
+          : unit == null
+            ? unit
+            : unit;
+
+      return {
+        ...itemRecord,
+        unit: normalizedUnit,
+      };
+    }),
+  };
+}
+
+function normalizeDecisionShoppingUnits(decision: AgentDecision): AgentDecision {
+  if (decision.type !== "show_plan") {
+    return decision;
+  }
+
+  return {
+    ...decision,
+    plan: normalizeShoppingDraftUnits(decision.plan) as typeof decision.plan,
+  };
 }
 
 function toDomainDecisionInput(decision: OpenAIDecision): unknown {
@@ -108,7 +185,7 @@ function toDomainDecisionInput(decision: OpenAIDecision): unknown {
       message: decision.message,
       missingFields: decision.missingFields,
       collectedContext,
-      plan: stripNullProperties(decision.plan),
+      plan: normalizeShoppingDraftUnits(stripNullProperties(decision.plan)),
     };
   }
 
@@ -123,7 +200,7 @@ function toDomainDecisionInput(decision: OpenAIDecision): unknown {
 export function parseOpenAIAgentDecisionOutput(parsed: unknown): AgentDecision {
   const domainDecision = AgentDecisionSchema.safeParse(parsed);
   if (domainDecision.success) {
-    return domainDecision.data;
+    return normalizeDecisionShoppingUnits(domainDecision.data);
   }
 
   const output = OpenAIAgentDecisionOutputSchema.parse(
@@ -132,5 +209,7 @@ export function parseOpenAIAgentDecisionOutput(parsed: unknown): AgentDecision {
       : { decision: parsed },
   );
 
-  return AgentDecisionSchema.parse(toDomainDecisionInput(output.decision));
+  return normalizeDecisionShoppingUnits(
+    AgentDecisionSchema.parse(toDomainDecisionInput(output.decision)),
+  );
 }

@@ -118,7 +118,7 @@ describe("runAgentTurn", () => {
     expect(result.outputTokens).toBe(8);
   });
 
-  it("asks a follow-up on the first turn when a plan lacks enough user context", async () => {
+  it("allows a complete first-turn plan returned by the model", async () => {
     const fake = createRuntime([
       {
         decision: {
@@ -138,10 +138,44 @@ describe("runAgentTurn", () => {
       fake.runtime,
     );
 
-    expect(result.status).toBe("collecting_context");
-    expect(result.assistantContent).toContain("dla ilu osób");
-    expect(result.state.canExecute).toBe(false);
-    expect(result.plan).toBeNull();
+    expect(result.status).toBe("awaiting_confirmation");
+    expect(result.plan?.title).toBe("Ryż z jajkiem");
+    expect(result.state.canExecute).toBe(true);
+  });
+
+  it("allows a first-turn plan for 'dla mnie' when the model resolved servings", async () => {
+    const fake = createRuntime([
+      {
+        decision: {
+          type: "show_plan",
+          message: "Mam draft planu.",
+          missingFields: [],
+          plan: { ...createPlan(), servings: 1 },
+        },
+        model: "gpt-5.4-mini",
+        inputTokens: 20,
+        outputTokens: 8,
+      },
+    ]);
+
+    const result = await runAgentTurn(
+      {
+        messages: [
+          {
+            role: "user",
+            content:
+              "Chcę lekką kolację dla mnie, mam jajka i ryż, maksymalnie 20 minut.",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        state: createState(),
+      },
+      fake.runtime,
+    );
+
+    expect(result.status).toBe("awaiting_confirmation");
+    expect(result.plan?.servings).toBe(1);
+    expect(result.state.canExecute).toBe(true);
   });
 
   it("allows a first-turn plan when the user gives servings and style", async () => {

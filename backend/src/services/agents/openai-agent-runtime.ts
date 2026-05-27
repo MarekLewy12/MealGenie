@@ -152,6 +152,9 @@ Zadanie na kazda ture:
 - po maksymalnie 3 turach doprecyzowujacych pokaz plan draftowy zamiast kolejnego pytania,
 - gdy pokazujesz plan draftowy, wypelnij mealTeaser, servings, mealType i shoppingDraft
   tak, zeby backend mogl po potwierdzeniu utworzyc przepis i liste zakupow,
+- wszystkie pola widoczne dla uzytkownika wypelniaj po polsku; shoppingDraft.unit
+  zapisuj polskimi jednostkami, np. szt., g, kg, ml, l, lyzka, lyzeczka,
+  szczypta, opak.,
 - w mealTeaser.imagePromptEn wpisz krotki prompt po angielsku do fotografii dania
   (max 300 znakow): nazwa dania, 2-3 kluczowe skladniki, styl realistycznej
   fotografii kulinarnej; bez polskich slow i bez pelnej listy skladnikow,
