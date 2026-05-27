@@ -1,8 +1,8 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 import { cn } from "../../utils/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "pill";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "pill" | "danger";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -19,20 +19,26 @@ const variantClasses: Record<ButtonVariant, string> = {
     "border-transparent bg-transparent text-ink-soft hover:bg-accent-soft hover:text-ink active:bg-bg-sunken",
   pill:
     "rounded-pill border-border-strong bg-bg-elevated text-accent shadow-xs hover:border-accent hover:bg-accent-soft hover:text-accent-deep active:bg-bg-sunken",
+  danger:
+    "border-bordeaux bg-bordeaux text-white shadow-[0_14px_30px_-20px_rgba(128,36,36,0.72)] hover:border-bordeaux hover:bg-bordeaux/90 hover:text-white active:bg-bordeaux/85 focus-visible:outline-bordeaux",
 };
 
-export function Button({
-  variant = "primary",
-  type = "button",
-  leftIcon,
-  rightIcon,
-  className,
-  children,
-  disabled,
-  ...props
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = "primary",
+    type = "button",
+    leftIcon,
+    rightIcon,
+    className,
+    children,
+    disabled,
+    ...props
+  },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       type={type}
       disabled={disabled}
       className={cn(
@@ -50,4 +56,4 @@ export function Button({
       {rightIcon ? <span className="shrink-0" aria-hidden="true">{rightIcon}</span> : null}
     </button>
   );
-}
+});

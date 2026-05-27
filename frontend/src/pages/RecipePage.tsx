@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useParams, Navigate } from "react-router-dom";
+import { useLocation, useParams, Navigate, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -12,6 +12,7 @@ import {
   Scale,
   Share2,
   Sparkles,
+  Trash2,
   Users,
   XCircle,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import {
 } from "../services/api";
 import { RecipeLoadingWithPreview } from "../components/RecipeLoadingWithPreview";
 import { DashboardBackLink } from "../components/DashboardBackLink";
+import { useDeleteMealHistory } from "../hooks/useDeleteMealHistory";
 import {
   IngredientsSection,
   NutritionSection,
@@ -43,7 +45,7 @@ import type {
   RecipeGenerationContext,
   RecipeRouteState,
 } from "../types/meal";
-import { Button, Card, Eyebrow, IconButton } from "../components/ui";
+import { Button, Card, ConfirmDialog, Eyebrow, IconButton } from "../components/ui";
 
 type RecipeView = "loading" | "recipe" | "error";
 
@@ -58,6 +60,7 @@ function getRecipeServings(recipeContext?: RecipeGenerationContext) {
 export function RecipePage() {
   const { state } = useLocation() as { state?: RecipeRouteState };
   const { id: routeId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const teaser = state?.teaser;
   const unusedImageUrls = state?.unusedImageUrls;
   const recipeContext = state?.recipeContext;
@@ -69,6 +72,7 @@ export function RecipePage() {
   const [isExporting, setIsExporting] = useState(false);
   const [shareId, setShareId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [localRecipe, setLocalRecipe] = useState<FullRecipe | null>(null);
 
@@ -223,6 +227,13 @@ export function RecipePage() {
 
   const shareMutation = useMutation({
     mutationFn: (id: string) => toggleMealShare(id),
+  });
+  const deleteMutation = useDeleteMealHistory({
+    successMessage: "Usunięto przepis.",
+    onSuccess: () => {
+      setIsDeleteDialogOpen(false);
+      navigate("/recipes");
+    },
   });
 
   if (!teaser && !routeId) {
@@ -458,6 +469,40 @@ export function RecipePage() {
                 />
               ) : null}
 
+              {mealId ? (
+                <>
+                  <IconButton
+                    variant="ghost"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    disabled={deleteMutation.isPending}
+                    aria-label="Usuń przepis"
+                    className="text-bordeaux hover:bg-bordeaux/10 hover:text-bordeaux sm:hidden"
+                    icon={
+                      deleteMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )
+                    }
+                  />
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    disabled={deleteMutation.isPending}
+                    className="hidden px-3 text-bordeaux hover:bg-bordeaux/10 hover:text-bordeaux sm:inline-flex"
+                    leftIcon={
+                      deleteMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )
+                    }
+                  >
+                    Usuń
+                  </Button>
+                </>
+              ) : null}
+
               <IconButton
                 variant="ghost"
                 onClick={handleExportPdf}
@@ -511,6 +556,21 @@ export function RecipePage() {
           ) : null}
         </div>
       </header>
+
+      {mealId && recipe ? (
+        <ConfirmDialog
+          open={isDeleteDialogOpen}
+          tone="danger"
+          title="Usunąć przepis?"
+          description={`"${recipe.name || headerData?.name || "Przepis"}" zniknie z historii. Tej akcji nie można cofnąć.`}
+          confirmLabel="Usuń przepis"
+          cancelLabel="Zostaw"
+          pendingLabel="Usuwam..."
+          isPending={deleteMutation.isPending}
+          onCancel={() => setIsDeleteDialogOpen(false)}
+          onConfirm={() => deleteMutation.deleteMeal(mealId)}
+        />
+      ) : null}
 
       <AnimatePresence mode="wait">
         {view === "loading" ? (

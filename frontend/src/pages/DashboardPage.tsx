@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
@@ -11,6 +11,7 @@ import {
   Plus,
   ShoppingCart,
   Sparkles,
+  Trash2,
   Utensils,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -18,8 +19,10 @@ import { Link } from "react-router-dom";
 
 import { AppPageHeader } from "../components/AppPageHeader";
 import { MealHistoryCard } from "../components/MealHistoryCard";
+import { useDeleteMealHistory } from "../hooks/useDeleteMealHistory";
 import {
   Badge,
+  ConfirmDialog,
   Eyebrow,
   HandwrittenKicker,
   MealEmoji,
@@ -714,87 +717,124 @@ function AssistantCard({ onOpen }: { onOpen: () => void }) {
 }
 
 function HeroMealCard({ meal }: { meal: MealHistoryItem }) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const deleteMutation = useDeleteMealHistory({
+    onSuccess: () => setIsDeleteDialogOpen(false),
+  });
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
   const imageUrl = meal.imageUrl?.startsWith("/")
     ? `${apiBaseUrl}${meal.imageUrl}`
     : meal.imageUrl;
 
   return (
-    <Link
-      to={`/recipe/${meal.id}`}
-      className="group relative block min-h-72 overflow-hidden rounded-2xl text-ink shadow-lg transition duration-base hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:min-h-80"
-    >
-      {/* Image */}
-      {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt={`Zdjęcie dania: ${meal.name}`}
-          className="absolute inset-0 h-full w-full object-cover brightness-[0.92] contrast-[1.04] saturate-[1.04] transition duration-slow group-hover:scale-[1.03]"
-        />
-      ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--accent-soft),transparent_45%),var(--bg-sunken)]">
-          <div className="flex h-full w-full items-center justify-center">
-            <MealEmoji size="lg" fallback="MG" className="text-accent" />
+    <article className="group relative min-h-72 overflow-hidden rounded-2xl text-ink shadow-lg transition duration-base hover:shadow-xl sm:min-h-80">
+      <Link
+        to={`/recipe/${meal.id}`}
+        className="block min-h-72 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:min-h-80"
+      >
+        {/* Image */}
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`Zdjęcie dania: ${meal.name}`}
+            className="absolute inset-0 h-full w-full object-cover brightness-[0.92] contrast-[1.04] saturate-[1.04] transition duration-slow group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--accent-soft),transparent_45%),var(--bg-sunken)]">
+            <div className="flex h-full w-full items-center justify-center">
+              <MealEmoji size="lg" fallback="MG" className="text-accent" />
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Gradient overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-      {/* Top badges */}
-      <div className="absolute left-4 right-4 top-4 flex items-center justify-between">
-        <Badge
-          variant="accent"
-          className="gap-1.5 bg-bg-elevated/90 shadow-sm backdrop-blur-sm"
-        >
-          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-          Ostatnio gotowane
-        </Badge>
-
-        {meal.isFavorite && (
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-bg-elevated/90 text-bordeaux shadow-sm backdrop-blur-sm">
-            <Heart className="h-5 w-5 fill-current" aria-hidden="true" />
-            <span className="sr-only">Ulubiony przepis</span>
-          </span>
         )}
-      </div>
 
-      {/* Bottom content - on image */}
-      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-        <h3 className="break-words font-brand text-2xl font-semibold leading-tight text-white sm:text-3xl lg:text-4xl">
-          {meal.name}
-        </h3>
+        {/* Gradient overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        {meal.description ? (
-          <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-white/75 sm:text-base">
-            {meal.description}
-          </p>
-        ) : null}
+        {/* Top badges */}
+        <div className="absolute left-4 right-20 top-4 flex items-center justify-between">
+          <Badge
+            variant="accent"
+            className="gap-1.5 bg-bg-elevated/90 shadow-sm backdrop-blur-sm"
+          >
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            Ostatnio gotowane
+          </Badge>
 
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            {meal.estimatedTime ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-                {meal.estimatedTime} min
+          {meal.isFavorite && (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-bg-elevated/90 text-bordeaux shadow-sm backdrop-blur-sm">
+              <Heart className="h-5 w-5 fill-current" aria-hidden="true" />
+              <span className="sr-only">Ulubiony przepis</span>
+            </span>
+          )}
+        </div>
+
+        {/* Bottom content - on image */}
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+          <h3 className="break-words font-brand text-2xl font-semibold leading-tight text-white sm:text-3xl lg:text-4xl">
+            {meal.name}
+          </h3>
+
+          {meal.description ? (
+            <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-white/75 sm:text-base">
+              {meal.description}
+            </p>
+          ) : null}
+
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              {meal.estimatedTime ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                  {meal.estimatedTime} min
+                </span>
+              ) : null}
+              <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                {formatMealDate(meal.createdAt)}
               </span>
-            ) : null}
-            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-              {formatMealDate(meal.createdAt)}
+            </div>
+
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+              Zobacz przepis
+              <ArrowRight
+                className="h-4 w-4 transition duration-fast group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
             </span>
           </div>
-
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
-            Zobacz przepis
-            <ArrowRight
-              className="h-4 w-4 transition duration-fast group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
-          </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      <button
+        type="button"
+        onClick={() => setIsDeleteDialogOpen(true)}
+        disabled={deleteMutation.isPending}
+        className="absolute right-4 top-4 z-20 inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-white/45 bg-bg-elevated/95 px-3 text-xs font-bold leading-none text-bordeaux shadow-sm backdrop-blur-md transition duration-fast hover:border-bordeaux hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent disabled:cursor-not-allowed disabled:border-white/20 disabled:bg-bg-elevated/70 disabled:text-ink-disabled"
+        aria-label={`Usuń przepis: ${meal.name}`}
+        title={`Usuń przepis: ${meal.name}`}
+      >
+        {deleteMutation.isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+        ) : (
+          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+        )}
+        <span className="hidden sm:inline">
+          {deleteMutation.isPending ? "Usuwam" : "Usuń"}
+        </span>
+      </button>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        tone="danger"
+        title="Usunąć przepis?"
+        description={`"${meal.name}" zniknie z historii. Tej akcji nie można cofnąć.`}
+        confirmLabel="Usuń przepis"
+        cancelLabel="Zostaw"
+        pendingLabel="Usuwam..."
+        isPending={deleteMutation.isPending}
+        onCancel={() => setIsDeleteDialogOpen(false)}
+        onConfirm={() => deleteMutation.deleteMeal(meal.id)}
+      />
+    </article>
   );
 }
 

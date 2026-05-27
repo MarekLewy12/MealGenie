@@ -4,6 +4,8 @@ export { Button } from "./Button";
 export type { ButtonProps, ButtonVariant } from "./Button";
 export { Card } from "./Card";
 export type { CardProps, CardVariant } from "./Card";
+export { ConfirmDialog } from "./ConfirmDialog";
+export type { ConfirmDialogProps } from "./ConfirmDialog";
 export { DottedRow } from "./DottedRow";
 export type { DottedRowProps } from "./DottedRow";
 export { Eyebrow } from "./Eyebrow";

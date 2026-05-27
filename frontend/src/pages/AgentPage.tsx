@@ -164,7 +164,8 @@ export function AgentPage() {
   useEffect(() => {
     if (agent.plan && !prevPlanRef.current) {
       prevPlanRef.current = true;
-      setMobileTab("plan");
+      const timeoutId = window.setTimeout(() => setMobileTab("plan"), 0);
+      return () => window.clearTimeout(timeoutId);
     }
   }, [agent.plan]);
 

@@ -1,31 +1,18 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { ArrowRight, Clock3, Heart, Loader2, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { deleteMealHistory } from "../services/api";
-import { notify } from "../store/notificationStore";
+import { useDeleteMealHistory } from "../hooks/useDeleteMealHistory";
 import type { MealHistoryItem } from "../types/meal";
-import { Badge, MealEmoji } from "./ui";
+import { Badge, ConfirmDialog, MealEmoji } from "./ui";
 
 type MealHistoryCardProps = {
   meal: MealHistoryItem;
 };
 
 export function MealHistoryCard({ meal }: MealHistoryCardProps) {
-  const queryClient = useQueryClient();
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteMealHistory(meal.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mealHistory"] });
-      notify.success("Usunięto przepis z historii.");
-    },
-    onError: (err) => {
-      notify.error(
-        err instanceof Error
-          ? err.message
-          : "Nie udało się usunąć przepisu.",
-        "Błąd usuwania",
-      );
-    },
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const deleteMutation = useDeleteMealHistory({
+    onSuccess: () => setIsDeleteDialogOpen(false),
   });
 
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
@@ -101,7 +88,7 @@ export function MealHistoryCard({ meal }: MealHistoryCardProps) {
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          deleteMutation.mutate();
+          setIsDeleteDialogOpen(true);
         }}
         disabled={deleteMutation.isPending}
         className="absolute right-3 top-3 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-pill border border-border-strong bg-bg-elevated px-3 text-xs font-bold leading-none text-bordeaux shadow-xs transition duration-fast ease-out hover:border-bordeaux hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent disabled:cursor-not-allowed disabled:border-border disabled:bg-bg-sunken disabled:text-ink-disabled disabled:shadow-none"
@@ -120,6 +107,19 @@ export function MealHistoryCard({ meal }: MealHistoryCardProps) {
           </>
         )}
       </button>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        tone="danger"
+        title="Usunąć przepis?"
+        description={`"${meal.name}" zniknie z historii. Tej akcji nie można cofnąć.`}
+        confirmLabel="Usuń przepis"
+        cancelLabel="Zostaw"
+        pendingLabel="Usuwam..."
+        isPending={deleteMutation.isPending}
+        onCancel={() => setIsDeleteDialogOpen(false)}
+        onConfirm={() => deleteMutation.deleteMeal(meal.id)}
+      />
     </article>
   );
 }
