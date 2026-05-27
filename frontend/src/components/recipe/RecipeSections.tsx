@@ -147,6 +147,13 @@ export function IngredientsSection({
 
       <div className="rounded-[1.25rem] border border-border bg-bg-elevated shadow-sm">
         <div className="space-y-4 p-3 lg:max-h-[calc(100dvh-14rem)] lg:overflow-y-auto lg:overscroll-contain lg:[scrollbar-gutter:stable]">
+          {ingredients.length === 0 ? (
+            <p className="rounded-xl bg-bg-sunken px-4 py-5 text-sm leading-6 text-ink-soft">
+              Ten przepis nie zawiera listy składników. Spróbuj wygenerować go
+              ponownie.
+            </p>
+          ) : null}
+
           {Object.entries(grouped).map(([category, items], index) => {
             const IconComponent = categoryIcons[category] || UtensilsCrossed;
             const isLast = index === Object.keys(grouped).length - 1;
@@ -280,6 +287,13 @@ export function StepsSection({ steps }: { steps: FullRecipe["steps"] }) {
       </div>
 
       <div className="space-y-5">
+        {steps.length === 0 ? (
+          <div className="rounded-[1.35rem] border border-border/80 bg-bg-elevated/90 p-6 text-sm leading-6 text-ink-soft shadow-sm sm:p-8">
+            Ten przepis nie zawiera kroków przygotowania. Wygeneruj go ponownie
+            przed gotowaniem.
+          </div>
+        ) : null}
+
         {steps.map((step, idx) => (
           <motion.div
             key={step.stepNumber}

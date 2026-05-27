@@ -220,6 +220,16 @@ export function AgentPage() {
   }, [agent.plan]);
 
   useEffect(() => {
+    if (hasConversation) return;
+
+    prevPlanRef.current = false;
+    redirectedMealIdRef.current = null;
+
+    const timeoutId = window.setTimeout(() => setMobileTab("chat"), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [hasConversation]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: shouldReduceMotion ? "auto" : "smooth",
       block: "end",
@@ -284,11 +294,23 @@ export function AgentPage() {
     void agent.submitMessage(prompt);
   };
 
+  const resetAgentUiState = () => {
+    prevPlanRef.current = false;
+    redirectedMealIdRef.current = null;
+    setMobileTab("chat");
+  };
+
+  const handleResetSession = () => {
+    resetAgentUiState();
+    agent.resetSession();
+  };
+
   const handleRestartFromError = () => {
     const lastUserMessage = [...agent.messages]
       .reverse()
       .find((message) => message.role === "user");
 
+    resetAgentUiState();
     agent.resetSession();
     setDraft(lastUserMessage?.content ?? "");
   };
@@ -307,7 +329,11 @@ export function AgentPage() {
 
       {hasConversation ? (
         <div className="relative z-20 shrink-0 border-b border-border bg-bg-elevated/80 backdrop-blur-md lg:hidden">
-          <div className="mx-auto flex max-w-lg px-4">
+          <div
+            role="tablist"
+            aria-label="Widok Agenta na urządzeniu mobilnym"
+            className="mx-auto flex max-w-lg px-4"
+          >
             {[
               { key: "chat", label: "Rozmowa", icon: MessageSquareText },
               { key: "plan", label: "Plan", icon: Sparkles },
@@ -315,6 +341,10 @@ export function AgentPage() {
               <button
                 key={key}
                 type="button"
+                role="tab"
+                id={`agent-mobile-tab-${key}`}
+                aria-controls={`agent-mobile-panel-${key}`}
+                aria-selected={mobileTab === key}
                 onClick={() => setMobileTab(key as "chat" | "plan")}
                 className={cn(
                   "relative flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors",
@@ -347,6 +377,9 @@ export function AgentPage() {
         className="mx-auto flex min-h-0 w-full max-w-screen-2xl flex-1 flex-col gap-6 px-4 pb-0 pt-4 sm:px-6 sm:pt-5 lg:flex-row lg:items-stretch lg:gap-8 lg:px-8 lg:pt-6"
       >
         <main
+          id="agent-mobile-panel-chat"
+          role="tabpanel"
+          aria-labelledby="agent-mobile-tab-chat"
           className={cn(
             "relative z-10 min-h-0 flex-1 flex-col lg:flex lg:h-full lg:border-r lg:border-border/40 lg:pr-2",
             mobileTab === "plan" ? "hidden lg:flex" : "flex",
@@ -370,7 +403,7 @@ export function AgentPage() {
 
               <button
                 type="button"
-                onClick={() => agent.resetSession()}
+                onClick={handleResetSession}
                 disabled={agent.isBusy}
                 className="group flex items-center gap-2 rounded-lg border border-border/60 bg-bg-elevated px-3 py-1.5 text-sm font-semibold text-ink-soft shadow-xs transition duration-fast hover:border-accent/40 hover:bg-accent-soft hover:text-accent-deep focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent disabled:opacity-50"
               >
@@ -430,7 +463,10 @@ export function AgentPage() {
                     ease: premiumEase,
                   }}
                 >
-                  <AgentEmptyState onSelectPrompt={handleStarterPrompt} />
+                  <AgentEmptyState
+                    onSelectPrompt={handleStarterPrompt}
+                    shouldReduceMotion={shouldReduceMotion}
+                  />
                 </motion.div>
               ) : (
                 <motion.div
@@ -471,18 +507,18 @@ export function AgentPage() {
 
                           <div
                             className={cn(
-                              "px-5 py-4 text-base leading-relaxed shadow-sm",
+                              "min-w-0 break-words px-5 py-4 text-base leading-relaxed shadow-sm [overflow-wrap:anywhere]",
                               message.role === "user"
                                 ? "rounded-2xl rounded-br-sm bg-accent text-white shadow-[0_8px_24px_-12px_rgba(232,111,69,0.5)] transition-shadow duration-200 hover:shadow-[0_10px_30px_-10px_rgba(232,111,69,0.65)]"
                                 : "rounded-2xl rounded-bl-sm border border-border/50 bg-gradient-to-br from-bg-elevated/90 to-bg-elevated/70 text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:from-white/[0.07] dark:to-white/[0.04]",
                             )}
                           >
                             {message.role === "user" ? (
-                              <p className="whitespace-pre-wrap">
+                              <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                                 {message.content}
                               </p>
                             ) : (
-                              <div className="prose prose-base max-w-none prose-p:my-0 prose-p:leading-relaxed prose-strong:text-ink prose-ul:my-2 prose-li:my-0 dark:prose-invert">
+                              <div className="prose prose-base max-w-none break-words prose-p:my-0 prose-p:leading-relaxed prose-strong:text-ink prose-ul:my-2 prose-li:my-0 prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto prose-table:block prose-table:max-w-full prose-table:overflow-x-auto dark:prose-invert">
                                 <ReactMarkdown
                                   remarkPlugins={[remarkGfm, remarkBreaks]}
                                 >
@@ -536,7 +572,10 @@ export function AgentPage() {
                     </AnimatePresence>
 
                     {agent.error && !agent.isExecuting ? (
-                      <div className="ml-0 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux sm:ml-11">
+                      <div
+                        role="alert"
+                        className="ml-0 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux sm:ml-11"
+                      >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <span>{agent.error.message}</span>
                           <button
@@ -580,7 +619,7 @@ export function AgentPage() {
                 }
                 rows={1}
                 disabled={isBusy}
-                className="agent-message-input min-h-12 flex-1 resize-none overflow-hidden bg-transparent px-4 py-3 text-base leading-6 text-ink outline-none transition-[height] duration-200 ease-out placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                className="agent-message-input max-h-40 min-h-12 flex-1 resize-none overflow-y-auto bg-transparent px-4 py-3 text-base leading-6 text-ink outline-none transition-[height] duration-200 ease-out placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
               />
               <button
                 type="submit"
@@ -599,6 +638,9 @@ export function AgentPage() {
         </main>
 
         <motion.div
+          id="agent-mobile-panel-plan"
+          role="tabpanel"
+          aria-labelledby="agent-mobile-tab-plan"
           layout
           transition={{ layout: layoutTransition }}
           className={cn(
@@ -648,8 +690,10 @@ export function AgentPage() {
 
 function AgentEmptyState({
   onSelectPrompt,
+  shouldReduceMotion,
 }: {
   onSelectPrompt: (prompt: string) => void;
+  shouldReduceMotion: boolean | null;
 }) {
   const user = useAuthStore((state) => state.user);
   const firstName = user?.name?.split(" ")[0] || "";
@@ -658,43 +702,57 @@ function AgentEmptyState({
     <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center pb-6 pt-2 text-center sm:pb-8 2xl:max-w-[86rem]">
       <div className="pointer-events-none absolute inset-y-4 left-0 right-0 -z-10 hidden overflow-hidden 2xl:block">
         <motion.div
-          animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          animate={
+            shouldReduceMotion ? undefined : { y: [0, -15, 0], rotate: [0, 5, 0] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: 6, repeat: Infinity, ease: "easeInOut" }
+          }
           className="absolute left-2 top-[6%] text-accent/[0.18] dark:text-accent/[0.16]"
         >
           <Sparkles className="h-10 w-10" aria-hidden="true" />
         </motion.div>
         <motion.div
-          animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }}
+          animate={
+            shouldReduceMotion ? undefined : { y: [0, 20, 0], rotate: [0, -10, 0] }
+          }
           transition={{
-            duration: 8,
-            repeat: Infinity,
+            duration: shouldReduceMotion ? 0.01 : 8,
+            repeat: shouldReduceMotion ? 0 : Infinity,
             ease: "easeInOut",
-            delay: 1,
+            delay: shouldReduceMotion ? 0 : 1,
           }}
           className="absolute right-2 top-[10%] text-saffron/20 dark:text-saffron/[0.18]"
         >
           <Bot className="h-12 w-12" aria-hidden="true" />
         </motion.div>
         <motion.div
-          animate={{ y: [0, -10, 0], scale: [1, 1.1, 1] }}
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { y: [0, -10, 0], scale: [1, 1.1, 1] }
+          }
           transition={{
-            duration: 5,
-            repeat: Infinity,
+            duration: shouldReduceMotion ? 0.01 : 5,
+            repeat: shouldReduceMotion ? 0 : Infinity,
             ease: "easeInOut",
-            delay: 2,
+            delay: shouldReduceMotion ? 0 : 2,
           }}
           className="absolute bottom-[8%] left-3 text-basil/[0.18] dark:text-basil/[0.16]"
         >
           <Wand2 className="h-8 w-8" aria-hidden="true" />
         </motion.div>
         <motion.div
-          animate={{ y: [0, 14, 0], rotate: [0, 8, 0] }}
+          animate={
+            shouldReduceMotion ? undefined : { y: [0, 14, 0], rotate: [0, 8, 0] }
+          }
           transition={{
-            duration: 7,
-            repeat: Infinity,
+            duration: shouldReduceMotion ? 0.01 : 7,
+            repeat: shouldReduceMotion ? 0 : Infinity,
             ease: "easeInOut",
-            delay: 0.4,
+            delay: shouldReduceMotion ? 0 : 0.4,
           }}
           className="absolute bottom-[10%] right-3 text-accent/[0.18] dark:text-accent/[0.16]"
         >
@@ -702,7 +760,7 @@ function AgentEmptyState({
         </motion.div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-4xl animate-fade-in-up flex-col items-center">
+      <div className="mx-auto flex w-full max-w-4xl animate-fade-in-up flex-col items-center motion-reduce:animate-none">
         <HandwrittenKicker className="mb-4 text-xl text-accent/80 sm:text-2xl">
           twój osobisty planer
         </HandwrittenKicker>
@@ -898,7 +956,10 @@ function AgentProcessCanvas({
                   className="h-full rounded-full bg-accent"
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0.01 : 0.5,
+                    ease: "easeOut",
+                  }}
                 />
               </div>
             );
@@ -908,7 +969,10 @@ function AgentProcessCanvas({
       </div>
 
       {error ? (
-        <div className="relative mt-5 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux">
+        <div
+          role="alert"
+          className="relative mt-5 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux"
+        >
           {error}
         </div>
       ) : null}
@@ -950,8 +1014,8 @@ function PlanCanvas({
 
   useEffect(() => {
     if (!isExecuting) {
-      setLoadingMsgIndex(0);
-      return;
+      const timeoutId = window.setTimeout(() => setLoadingMsgIndex(0), 0);
+      return () => window.clearTimeout(timeoutId);
     }
 
     const interval = window.setInterval(() => {
@@ -1095,7 +1159,10 @@ function PlanCanvas({
         </div>
 
         {error ? (
-          <div className="mt-6 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux">
+          <div
+            role="alert"
+            className="mt-6 rounded-xl border border-bordeaux/30 bg-accent-soft px-4 py-3 text-sm font-medium text-bordeaux"
+          >
             {error}
           </div>
         ) : null}

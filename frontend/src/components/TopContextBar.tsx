@@ -39,6 +39,7 @@ export function TopContextBar({ onOpenMobileNav }: TopContextBarProps) {
         <div className="flex items-center gap-2">
           <Link
             to="/generator"
+            aria-label="Nowy przepis"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-pill border border-accent bg-accent px-4 py-2 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />

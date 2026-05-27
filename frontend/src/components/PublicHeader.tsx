@@ -26,9 +26,11 @@ export function PublicHeader() {
           {token ? (
             <Link
               to={appHref}
-              className="inline-flex min-h-11 items-center justify-center rounded-pill border border-accent/35 bg-accent-soft px-4 py-2 text-sm font-semibold text-accent-deep transition duration-fast hover:border-accent hover:bg-accent-soft/80 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              aria-label="Przejdź do aplikacji"
+              className="inline-flex min-h-11 items-center justify-center rounded-pill border border-accent/35 bg-accent-soft px-3 py-2 text-sm font-semibold text-accent-deep transition duration-fast hover:border-accent hover:bg-accent-soft/80 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent sm:px-4"
             >
-              Przejdź do aplikacji
+              <span className="sm:hidden">Aplikacja</span>
+              <span className="hidden sm:inline">Przejdź do aplikacji</span>
             </Link>
           ) : (
             <>

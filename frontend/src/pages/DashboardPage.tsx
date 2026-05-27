@@ -119,7 +119,8 @@ export function DashboardPage() {
   });
 
   const recentMeals = (historyData?.items ?? []).slice(0, 3);
-  const isOnboarding = recentMeals.length === 0 && !isHistoryLoading;
+  const isOnboarding =
+    recentMeals.length === 0 && !isHistoryLoading && !isHistoryError;
   const favoriteMeals = favoritesData?.items ?? [];
   const totalRecipes = historyData?.total ?? 0;
   const totalFavorites = favoritesData?.total ?? favoriteMeals.length;

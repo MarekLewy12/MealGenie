@@ -110,7 +110,10 @@ export function SettingsPage() {
             <Loader2 className="h-8 w-8 animate-spin" aria-hidden="true" />
           </div>
         ) : isError ? (
-          <div className="p-10 text-center font-medium text-bordeaux">
+          <div
+            role="alert"
+            className="p-10 text-center font-medium text-bordeaux"
+          >
             Nie udało się pobrać ustawień. Spróbuj odświeżyć stronę.
           </div>
         ) : (

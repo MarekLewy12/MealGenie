@@ -345,14 +345,14 @@ export function ChatDrawer() {
                     >
                       <div
                         className={cn(
-                          "max-w-[85%] px-4 py-3 text-sm leading-6 shadow-xs",
+                          "min-w-0 max-w-[85%] break-words px-4 py-3 text-sm leading-6 shadow-xs [overflow-wrap:anywhere]",
                           message.role === "user"
                             ? "rounded-[18px] rounded-br-sm bg-accent text-ink-inverse"
                             : "rounded-[18px] rounded-bl-sm border border-border bg-bg-elevated text-ink",
                         )}
                       >
                         {message.role === "assistant" ? (
-                          <div className="prose prose-sm max-w-none prose-headings:font-brand prose-headings:text-ink prose-p:my-0 prose-p:text-ink prose-a:text-accent prose-strong:text-ink prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-code:text-accent-deep dark:prose-invert dark:prose-p:text-ink dark:prose-strong:text-ink">
+                          <div className="prose prose-sm max-w-none break-words prose-headings:font-brand prose-headings:text-ink prose-p:my-0 prose-p:text-ink prose-a:text-accent prose-strong:text-ink prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-code:break-words prose-code:text-accent-deep prose-pre:max-w-full prose-pre:overflow-x-auto prose-table:block prose-table:max-w-full prose-table:overflow-x-auto dark:prose-invert dark:prose-p:text-ink dark:prose-strong:text-ink">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm, remarkBreaks]}
                             >
@@ -360,7 +360,9 @@ export function ChatDrawer() {
                             </ReactMarkdown>
                           </div>
                         ) : (
-                          <p className="whitespace-pre-wrap">{message.content}</p>
+                          <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                            {message.content}
+                          </p>
                         )}
                         <p
                           className={cn(

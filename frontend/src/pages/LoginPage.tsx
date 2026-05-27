@@ -160,7 +160,7 @@ export function LoginPage() {
     <div className="flex min-h-0 flex-1 overflow-hidden bg-bg text-ink">
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
         {/* LEWA STRONA (Branding / Wizualna) */}
-        <div className="relative hidden min-h-0 flex-col items-center justify-center overflow-hidden border-r border-border bg-bg-sunken p-12 lg:flex">
+        <div className="relative hidden min-h-0 flex-col items-center justify-center overflow-y-auto overflow-x-hidden border-r border-border bg-bg-sunken p-10 lg:flex xl:p-12">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -left-[10%] -top-[10%] h-[40rem] w-[40rem] rounded-full bg-saffron/20 blur-[100px] dark:bg-saffron/10" />
             <div className="absolute bottom-[-10%] right-[-10%] h-[45rem] w-[45rem] rounded-full bg-accent/15 blur-[120px] dark:bg-accent/10" />
@@ -295,7 +295,7 @@ export function LoginPage() {
         </div>
 
         {/* PRAWA STRONA (Formularz) */}
-        <div className="relative flex min-h-0 flex-col items-center justify-center overflow-y-auto bg-bg p-6 sm:p-12 lg:p-16">
+        <div className="relative flex min-h-0 flex-col items-center justify-start overflow-y-auto bg-bg p-6 pt-24 sm:p-12 sm:pt-28 lg:justify-center lg:p-16">
           <div className="absolute right-6 top-6 z-10 flex items-center gap-3 text-sm sm:right-12 sm:top-12">
             <span className="hidden min-w-[6.75rem] justify-end font-medium text-ink-soft sm:inline-flex">
               <AnimatePresence mode="wait">

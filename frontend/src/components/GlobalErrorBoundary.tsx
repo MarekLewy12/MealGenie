@@ -53,17 +53,27 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               {this.state.error?.message || "Nieznany błąd krytyczny."}
             </p>
 
-            <button
-              type="button"
-              onClick={() => {
-                localStorage.clear();
-                window.location.href = "/";
-              }}
-              className="mx-auto mt-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
-            >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              Wyczyść dane i odśwież
-            </button>
+            <div className="mx-auto mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-accent transition duration-fast ease-out hover:border-accent-hover hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              >
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Odśwież stronę
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.clear();
+                  window.location.href = "/";
+                }}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-border-strong bg-bg-elevated px-5 py-2.5 text-sm font-semibold text-ink-soft shadow-xs transition duration-fast ease-out hover:border-bordeaux/40 hover:bg-accent-soft hover:text-bordeaux focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
+              >
+                Wyczyść dane lokalne
+              </button>
+            </div>
           </section>
         </main>
       );

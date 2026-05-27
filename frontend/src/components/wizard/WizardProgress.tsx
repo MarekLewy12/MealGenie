@@ -40,14 +40,20 @@ export function WizardProgress({
                   isCompleted ? " (ukończony)" : isActive ? " (aktywny)" : ""
                 }`}
                 className={cn(
-                  "h-2 rounded-full transition-all duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
-                  isActive &&
-                    "w-10 bg-accent shadow-[0_0_12px_-2px_rgba(232,111,69,0.45)] sm:w-14",
-                  isCompleted && "w-7 bg-accent/60 hover:bg-accent sm:w-10",
-                  !isActive && !isCompleted && "w-7 bg-bg-sunken sm:w-10",
+                  "flex h-11 min-w-11 items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
                   canJump ? "cursor-pointer" : "cursor-default",
                 )}
-              />
+              >
+                <span
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300 ease-out",
+                    isActive &&
+                      "w-10 bg-accent shadow-[0_0_12px_-2px_rgba(232,111,69,0.45)] sm:w-14",
+                    isCompleted && "w-7 bg-accent/60 hover:bg-accent sm:w-10",
+                    !isActive && !isCompleted && "w-7 bg-bg-sunken sm:w-10",
+                  )}
+                />
+              </button>
             </li>
           );
         })}

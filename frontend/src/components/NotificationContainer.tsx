@@ -12,6 +12,7 @@ import {
   type Notification,
   type NotificationType,
 } from "../store/notificationStore";
+import { useChatStore } from "../store/chatStore";
 
 const icons: Record<NotificationType, ElementType> = {
   success: CheckCircle2,
@@ -131,10 +132,15 @@ function NotificationItem({
 
 export function NotificationContainer() {
   const notifications = useNotificationStore((s) => s.notifications);
+  const isChatOpen = useChatStore((s) => s.isOpen);
   const shouldReduceMotion = Boolean(useReducedMotion());
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100] flex flex-col items-end gap-3 p-4 sm:p-6">
+    <div
+      className={`pointer-events-none fixed inset-0 flex flex-col items-end gap-3 p-4 sm:p-6 ${
+        isChatOpen ? "z-[45]" : "z-[60]"
+      }`}
+    >
       <div className="pointer-events-auto flex flex-col gap-3">
         <AnimatePresence mode="popLayout">
           {notifications.map((notification) => (

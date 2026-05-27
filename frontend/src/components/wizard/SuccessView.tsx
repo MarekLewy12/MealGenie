@@ -226,6 +226,7 @@ export function SuccessView({
 }: SuccessViewProps) {
   const [showAllIngredients, setShowAllIngredients] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = Boolean(useReducedMotion());
   const hasMeals = meals.length > 0;
 
@@ -234,24 +235,27 @@ export function SuccessView({
       return;
     }
 
-    const scrollToBottom = () => {
+    const scrollToResults = () => {
+      const target = resultsRef.current;
+      if (!target) return;
+
       const scrollContainer = findScrollableParent(rootRef.current);
-      const scrollOptions: ScrollToOptions = {
-        top: scrollContainer
-          ? scrollContainer.scrollHeight
-          : document.documentElement.scrollHeight,
-        behavior: shouldReduceMotion ? "auto" : "smooth",
-      };
+      const behavior = shouldReduceMotion ? "auto" : "smooth";
 
       if (scrollContainer) {
-        scrollContainer.scrollTo(scrollOptions);
+        const containerTop = scrollContainer.getBoundingClientRect().top;
+        const targetTop = target.getBoundingClientRect().top;
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollTop + targetTop - containerTop - 16,
+          behavior,
+        });
       } else {
-        window.scrollTo(scrollOptions);
+        target.scrollIntoView({ behavior, block: "start" });
       }
     };
 
-    const earlyTimer = setTimeout(scrollToBottom, 150);
-    const finalTimer = setTimeout(scrollToBottom, 450);
+    const earlyTimer = setTimeout(scrollToResults, 150);
+    const finalTimer = setTimeout(scrollToResults, 450);
 
     return () => {
       clearTimeout(earlyTimer);
@@ -368,6 +372,7 @@ export function SuccessView({
       </div>
 
       <motion.div
+        ref={resultsRef}
         variants={successStagger}
         initial="hidden"
         animate="visible"

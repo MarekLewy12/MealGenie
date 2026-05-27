@@ -169,7 +169,7 @@ export function LandingHeroSection() {
         initial={shouldReduceMotion ? false : "hidden"}
         animate={shouldReduceMotion ? undefined : "visible"}
         variants={contentStagger}
-        className="mx-auto grid max-w-7xl items-start gap-7 sm:gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,0.92fr)] lg:gap-16 xl:gap-20"
+        className="mx-auto grid max-w-7xl items-start gap-7 sm:gap-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] lg:gap-16 xl:grid-cols-[minmax(0,1.08fr)_minmax(390px,0.92fr)] xl:gap-20"
       >
         <MotionDiv
           variants={contentStagger}
@@ -191,7 +191,7 @@ export function LandingHeroSection() {
           <MotionH1
             id="landing-hero-title"
             variants={landingStagger}
-            className="landing-display max-w-3xl text-balance text-[2rem] text-ink min-[375px]:text-[2.35rem] sm:text-5xl lg:text-[4.4rem]"
+            className="landing-display max-w-3xl text-balance text-[2rem] text-ink min-[375px]:text-[2.35rem] sm:text-5xl lg:text-[3.8rem] xl:text-[4.4rem]"
           >
             {landingHeroCopy.headlineLines.map((line) => (
               <motion.span
@@ -389,22 +389,27 @@ export function LandingHeroSection() {
                       <button
                         key={i}
                         onClick={() => handleRecipeSelect(i)}
-                        className={`relative h-2 overflow-hidden rounded-full transition-all duration-300 ease-out ${
-                          i === activeRecipe
-                            ? "w-9 border border-accent/25 bg-accent/20 dark:border-accent/30 dark:bg-accent/18"
-                            : "w-2 bg-border-strong hover:bg-accent/50"
-                        }`}
+                        className="flex h-10 min-w-10 cursor-pointer items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         aria-label={`Pokaż danie ${i + 1}`}
                       >
-                        {i === activeRecipe && !shouldReduceMotion ? (
-                          <span
-                            key={activeRecipe}
-                            className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-accent"
-                            style={{
-                              animation: `carousel-dot-fill ${CAROUSEL_INTERVAL}ms linear`,
-                            }}
-                          />
-                        ) : null}
+                        <span
+                          className={`relative h-2 overflow-hidden rounded-full transition-all duration-300 ease-out ${
+                            i === activeRecipe
+                              ? "w-9 border border-accent/25 bg-accent/20 dark:border-accent/30 dark:bg-accent/18"
+                              : "w-2 bg-border-strong hover:bg-accent/50"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {i === activeRecipe && !shouldReduceMotion ? (
+                            <span
+                              key={activeRecipe}
+                              className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-accent"
+                              style={{
+                                animation: `carousel-dot-fill ${CAROUSEL_INTERVAL}ms linear`,
+                              }}
+                            />
+                          ) : null}
+                        </span>
                       </button>
                     ))}
                   </div>

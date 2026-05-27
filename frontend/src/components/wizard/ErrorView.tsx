@@ -81,7 +81,7 @@ export function ErrorView({
           leftIcon={<RefreshCw className="h-4 w-4" />}
           className="rounded-lg"
         >
-          Spróbuj ponownie
+          Wróć do formularza
         </Button>
       )}
     </motion.div>

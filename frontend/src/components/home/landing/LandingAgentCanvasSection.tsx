@@ -152,9 +152,12 @@ export function LandingAgentCanvasSection() {
             variants={landingFadeUp}
             className="mt-8 flex flex-wrap gap-3"
           >
-            <LandingCtaLink to="/agent" className="rounded-full shadow-accent">
+            <LandingCtaLink
+              to="/login?mode=register"
+              className="rounded-full shadow-accent"
+            >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
-              Uruchom Agenta
+              Zaloguj i uruchom Agenta
             </LandingCtaLink>
             <LandingCtaLink
               to="/login?mode=register"
@@ -209,7 +212,7 @@ export function LandingAgentCanvasSection() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
+          <div className="grid gap-4 md:grid-cols-2 md:items-start">
             <div className="relative rounded-[1.75rem] border border-white/45 bg-bg-elevated/72 p-4 shadow-[0_18px_54px_-34px_rgba(32,37,31,0.42)] backdrop-blur-xl dark:border-white/10 dark:bg-black/35">
               <div className="mb-4 flex items-center gap-2">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent">

@@ -7,6 +7,7 @@ type TagInputProps = {
   label: string;
   placeholder?: string;
   labelHidden?: boolean;
+  itemLabel?: string;
 };
 
 export function TagInput({
@@ -15,6 +16,7 @@ export function TagInput({
   label,
   placeholder,
   labelHidden = false,
+  itemLabel = "składnik",
 }: TagInputProps) {
   const generatedId = useId();
   const inputId = `${generatedId}-tag-input`;
@@ -71,14 +73,14 @@ export function TagInput({
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-border-strong bg-bg-elevated py-1 pl-3 pr-1 text-sm font-semibold text-ink shadow-xs"
+            className="inline-flex min-h-8 max-w-full min-w-0 items-center gap-1.5 rounded-lg border border-border-strong bg-bg-elevated py-1 pl-3 pr-1 text-sm font-semibold text-ink shadow-xs"
           >
-            {tag}
+            <span className="min-w-0 truncate">{tag}</span>
             <button
               type="button"
               onClick={() => removeTag(tag)}
               className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-ink-muted transition hover:bg-bordeaux/10 hover:text-bordeaux focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              aria-label={`Usuń składnik: ${tag}`}
+              aria-label={`Usuń ${itemLabel}: ${tag}`}
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -100,7 +102,7 @@ export function TagInput({
               type="button"
               onClick={addTag}
               className="ml-2 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-accent bg-accent text-ink-inverse shadow-accent transition hover:border-accent-hover hover:bg-accent-hover active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              aria-label={`Dodaj składnik: ${inputValue.trim()}`}
+              aria-label={`Dodaj ${itemLabel}: ${inputValue.trim()}`}
             >
               <Plus className="h-4 w-4" />
             </button>

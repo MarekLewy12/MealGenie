@@ -765,6 +765,7 @@ export function OnboardingForm({
             label="Alergie i nietolerancje"
             labelHidden
             placeholder="np. orzechy, laktoza, gluten"
+            itemLabel="alergię lub nietolerancję"
             value={field.value}
             onChange={field.onChange}
           />
@@ -789,6 +790,7 @@ export function OnboardingForm({
             label="Nielubiane składniki"
             labelHidden
             placeholder="np. kolendra, oliwki"
+            itemLabel="nielubiany składnik"
             value={field.value}
             onChange={field.onChange}
           />
@@ -813,6 +815,7 @@ export function OnboardingForm({
             label="Ulubione kuchnie"
             labelHidden
             placeholder="np. włoska, tajska, polska"
+            itemLabel="kuchnię"
             value={field.value}
             onChange={field.onChange}
           />

@@ -18,6 +18,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "border-transparent bg-transparent text-ink-soft hover:bg-accent-soft hover:text-ink active:bg-bg-sunken",
   pill:
     "rounded-pill border-border-strong bg-bg-elevated text-accent shadow-xs hover:border-accent hover:bg-accent-soft hover:text-accent-deep active:bg-bg-sunken",
+  danger:
+    "border-bordeaux bg-bordeaux text-white shadow-[0_14px_30px_-20px_rgba(128,36,36,0.72)] hover:border-bordeaux hover:bg-bordeaux/90 hover:text-white active:bg-bordeaux/85 focus-visible:outline-bordeaux",
 };
 
 export function IconButton({
@@ -34,6 +36,7 @@ export function IconButton({
       disabled={disabled}
       className={cn(
         "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border p-2.5 transition duration-fast ease-out",
+        "cursor-pointer",
         "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent",
         "disabled:cursor-not-allowed disabled:border-border disabled:bg-bg-sunken disabled:text-ink-disabled disabled:shadow-none",
         variantClasses[variant],

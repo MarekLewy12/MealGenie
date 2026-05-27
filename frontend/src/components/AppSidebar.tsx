@@ -97,7 +97,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col px-3 py-4">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain px-3 py-4">
       <Link
         to="/dashboard"
         onClick={onNavigate}

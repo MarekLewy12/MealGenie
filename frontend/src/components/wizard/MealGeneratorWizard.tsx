@@ -613,7 +613,10 @@ export function MealGeneratorWizard({
         )}
 
         {view === "success" && data?.meals && (
-          <div key="wizard-success">
+          <div
+            key="wizard-success"
+            className="mx-auto max-w-[1760px] px-4 sm:px-6 lg:px-8"
+          >
             <SuccessView
               meals={data.meals}
               isGuestMode={isGuestMode}

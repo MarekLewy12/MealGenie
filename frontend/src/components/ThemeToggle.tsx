@@ -38,7 +38,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border border-border bg-bg-elevated p-2.5 text-ink-soft shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent"
+      className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border border-border bg-bg-elevated p-2.5 text-ink-soft shadow-xs transition duration-fast ease-out hover:border-accent hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent"
       aria-label={`Przełącz na motyw ${theme === "dark" ? "jasny" : "ciemny"}`}
       type="button"
       title={`Przełącz na motyw ${theme === "dark" ? "jasny" : "ciemny"}`}

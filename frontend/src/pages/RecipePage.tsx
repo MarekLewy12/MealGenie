@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation, useParams, Navigate, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import {
   Heart,
   Loader2,
   MessageSquare,
+  MoreHorizontal,
   Refrigerator,
   Scale,
   Share2,
@@ -73,17 +74,20 @@ export function RecipePage() {
   const [shareId, setShareId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [localRecipe, setLocalRecipe] = useState<FullRecipe | null>(null);
 
   const hasNotifiedRef = useRef(false);
   const copiedTimeoutRef = useRef<number | null>(null);
+  const mobileActionsMenuRef = useRef<HTMLDivElement | null>(null);
   const openRecipeChat = useChatStore((state) => state.openRecipeChat);
 
   useEffect(() => {
     setLocalRecipe(null);
     setShareId(null);
     setIsCopied(false);
+    setIsMobileActionsOpen(false);
     setErrorMessage("");
     hasNotifiedRef.current = false;
     if (copiedTimeoutRef.current) {
@@ -120,6 +124,33 @@ export function RecipePage() {
   }, []);
 
   useEffect(() => {
+    if (!isMobileActionsOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        mobileActionsMenuRef.current &&
+        !mobileActionsMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileActionsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMobileActionsOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMobileActionsOpen]);
+
+  useEffect(() => {
     if (isHistoryView) {
       setView("loading");
     }
@@ -129,6 +160,18 @@ export function RecipePage() {
     if (!isHistoryView) return;
 
     if (historyMeal) {
+      if (!historyMeal.fullRecipeJson) {
+        const msg =
+          "Ten wpis historii nie zawiera pełnej treści przepisu. Wróć do biblioteki albo wygeneruj nowy przepis.";
+        setView("error");
+        setErrorMessage(msg);
+        if (!hasNotifiedRef.current) {
+          notify.error(msg, "Brak treści przepisu");
+          hasNotifiedRef.current = true;
+        }
+        return;
+      }
+
       setView("recipe");
       setIsFavorite(historyMeal.isFavorite);
       setShareId(historyMeal.shareId ?? null);
@@ -383,7 +426,10 @@ export function RecipePage() {
         <div className="mx-auto flex min-h-14 max-w-[1760px] items-center justify-between gap-3 px-4 py-2">
           <DashboardBackLink />
           {recipe ? (
-            <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
+            <div
+              ref={mobileActionsMenuRef}
+              className="relative flex min-w-0 items-center justify-end gap-1.5 sm:gap-2"
+            >
               {mealId ? (
                 <>
                   <IconButton
@@ -393,7 +439,7 @@ export function RecipePage() {
                     aria-label={
                       isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"
                     }
-                    className="sm:hidden"
+                    className="hidden"
                     icon={
                       favoriteMutation.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -464,7 +510,7 @@ export function RecipePage() {
                   onClick={handleDisableShare}
                   disabled={shareMutation.isPending}
                   aria-label="Wyłącz udostępnianie przepisu"
-                  className="text-bordeaux hover:bg-bordeaux/10"
+                  className="hidden text-bordeaux hover:bg-bordeaux/10 sm:inline-flex"
                   icon={<XCircle className="h-4 w-4" />}
                 />
               ) : null}
@@ -476,7 +522,7 @@ export function RecipePage() {
                     onClick={() => setIsDeleteDialogOpen(true)}
                     disabled={deleteMutation.isPending}
                     aria-label="Usuń przepis"
-                    className="text-bordeaux hover:bg-bordeaux/10 hover:text-bordeaux sm:hidden"
+                    className="hidden text-bordeaux hover:bg-bordeaux/10 hover:text-bordeaux"
                     icon={
                       deleteMutation.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -508,7 +554,7 @@ export function RecipePage() {
                 onClick={handleExportPdf}
                 disabled={isExporting}
                 aria-label="Pobierz przepis jako PDF"
-                className="sm:hidden"
+                className="hidden"
                 icon={
                   isExporting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -551,6 +597,92 @@ export function RecipePage() {
                     Asystent przepisu
                   </Button>
                 </>
+              ) : null}
+
+              <IconButton
+                variant="ghost"
+                onClick={() => setIsMobileActionsOpen((current) => !current)}
+                aria-label="Pokaż więcej akcji przepisu"
+                aria-haspopup="menu"
+                aria-expanded={isMobileActionsOpen}
+                className="sm:hidden"
+                icon={<MoreHorizontal className="h-4 w-4" />}
+              />
+
+              {isMobileActionsOpen ? (
+                <div
+                  role="menu"
+                  aria-label="Więcej akcji przepisu"
+                  className="absolute right-0 top-[calc(100%+0.5rem)] z-40 w-64 overflow-hidden rounded-xl border border-border bg-bg-elevated p-1.5 text-sm text-ink shadow-lg sm:hidden"
+                >
+                  {mealId ? (
+                    <MobileRecipeActionItem
+                      icon={
+                        favoriteMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Heart className="h-4 w-4" />
+                        )
+                      }
+                      label={
+                        isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"
+                      }
+                      disabled={favoriteMutation.isPending}
+                      onSelect={() => {
+                        setIsMobileActionsOpen(false);
+                        handleToggleFavorite();
+                      }}
+                    />
+                  ) : null}
+
+                  {shareId ? (
+                    <MobileRecipeActionItem
+                      icon={<XCircle className="h-4 w-4" />}
+                      label="Wyłącz udostępnianie"
+                      danger
+                      disabled={shareMutation.isPending}
+                      onSelect={() => {
+                        setIsMobileActionsOpen(false);
+                        void handleDisableShare();
+                      }}
+                    />
+                  ) : null}
+
+                  <MobileRecipeActionItem
+                    icon={
+                      isExporting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )
+                    }
+                    label="Pobierz PDF"
+                    disabled={isExporting}
+                    onSelect={() => {
+                      setIsMobileActionsOpen(false);
+                      void handleExportPdf();
+                    }}
+                  />
+
+                  {mealId ? (
+                    <MobileRecipeActionItem
+                      icon={
+                        deleteMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )
+                      }
+                      label="Usuń przepis"
+                      danger
+                      disabled={deleteMutation.isPending}
+                      onSelect={() => {
+                        setIsMobileActionsOpen(false);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    />
+                  ) : null}
+                </div>
               ) : null}
             </div>
           ) : null}
@@ -723,6 +855,39 @@ function RecipeHeroSeparator() {
         <div className="h-1.5 w-1.5 rotate-45 bg-border-strong/80 dark:bg-white/25" />
       </div>
     </div>
+  );
+}
+
+function MobileRecipeActionItem({
+  danger = false,
+  disabled,
+  icon,
+  label,
+  onSelect,
+}: {
+  danger?: boolean;
+  disabled?: boolean;
+  icon: ReactNode;
+  label: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      disabled={disabled}
+      onClick={onSelect}
+      className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50 ${
+        danger
+          ? "text-bordeaux hover:bg-bordeaux/10"
+          : "text-ink-soft hover:bg-bg-sunken hover:text-ink"
+      }`}
+    >
+      <span className="shrink-0" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+    </button>
   );
 }
 

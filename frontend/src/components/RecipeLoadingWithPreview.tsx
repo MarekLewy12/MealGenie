@@ -69,8 +69,8 @@ export function RecipeLoadingWithPreview({ teaser, recipeContext }: Props) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 pb-16 pt-8">
-        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_360px] lg:items-start xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-12">
+      <div className="mx-auto max-w-[1760px] px-4 pb-16 pt-8">
+        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_620px]">
           <aside className="order-1 space-y-8 lg:order-2">
             <section>
               <SkeletonBlock className="mb-4 h-6 w-40" />
