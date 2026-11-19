@@ -90,12 +90,11 @@ export async function guestGenerateMealSuggestions(
 export async function generateFullRecipe(
   mealTeaser: MealSuggestion,
   servings: number = 2,
-  unusedImageUrls?: string[],
   recipeContext?: RecipeGenerationContext,
 ): Promise<GenerateRecipeResponse> {
   const { data } = await api.post<GenerateRecipeResponse>(
     "/meals/recipe",
-    { mealTeaser, servings, unusedImageUrls, recipeContext },
+    { mealTeaser, servings, recipeContext },
     { timeout: 60_000 },
   );
 

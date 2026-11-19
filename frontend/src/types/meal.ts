@@ -104,6 +104,5 @@ export interface RecipeGenerationContext {
 
 export interface RecipeRouteState {
   teaser?: MealSuggestion;
-  unusedImageUrls?: string[];
   recipeContext?: RecipeGenerationContext;
 }

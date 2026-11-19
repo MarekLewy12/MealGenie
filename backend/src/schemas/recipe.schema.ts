@@ -27,7 +27,6 @@ export const RecipeGenerationContextSchema = z.object({
 export const GenerateRecipeRequestSchema = z.object({
   mealTeaser: MealTeaserInputSchema,
   servings: z.number().int().min(1).max(12).default(2),
-  unusedImageUrls: z.array(z.string()).optional(),
   recipeContext: RecipeGenerationContextSchema.optional(),
 });
 

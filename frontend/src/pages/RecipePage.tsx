@@ -63,7 +63,6 @@ export function RecipePage() {
   const { id: routeId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const teaser = state?.teaser;
-  const unusedImageUrls = state?.unusedImageUrls;
   const recipeContext = state?.recipeContext;
   const recipeServings = getRecipeServings(recipeContext);
 
@@ -206,7 +205,7 @@ export function RecipePage() {
       recipeContext?.hungerLevel,
     ],
     queryFn: () =>
-      generateFullRecipe(teaser!, recipeServings, unusedImageUrls, recipeContext),
+      generateFullRecipe(teaser!, recipeServings, recipeContext),
     enabled: !!teaser && !routeId,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 5,

@@ -2,7 +2,6 @@ import { type Request, type Response, type NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import { GenerateRecipeRequestSchema } from "../schemas/recipe.schema.js";
 import { generateFullRecipe } from "../services/recipe.service.js";
-import { removeMealImages } from "../services/image.service.js";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +23,7 @@ export async function generateRecipeController(
       throw new Error("User ID missing in request context");
     }
 
-    const { mealTeaser, servings, unusedImageUrls, recipeContext } =
+    const { mealTeaser, servings, recipeContext } =
       GenerateRecipeRequestSchema.parse(req.body);
 
     const preferences = await prisma.preference.findUnique({
@@ -70,8 +69,6 @@ export async function generateRecipeController(
         selectedAt: new Date(),
       },
     });
-
-    await removeMealImages(unusedImageUrls);
 
     res.json({
       recipe: {

@@ -259,7 +259,7 @@ export function MealGeneratorWizard({
   }, [jumpToStep]);
 
   const handleSelectMeal = useCallback(
-    (selectedMeal: MealSuggestion, allMeals: MealSuggestion[]) => {
+    (selectedMeal: MealSuggestion) => {
       if (isGuestMode) {
         notify.info(
           "Aby wybrać danie i otworzyć pełny przepis, załóż konto.",
@@ -269,10 +269,6 @@ export function MealGeneratorWizard({
         return;
       }
 
-      const unusedImageUrls = allMeals
-        .filter((meal) => meal.imageUrl !== selectedMeal.imageUrl)
-        .map((meal) => meal.imageUrl)
-        .filter((url): url is string => Boolean(url));
       const recipeContext: RecipeGenerationContext = {
         portionMode: generator.portionMode,
         servingSize: generator.servingSize,
@@ -284,7 +280,6 @@ export function MealGeneratorWizard({
       navigate("/recipe", {
         state: {
           teaser: selectedMeal,
-          unusedImageUrls,
           recipeContext,
         },
       });
@@ -623,7 +618,7 @@ export function MealGeneratorWizard({
               onReset={handleBackToForm}
               onRegenerate={handleRegenerate}
               onGuestCta={handleGuestCta}
-              onSelectMeal={(meal) => handleSelectMeal(meal, data.meals)}
+              onSelectMeal={handleSelectMeal}
             />
           </div>
         )}

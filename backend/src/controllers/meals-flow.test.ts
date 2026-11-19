@@ -1,5 +1,7 @@
 import { jest } from "@jest/globals";
 import { randomUUID } from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 import request from "supertest";
 import { PrismaClient } from "@prisma/client";
 import { app } from "../index.js";
@@ -9,6 +11,8 @@ import type { MealWithImage } from "../schemas/meal.schema.js";
 import type { FullRecipe } from "../schemas/recipe.schema.js";
 
 const prisma = new PrismaClient();
+
+const IMAGE_DIR = path.join(process.cwd(), "public", "meal-images");
 
 const randomId = Math.floor(Math.random() * 100000);
 const owner = {
@@ -183,6 +187,29 @@ describe("Meal suggestion, recipe and history flow", () => {
       expect(saved.imageUrl).toBe(mealTeaser.imageUrl);
       expect(saved.fullRecipeJson).toEqual(recipe);
       expect(saved.wasSelected).toBe(true);
+    });
+
+    it("ignores the legacy unusedImageUrls field and keeps the image file", async () => {
+      const fileName = `flow-test-${randomUUID()}.jpg`;
+      const filePath = path.join(IMAGE_DIR, fileName);
+      await fs.mkdir(IMAGE_DIR, { recursive: true });
+      await fs.writeFile(filePath, "test");
+
+      try {
+        const res = await asOwner(
+          request(app)
+            .post("/api/meals/recipe")
+            .send({
+              mealTeaser: { ...mealTeaser, imageUrl: `/meal-images/${fileName}` },
+              unusedImageUrls: [`/meal-images/${fileName}`],
+            }),
+        );
+
+        expect(res.status).toBe(200);
+        await expect(fs.access(filePath)).resolves.toBeUndefined();
+      } finally {
+        await fs.rm(filePath, { force: true });
+      }
     });
   });
 
