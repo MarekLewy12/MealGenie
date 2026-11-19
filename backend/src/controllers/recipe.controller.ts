@@ -6,6 +6,13 @@ import { removeMealImages } from "../services/image.service.js";
 
 const prisma = new PrismaClient();
 
+type RecipeGenerator = typeof generateFullRecipe;
+let recipeGenerator: RecipeGenerator = generateFullRecipe;
+
+export function setRecipeGeneratorForTests(generator?: RecipeGenerator) {
+  recipeGenerator = generator ?? generateFullRecipe;
+}
+
 export async function generateRecipeController(
   req: Request,
   res: Response,
@@ -31,7 +38,7 @@ export async function generateRecipeController(
       });
     }
 
-    const recipe = await generateFullRecipe({
+    const recipe = await recipeGenerator({
       teaser: mealTeaser,
       servings,
       recipeContext,

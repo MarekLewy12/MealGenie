@@ -8,6 +8,15 @@ import { generateMealSuggestions } from "../services/ai.service.js";
 
 const prisma = new PrismaClient();
 
+type MealSuggestionsGenerator = typeof generateMealSuggestions;
+let mealSuggestionsGenerator: MealSuggestionsGenerator = generateMealSuggestions;
+
+export function setMealSuggestionsGeneratorForTests(
+  generator?: MealSuggestionsGenerator,
+) {
+  mealSuggestionsGenerator = generator ?? generateMealSuggestions;
+}
+
 export async function suggestMealsController(
   req: Request,
   res: Response,
@@ -69,7 +78,7 @@ export async function suggestMealsController(
     };
 
     // Wywołanie serwisu AI z kontekstem
-    const meals = await generateMealSuggestions(context);
+    const meals = await mealSuggestionsGenerator(context);
 
     res.json({ meals });
   } catch (error) {

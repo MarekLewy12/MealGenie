@@ -7,7 +7,7 @@
     "dev": "nodemon --watch src --exec tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "OPENAI_API_KEY=test-dummy TOGETHER_API_KEY=test-dummy NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "keywords": [],
   "author": "",
